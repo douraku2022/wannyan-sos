@@ -1,0 +1,2740 @@
+/* =========================================
+   ワンニャンSOS熊本
+   MVP 共通CSS
+   ========================================= */
+
+
+/* -----------------------------------------
+   基本
+   ----------------------------------------- */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0 0 84px;
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Hiragino Kaku Gothic ProN",
+    "Hiragino Sans",
+    "Yu Gothic",
+    "Meiryo",
+    sans-serif;
+
+  background: #f6f7f8;
+  color: #333;
+
+  line-height: 1.7;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+
+/* -----------------------------------------
+   ヘッダー
+   ----------------------------------------- */
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  height: 64px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 16px;
+
+  background: #fff;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  font-size: 17px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.header-space {
+  flex: 1;
+}
+
+.back-button {
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-right: 8px;
+
+  font-size: 24px;
+
+  border-radius: 50%;
+}
+
+.back-button:hover {
+  background: #f0f0f0;
+}
+
+.menu-button {
+  width: 40px;
+  height: 40px;
+
+  border: 0;
+  background: transparent;
+
+  font-size: 22px;
+}
+
+
+/* -----------------------------------------
+   ページ共通
+   ----------------------------------------- */
+
+.sos-container,
+.detail-container,
+.create-container,
+.chat-container,
+.mypage-container,
+.admin-container {
+  width: min(100% - 32px, 720px);
+
+  margin: 0 auto;
+
+  padding: 24px 0;
+}
+
+.page-title {
+  margin-bottom: 20px;
+}
+
+.page-title h1 {
+  margin: 0 0 4px;
+
+  font-size: 24px;
+  line-height: 1.4;
+}
+
+.page-title p {
+  margin: 0;
+
+  color: #777;
+}
+
+
+/* -----------------------------------------
+   共通カード
+   ----------------------------------------- */
+
+.sos-card,
+.sos-detail-card,
+.support-status-card,
+.help-options-card,
+.comments-card,
+.chat-entry-card,
+.create-card,
+.profile-card,
+.mypage-section,
+.chat-sos-info,
+.chat-members,
+.chat-partner,
+.admin-section,
+.admin-profile,
+.sponsor-admin,
+.archive-notice {
+  background: #fff;
+
+  border: 1px solid #e5e5e5;
+  border-radius: 14px;
+
+  padding: 20px;
+  margin-bottom: 16px;
+
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+
+/* -----------------------------------------
+   SOS一覧
+   ----------------------------------------- */
+
+.sos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sos-card {
+  display: block;
+
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.sos-card:hover {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.sos-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 10px;
+}
+
+.sos-id {
+  font-size: 12px;
+  color: #888;
+}
+
+.sos-status,
+.resolved-status {
+  padding: 3px 9px;
+
+  border-radius: 20px;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sos-status {
+  background: #fff1e6;
+  color: #c75b00;
+}
+
+.resolved-status {
+  background: #e9f7ee;
+  color: #267a43;
+}
+
+.sos-card h2,
+.sos-detail-card h1 {
+  margin: 0 0 8px;
+
+  line-height: 1.45;
+}
+
+.sos-card h2 {
+  font-size: 19px;
+}
+
+.sos-location {
+  margin: 6px 0;
+
+  color: #666;
+}
+
+.sos-date,
+.detail-date {
+  font-size: 13px;
+  color: #999;
+}
+
+.sos-summary {
+  margin: 12px 0;
+
+  color: #555;
+}
+
+.sos-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 12px;
+
+  margin-top: 14px;
+  padding-top: 12px;
+
+  border-top: 1px solid #eee;
+}
+
+.sos-card-footer a {
+  font-weight: 700;
+}
+
+
+/* -----------------------------------------
+   タグ
+   ----------------------------------------- */
+
+.help-tags,
+.detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 7px;
+
+  margin: 14px 0;
+}
+
+.help-tags span,
+.detail-tags span {
+  display: inline-block;
+
+  padding: 5px 10px;
+
+  background: #f1f3f4;
+
+  border-radius: 20px;
+
+  font-size: 13px;
+}
+
+
+/* -----------------------------------------
+   SOS一覧タイトル
+   ----------------------------------------- */
+
+.page-title .sos-create-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 14px;
+
+  padding: 10px 16px;
+
+  border-radius: 10px;
+
+  background: #333;
+  color: #fff;
+
+  font-weight: 700;
+}
+
+
+/* -----------------------------------------
+   トリアージ
+   ----------------------------------------- */
+
+.triage-guide {
+  padding: 16px;
+
+  margin-bottom: 16px;
+
+  background: #fff;
+
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+}
+
+.triage-guide strong {
+  display: block;
+
+  margin-bottom: 8px;
+}
+
+.triage-options {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 8px;
+}
+
+.triage-options span {
+  padding: 5px 9px;
+
+  background: #f5f5f5;
+
+  border-radius: 20px;
+
+  font-size: 13px;
+}
+
+
+/* -----------------------------------------
+   フィルター
+   ----------------------------------------- */
+
+.filter-area {
+  padding: 16px;
+
+  margin-bottom: 18px;
+
+  background: #fff;
+
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+}
+
+.filter-group {
+  margin-bottom: 16px;
+}
+
+.filter-group:last-child {
+  margin-bottom: 0;
+}
+
+.filter-group strong {
+  display: block;
+
+  margin-bottom: 8px;
+
+  font-size: 14px;
+}
+
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 7px;
+}
+
+.filter-button {
+  padding: 7px 12px;
+
+  border: 1px solid #ddd;
+  border-radius: 20px;
+
+  background: #fff;
+
+  font-size: 13px;
+}
+
+.filter-button:hover,
+.filter-button.active {
+  background: #333;
+  color: #fff;
+  border-color: #333;
+}
+
+
+/* -----------------------------------------
+   SOS詳細
+   ----------------------------------------- */
+
+.detail-divider {
+  height: 1px;
+
+  margin: 18px 0;
+
+  background: #eee;
+}
+
+.sos-detail-card h2,
+.support-status-card h2,
+.help-options-card h2,
+.comments-card h2,
+.chat-entry-card h2,
+.mypage-section h2,
+.admin-section h2 {
+  margin-top: 0;
+
+  font-size: 19px;
+}
+
+.sos-body {
+  color: #444;
+
+  white-space: pre-wrap;
+}
+
+.help-section {
+  margin-top: 20px;
+}
+
+.help-section h3 {
+  margin-bottom: 8px;
+
+  font-size: 15px;
+}
+
+.detail-location-box {
+  margin-top: 20px;
+  padding: 14px;
+
+  background: #f7f7f7;
+
+  border-radius: 10px;
+}
+
+.detail-location-box strong {
+  display: block;
+}
+
+.detail-location-box p {
+  margin: 5px 0;
+}
+
+.detail-location-box small {
+  color: #888;
+}
+
+
+/* -----------------------------------------
+   支援状況
+   ----------------------------------------- */
+
+.support-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 12px 0;
+
+  border-bottom: 1px solid #eee;
+}
+
+.support-row:last-child {
+  border-bottom: none;
+}
+
+.status-wanted {
+  font-size: 13px;
+  font-weight: 700;
+
+  color: #c75b00;
+}
+
+
+/* -----------------------------------------
+   「これできます」
+   ----------------------------------------- */
+
+.can-help-button {
+  width: 100%;
+
+  margin-top: 16px;
+
+  padding: 13px 18px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #333;
+  color: #fff;
+
+  font-weight: 700;
+}
+
+.can-help-button:hover {
+  opacity: 0.9;
+}
+
+
+/* -----------------------------------------
+   支援選択
+   ----------------------------------------- */
+
+.help-options-card p {
+  color: #777;
+}
+
+.help-option-list {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 10px;
+}
+
+.help-option {
+  padding: 12px;
+
+  border: 1px solid #ddd;
+  border-radius: 10px;
+
+  background: #fff;
+
+  text-align: left;
+}
+
+.help-option:hover {
+  background: #f5f5f5;
+}
+
+
+/* -----------------------------------------
+   フォーム
+   ----------------------------------------- */
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group > label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  font-weight: 700;
+}
+
+.required {
+  display: inline-block;
+
+  margin-left: 5px;
+  padding: 1px 6px;
+
+  border-radius: 5px;
+
+  background: #f3f3f3;
+
+  color: #777;
+
+  font-size: 11px;
+}
+
+.form-help {
+  margin: -2px 0 10px;
+
+  color: #777;
+
+  font-size: 13px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="tel"],
+.form-group input[type="email"],
+.form-group textarea,
+.form-group select {
+  width: 100%;
+
+  padding: 12px 13px;
+
+  border: 1px solid #d8d8d8;
+  border-radius: 9px;
+
+  background: #fff;
+
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #777;
+}
+
+.form-group textarea {
+  resize: vertical;
+
+  min-height: 150px;
+
+  line-height: 1.7;
+}
+
+.form-group small {
+  display: block;
+
+  margin-top: 5px;
+
+  color: #888;
+
+  font-size: 12px;
+}
+
+
+/* -----------------------------------------
+   選択式カード
+   ----------------------------------------- */
+
+.choice-grid {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 10px;
+}
+
+.choice-card {
+  position: relative;
+
+  display: block;
+
+  padding: 13px;
+
+  border: 1px solid #ddd;
+  border-radius: 10px;
+
+  background: #fff;
+
+  cursor: pointer;
+}
+
+.choice-card input,
+.check-card input,
+.urgency-card input {
+  position: absolute;
+
+  opacity: 0;
+  pointer-events: none;
+}
+
+.choice-card span {
+  display: block;
+
+  text-align: center;
+
+  font-weight: 700;
+}
+
+.choice-card:has(input:checked) {
+  border-color: #333;
+
+  background: #f3f3f3;
+}
+
+
+/* -----------------------------------------
+   支援チェック
+   ----------------------------------------- */
+
+.help-check-list {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 9px;
+}
+
+.check-card {
+  position: relative;
+
+  display: block;
+
+  padding: 11px 12px;
+
+  border: 1px solid #ddd;
+  border-radius: 9px;
+
+  background: #fff;
+
+  cursor: pointer;
+}
+
+.check-card:has(input:checked) {
+  border-color: #333;
+
+  background: #f3f3f3;
+}
+
+.check-card span {
+  display: block;
+
+  font-size: 14px;
+}
+
+
+/* -----------------------------------------
+   緊急度
+   ----------------------------------------- */
+
+.urgency-list {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 10px;
+}
+
+.urgency-card {
+  position: relative;
+
+  display: block;
+
+  padding: 14px;
+
+  border: 1px solid #ddd;
+  border-radius: 10px;
+
+  background: #fff;
+
+  cursor: pointer;
+
+  text-align: center;
+}
+
+.urgency-card:has(input:checked) {
+  border-color: #333;
+
+  background: #f3f3f3;
+
+  font-weight: 700;
+}
+
+
+/* -----------------------------------------
+   説明・注意
+   ----------------------------------------- */
+
+.poster-notice,
+.privacy-notice,
+.chat-notice {
+  padding: 14px;
+
+  margin-bottom: 18px;
+
+  border-radius: 10px;
+
+  background: #f5f5f5;
+
+  font-size: 13px;
+}
+
+.poster-notice strong,
+.privacy-notice strong {
+  display: block;
+
+  margin-bottom: 6px;
+}
+
+.poster-notice p,
+.privacy-notice p {
+  margin: 5px 0;
+}
+
+.read-only-value {
+  padding: 12px 13px;
+
+  background: #f5f5f5;
+
+  border-radius: 9px;
+
+  color: #555;
+}
+
+
+/* -----------------------------------------
+   ボタン
+   ----------------------------------------- */
+
+.sos-submit-button {
+  width: 100%;
+
+  padding: 14px 18px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #333;
+  color: #fff;
+
+  font-weight: 700;
+}
+
+.sos-submit-button:hover {
+  opacity: 0.9;
+}
+
+.secondary-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+
+  margin-top: 10px;
+
+  padding: 12px 16px;
+
+  border: 1px solid #ccc;
+  border-radius: 10px;
+
+  background: #fff;
+
+  font-weight: 700;
+}
+
+.secondary-button:hover {
+  background: #f5f5f5;
+}
+
+
+/* -----------------------------------------
+   SOS管理
+   ----------------------------------------- */
+
+.owner-actions {
+  padding: 20px;
+
+  margin-bottom: 16px;
+
+  background: #fff;
+
+  border: 1px solid #e5e5e5;
+  border-radius: 14px;
+}
+
+.owner-actions h2 {
+  margin-top: 0;
+
+  font-size: 19px;
+}
+
+.end-chat-button {
+  width: 100%;
+
+  padding: 12px;
+
+  border: 1px solid #ccc;
+  border-radius: 10px;
+
+  background: #fff;
+
+  font-weight: 700;
+}
+
+
+/* -----------------------------------------
+   通報
+   ----------------------------------------- */
+
+.report-section {
+  padding: 18px;
+
+  text-align: center;
+}
+
+.report-button {
+  padding: 9px 14px;
+
+  border: 1px solid #ddd;
+  border-radius: 8px;
+
+  background: #fff;
+
+  color: #666;
+
+  font-size: 13px;
+}
+
+.report-section p {
+  margin: 8px 0 0;
+
+  color: #999;
+
+  font-size: 11px;
+}
+
+
+/* -----------------------------------------
+   マイページ
+   ----------------------------------------- */
+
+.profile-card {
+  display: flex;
+  align-items: center;
+
+  gap: 14px;
+}
+
+.profile-icon {
+  width: 52px;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #f0f0f0;
+
+  font-size: 25px;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-info h1 {
+  margin: 0;
+
+  font-size: 20px;
+}
+
+.profile-info p {
+  margin: 2px 0 0;
+
+  color: #777;
+
+  font-size: 13px;
+}
+
+.edit-profile-button {
+  padding: 7px 11px;
+
+  border: 1px solid #ddd;
+  border-radius: 8px;
+
+  background: #fff;
+
+  font-size: 13px;
+}
+
+.account-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.account-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 20px;
+
+  padding: 12px 0;
+
+  border-bottom: 1px solid #eee;
+}
+
+.account-row:last-child {
+  border-bottom: none;
+}
+
+.account-row span {
+  color: #777;
+
+  font-size: 13px;
+}
+
+.account-row strong {
+  text-align: right;
+
+  font-size: 14px;
+}
+
+.profile-introduction {
+  max-width: 60%;
+
+  font-weight: 400;
+}
+
+.verified {
+  color: #267a43;
+}
+
+.mypage-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 13px 0;
+}
+
+.mypage-item strong {
+  display: block;
+}
+
+.mypage-item p {
+  margin: 3px 0 0;
+
+  color: #777;
+
+  font-size: 12px;
+}
+
+.empty-message {
+  margin: 0;
+
+  color: #888;
+
+  font-size: 13px;
+
+  text-align: center;
+}
+
+.logout-button {
+  width: 100%;
+
+  padding: 11px;
+
+  border: 1px solid #ddd;
+  border-radius: 10px;
+
+  background: #fff;
+
+  color: #666;
+}
+
+
+/* -----------------------------------------
+   チャット
+   ----------------------------------------- */
+
+.chat-container {
+  padding-bottom: 20px;
+}
+
+.chat-sos-info {
+  margin-bottom: 10px;
+}
+
+.chat-sos-info h1 {
+  margin: 4px 0;
+
+  font-size: 18px;
+}
+
+.chat-sos-info p {
+  margin: 0;
+
+  color: #777;
+
+  font-size: 13px;
+}
+
+.chat-partner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 12px;
+}
+
+.chat-partner > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-partner > div > span {
+  color: #888;
+
+  font-size: 12px;
+}
+
+.chat-partner strong {
+  font-size: 17px;
+}
+
+.chat-help-type {
+  padding: 5px 9px;
+
+  border-radius: 20px;
+
+  background: #f1f3f4;
+
+  font-size: 12px;
+}
+
+.chat-notice {
+  color: #666;
+}
+
+.chat-area {
+  padding: 10px 2px;
+
+  min-height: 280px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+.message {
+  max-width: 82%;
+}
+
+.message-other {
+  align-self: flex-start;
+}
+
+.message-me {
+  align-self: flex-end;
+
+  text-align: right;
+}
+
+.message-name {
+  margin-bottom: 3px;
+
+  color: #777;
+
+  font-size: 12px;
+}
+
+.message-bubble {
+  display: inline-block;
+
+  padding: 10px 13px;
+
+  border-radius: 14px;
+
+  background: #fff;
+
+  border: 1px solid #e5e5e5;
+
+  text-align: left;
+
+  white-space: pre-wrap;
+}
+
+.message-me .message-bubble {
+  background: #f0f0f0;
+}
+
+.message time {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #999;
+
+  font-size: 10px;
+}
+
+.chat-input-area {
+  position: sticky;
+  bottom: 0;
+
+  padding: 10px 0;
+
+  background: #f6f7f8;
+}
+
+.chat-input-area form {
+  display: flex;
+  align-items: flex-end;
+
+  gap: 8px;
+}
+
+.chat-input-area textarea {
+  flex: 1;
+
+  min-height: 46px;
+  max-height: 140px;
+
+  padding: 10px 12px;
+
+  border: 1px solid #ccc;
+  border-radius: 10px;
+
+  background: #fff;
+
+  resize: vertical;
+}
+
+.chat-send-button {
+  padding: 11px 15px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #333;
+  color: #fff;
+
+  font-weight: 700;
+}
+
+.chat-end-section {
+  padding: 18px 0;
+
+  text-align: center;
+}
+
+.chat-end-section p {
+  margin: 8px 0 0;
+
+  color: #999;
+
+  font-size: 11px;
+}
+
+.chat-closed-message {
+  padding: 12px;
+
+  margin-top: 10px;
+
+  border-radius: 10px;
+
+  background: #eee;
+
+  color: #777;
+
+  text-align: center;
+
+  font-size: 13px;
+}
+
+
+/* -----------------------------------------
+   解決済み
+   ----------------------------------------- */
+
+.resolved-card {
+  opacity: 0.95;
+}
+
+.resolved-result {
+  padding: 12px;
+
+  margin: 14px 0;
+
+  border-radius: 10px;
+
+  background: #f3f8f4;
+}
+
+.resolved-result strong {
+  display: block;
+
+  margin-bottom: 4px;
+}
+
+.resolved-result p {
+  margin: 0;
+
+  font-size: 13px;
+}
+
+.archive-notice {
+  color: #666;
+
+  font-size: 13px;
+}
+
+.archive-notice strong {
+  color: #333;
+}
+
+
+/* -----------------------------------------
+   管理画面
+   ----------------------------------------- */
+
+.admin-profile {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.admin-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-section-header h2 {
+  margin: 0;
+}
+
+.admin-menu {
+  display: grid;
+
+  gap: 8px;
+}
+
+.admin-menu button {
+  padding: 11px;
+
+  border: 1px solid #ddd;
+  border-radius: 9px;
+
+  background: #fff;
+
+  text-align: left;
+}
+
+.sponsor-preview {
+  padding: 14px;
+
+  margin-bottom: 12px;
+
+  border-radius: 10px;
+
+  background: #f5f5f5;
+}
+
+
+/* -----------------------------------------
+   下部ナビ
+   ----------------------------------------- */
+
+.bottom-nav {
+  position: fixed;
+
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  z-index: 200;
+
+  height: 68px;
+
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  background: rgba(255, 255, 255, 0.97);
+
+  border-top: 1px solid #ddd;
+}
+
+.bottom-nav a {
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 1px;
+
+  color: #777;
+
+  font-size: 20px;
+}
+
+.bottom-nav a span {
+  font-size: 10px;
+}
+
+.bottom-nav a.active {
+  color: #333;
+
+  font-weight: 700;
+}
+
+
+/* -----------------------------------------
+   レスポンシブ
+   ----------------------------------------- */
+
+@media (max-width: 600px) {
+
+  .sos-container,
+  .detail-container,
+  .create-container,
+  .chat-container,
+  .mypage-container,
+  .admin-container {
+    width: min(100% - 20px, 720px);
+
+    padding-top: 16px;
+  }
+
+
+  .app-header {
+    height: 58px;
+
+    padding: 0 10px;
+  }
+
+
+  .header-logo {
+    font-size: 15px;
+  }
+
+
+  .page-title h1 {
+    font-size: 21px;
+  }
+
+
+  .sos-detail-card,
+  .support-status-card,
+  .help-options-card,
+  .chat-entry-card,
+  .create-card,
+  .profile-card,
+  .mypage-section,
+  .chat-sos-info,
+  .chat-members,
+  .chat-partner {
+    padding: 16px;
+  }
+
+
+  .help-option-list,
+  .help-check-list,
+  .choice-grid,
+  .urgency-list {
+    grid-template-columns: 1fr;
+  }
+
+
+  .sos-card-footer {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 5px;
+  }
+
+
+  .account-row {
+    flex-direction: column;
+
+    gap: 3px;
+  }
+
+
+  .account-row strong,
+  .profile-introduction {
+    max-width: 100%;
+
+    text-align: left;
+  }
+
+
+  .profile-card {
+    align-items: flex-start;
+  }
+
+
+  .edit-profile-button {
+    flex-shrink: 0;
+  }
+
+
+  .chat-input-area form {
+    align-items: stretch;
+  }
+
+
+  .chat-send-button {
+    padding-left: 13px;
+    padding-right: 13px;
+  }
+
+}
+
+
+/* -----------------------------------------
+   アクセシビリティ
+   ----------------------------------------- */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(0, 0, 0, 0.2);
+
+  outline-offset: 2px;
+}
+/* =========================================
+   追加修正版
+   既存CSSの末尾に追加
+   ========================================= */
+
+
+/* -----------------------------------------
+   共通
+   ----------------------------------------- */
+
+button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input,
+textarea {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+
+/* -----------------------------------------
+   ヘッダー
+   ----------------------------------------- */
+
+.menu-button {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-left: auto;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: #333;
+
+  font-size: 23px;
+}
+
+.menu-button:hover {
+  background: #f3f3f3;
+}
+
+
+/* -----------------------------------------
+   ページタイトル
+   ----------------------------------------- */
+
+.page-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 15px;
+}
+
+.page-title > div {
+  min-width: 0;
+}
+
+
+/* -----------------------------------------
+   SOS投稿ボタン
+   ----------------------------------------- */
+
+.sos-create-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  padding: 10px 14px;
+
+  border-radius: 9px;
+
+  background: #333;
+  color: #fff;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.sos-create-button:hover {
+  opacity: 0.9;
+}
+
+
+/* -----------------------------------------
+   フィルター
+   ----------------------------------------- */
+
+.filter-area {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 8px;
+
+  padding: 14px;
+
+  margin-bottom: 18px;
+
+  background: #fff;
+
+  border: 1px solid #e5e5e5;
+
+  border-radius: 12px;
+}
+
+.filter-button {
+  padding: 7px 12px;
+
+  border: 1px solid #ddd;
+  border-radius: 20px;
+
+  background: #fff;
+
+  color: #555;
+
+  font-size: 13px;
+}
+
+.filter-button:hover {
+  background: #f5f5f5;
+}
+
+.filter-button.active {
+  background: #333;
+  color: #fff;
+
+  border-color: #333;
+}
+
+
+/* -----------------------------------------
+   解決済みSOSへのリンク
+   ----------------------------------------- */
+
+.resolved-link {
+  margin: 20px 0 10px;
+
+  text-align: center;
+}
+
+.resolved-link a {
+  display: inline-block;
+
+  padding: 10px 14px;
+
+  color: #666;
+
+  font-size: 13px;
+
+  border: 1px solid #ddd;
+  border-radius: 9px;
+
+  background: #fff;
+}
+
+.resolved-link a:hover {
+  background: #f5f5f5;
+}
+
+
+/* -----------------------------------------
+   SOSカード
+   ----------------------------------------- */
+
+.sos-card {
+  width: 100%;
+
+  overflow: hidden;
+}
+
+.sos-card h2 {
+  overflow-wrap: anywhere;
+}
+
+.sos-summary {
+  margin: 12px 0;
+
+  color: #555;
+
+  font-size: 14px;
+}
+
+
+/* -----------------------------------------
+   詳細画面
+   ----------------------------------------- */
+
+.detail-container {
+  padding-bottom: 30px;
+}
+
+.sos-detail-card h1 {
+  font-size: 22px;
+}
+
+.sos-body {
+  margin: 0;
+
+  line-height: 1.9;
+}
+
+.support-status-list {
+  margin-top: 5px;
+}
+
+.help-options-card {
+  overflow: hidden;
+}
+
+.help-option {
+  width: 100%;
+
+  cursor: pointer;
+
+  font-size: 14px;
+}
+
+.section-title-row h2 {
+  margin: 0;
+}
+
+.section-title-row > span {
+  color: #888;
+
+  font-size: 12px;
+}
+
+.chat-entry-card p {
+  margin-bottom: 14px;
+
+  color: #777;
+
+  font-size: 13px;
+}
+
+.chat-button {
+  width: 100%;
+}
+
+
+/* -----------------------------------------
+   コメント
+   ----------------------------------------- */
+
+.comment {
+  overflow-wrap: anywhere;
+}
+
+.comment-form textarea {
+  display: block;
+
+  min-height: 90px;
+
+  font-size: 14px;
+
+  outline: none;
+}
+
+.comment-form textarea:focus {
+  border-color: #888;
+}
+
+
+/* -----------------------------------------
+   投稿・編集フォーム
+   ----------------------------------------- */
+
+.create-card {
+  overflow: hidden;
+}
+
+.create-card .page-title {
+  margin-bottom: 25px;
+}
+
+.create-card input[type="text"],
+.create-card input[type="tel"],
+.create-card input[type="password"],
+.create-card textarea,
+
+.form-group input[type="text"],
+.form-group input[type="tel"],
+.form-group input[type="password"],
+.form-group textarea {
+  width: 100%;
+
+  display: block;
+
+  font-size: 16px;
+
+  line-height: 1.5;
+}
+
+.form-group textarea {
+  min-height: 150px;
+}
+
+
+/* -----------------------------------------
+   選択カード
+   ----------------------------------------- */
+
+.choice-grid,
+.help-check-list,
+.urgency-list {
+  width: 100%;
+}
+
+.choice-card,
+.check-card,
+.urgency-card {
+  min-width: 0;
+
+  cursor: pointer;
+
+  user-select: none;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.choice-card span,
+.check-card span,
+.urgency-card span {
+  line-height: 1.4;
+}
+
+.choice-card:has(input:checked),
+.check-card:has(input:checked),
+.urgency-card:has(input:checked) {
+  border-color: #333;
+
+  background: #f3f3f3;
+}
+
+
+/* -----------------------------------------
+   投稿者注意
+   ----------------------------------------- */
+
+.poster-notice {
+  line-height: 1.7;
+}
+
+
+/* -----------------------------------------
+   編集画面
+   ----------------------------------------- */
+
+.read-only-value {
+  width: 100%;
+
+  padding: 12px;
+
+  background: #f5f5f5;
+
+  border: 1px solid #e5e5e5;
+
+  border-radius: 9px;
+
+  color: #666;
+
+  font-size: 14px;
+}
+
+
+/* -----------------------------------------
+   個別チャット
+   ----------------------------------------- */
+
+.chat-container {
+  width: min(100% - 32px, 720px);
+
+  margin: 0 auto;
+}
+
+.chat-partner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 12px;
+}
+
+.chat-partner > div {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-partner strong {
+  overflow-wrap: anywhere;
+}
+
+.chat-help-type {
+  flex-shrink: 0;
+
+  padding: 4px 9px;
+
+  border-radius: 20px;
+
+  background: #f1f3f4;
+
+  color: #666;
+
+  font-size: 12px;
+}
+
+.chat-notice {
+  line-height: 1.6;
+}
+
+.chat-area {
+  min-height: 300px;
+
+  padding: 12px 2px;
+
+  overflow: hidden;
+}
+
+.message {
+  overflow-wrap: anywhere;
+}
+
+.message-bubble {
+  max-width: 100%;
+
+  line-height: 1.6;
+
+  overflow-wrap: anywhere;
+}
+
+.message-me .message-bubble {
+  background: #333;
+  color: #fff;
+
+  border-color: #333;
+}
+
+.chat-input-area {
+  width: 100%;
+}
+
+.chat-input-area textarea {
+  min-height: 46px;
+
+  font-size: 16px;
+
+  outline: none;
+}
+
+.chat-input-area textarea:focus {
+  border-color: #888;
+}
+
+.chat-send-button {
+  min-width: 62px;
+
+  white-space: nowrap;
+}
+
+.chat-end-section {
+  margin-top: 15px;
+
+  padding: 18px 0 30px;
+
+  text-align: center;
+}
+
+.end-chat-button {
+  width: 100%;
+
+  padding: 12px 15px;
+
+  border: 1px solid #ccc;
+
+  border-radius: 9px;
+
+  background: #fff;
+
+  color: #555;
+
+  font-size: 13px;
+
+  font-weight: 700;
+}
+
+.end-chat-button:hover {
+  background: #f5f5f5;
+}
+
+.end-chat-button:disabled {
+  cursor: default;
+
+  background: #eee;
+
+  color: #999;
+}
+
+.chat-closed-message {
+  padding: 12px;
+
+  margin: 10px 0;
+
+  border-radius: 9px;
+
+  background: #eee;
+
+  color: #777;
+
+  text-align: center;
+
+  font-size: 13px;
+}
+
+
+/* -----------------------------------------
+   マイページ
+   ----------------------------------------- */
+
+.profile-card {
+  min-width: 0;
+}
+
+.profile-info {
+  min-width: 0;
+}
+
+.profile-info h1 {
+  overflow-wrap: anywhere;
+}
+
+.mypage-item {
+  min-width: 0;
+}
+
+.mypage-item > div {
+  min-width: 0;
+}
+
+.mypage-item strong {
+  display: block;
+
+  overflow-wrap: anywhere;
+}
+
+.mypage-item > span {
+  flex-shrink: 0;
+
+  color: #888;
+}
+
+
+/* -----------------------------------------
+   解決済み
+   ----------------------------------------- */
+
+.resolved-card {
+  opacity: 0.95;
+}
+
+.resolved-card .sos-card-footer {
+  border-top-color: #e8e8e8;
+}
+
+
+/* -----------------------------------------
+   管理画面
+   ----------------------------------------- */
+
+.admin-header {
+  background: #222;
+  color: #fff;
+}
+
+.admin-header .menu-button,
+.admin-header .back-button {
+  color: #fff;
+}
+
+.admin-container {
+  padding-bottom: 30px;
+}
+
+.admin-summary {
+  width: 100%;
+}
+
+.summary-card {
+  overflow: hidden;
+}
+
+.admin-sos-main {
+  min-width: 0;
+}
+
+.admin-sos-main h3 {
+  overflow-wrap: anywhere;
+}
+
+.admin-sos-actions {
+  flex-shrink: 0;
+}
+
+.admin-section {
+  overflow: hidden;
+}
+
+
+/* -----------------------------------------
+   ログイン・登録
+   ----------------------------------------- */
+
+.login-container {
+  width: min(100% - 32px, 480px);
+
+  min-height: 100vh;
+
+  margin: 0 auto;
+
+  padding: 30px 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-card {
+  width: 100%;
+
+  overflow: hidden;
+}
+
+.logo-area {
+  width: 100%;
+}
+
+.logo-area h1 {
+  overflow-wrap: anywhere;
+}
+
+.type-buttons {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 10px;
+}
+
+.type-button {
+  width: 100%;
+
+  padding: 12px;
+
+  border: 1px solid #ddd;
+
+  border-radius: 9px;
+
+  background: #fff;
+
+  color: #555;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.type-button:hover {
+  background: #f5f5f5;
+}
+
+.type-button.active {
+  border-color: #333;
+
+  background: #333;
+
+  color: #fff;
+}
+
+#individualFields,
+#organizationFields {
+  width: 100%;
+}
+
+
+/* -----------------------------------------
+   下部ナビ
+   ----------------------------------------- */
+
+.bottom-nav {
+  height: 64px;
+
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottom-nav a {
+  min-width: 0;
+}
+
+
+/* -----------------------------------------
+   スマホ
+   ----------------------------------------- */
+
+@media (max-width: 600px) {
+
+  body {
+    padding-bottom: 76px;
+  }
+
+
+  .app-header {
+    height: 58px;
+
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+
+  .header-logo {
+    min-width: 0;
+
+    font-size: 15px;
+  }
+
+  .header-logo span {
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+  }
+
+
+  .sos-container,
+  .detail-container,
+  .create-container,
+  .chat-container,
+  .mypage-container,
+  .admin-container {
+    width: calc(100% - 20px);
+
+    padding-top: 16px;
+  }
+
+
+  .page-title {
+    display: block;
+  }
+
+
+  .page-title h1 {
+    font-size: 21px;
+  }
+
+
+  .sos-create-button {
+    width: 100%;
+
+    margin-top: 12px;
+  }
+
+
+  .filter-area {
+    gap: 7px;
+
+    padding: 12px;
+  }
+
+
+  .filter-button {
+    flex: 0 0 auto;
+
+    padding: 7px 10px;
+  }
+
+
+  .sos-card,
+  .sos-detail-card,
+  .support-status-card,
+  .help-options-card,
+  .comments-card,
+  .chat-entry-card,
+  .create-card,
+  .profile-card,
+  .mypage-section,
+  .chat-sos-info,
+  .chat-members,
+  .chat-partner,
+  .admin-section,
+  .admin-profile,
+  .sponsor-admin,
+  .archive-notice {
+    padding: 16px;
+  }
+
+
+  .sos-card-header {
+    align-items: flex-start;
+  }
+
+
+  .sos-status,
+  .resolved-status {
+    flex-shrink: 0;
+
+    max-width: 55%;
+
+    text-align: center;
+  }
+
+
+  .sos-card h2 {
+    font-size: 18px;
+  }
+
+
+  .sos-detail-card h1 {
+    font-size: 20px;
+  }
+
+
+  .help-check-list,
+  .choice-grid,
+  .urgency-list {
+    grid-template-columns: 1fr;
+  }
+
+
+  .help-option-list {
+    grid-template-columns: 1fr;
+  }
+
+
+  .support-row {
+    gap: 10px;
+  }
+
+
+  .comment-header {
+    gap: 10px;
+  }
+
+
+  .comment-header strong {
+    overflow-wrap: anywhere;
+  }
+
+
+  .comment-header time {
+    flex-shrink: 0;
+  }
+
+
+  .profile-card {
+    align-items: flex-start;
+  }
+
+
+  .profile-icon {
+    flex-shrink: 0;
+  }
+
+
+  .edit-profile-button {
+    flex-shrink: 0;
+  }
+
+
+  .account-row {
+    flex-direction: column;
+
+    gap: 3px;
+  }
+
+
+  .account-row strong {
+    text-align: left;
+  }
+
+
+  .admin-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+
+
+  .admin-sos-item {
+    flex-direction: column;
+  }
+
+
+  .admin-sos-actions {
+    width: 100%;
+
+    justify-content: flex-start;
+  }
+
+
+  .chat-partner {
+    align-items: flex-start;
+  }
+
+
+  .chat-help-type {
+    margin-top: 2px;
+  }
+
+
+  .message {
+    max-width: 88%;
+  }
+
+
+  .chat-input-area {
+    padding:
+      8px 10px
+      calc(8px + env(safe-area-inset-bottom));
+  }
+
+
+  .chat-input-area form {
+    gap: 6px;
+  }
+
+
+  .chat-send-button {
+    min-width: 56px;
+
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+
+  .login-container {
+    width: calc(100% - 20px);
+
+    min-height: 100vh;
+
+    align-items: flex-start;
+
+    padding-top: 25px;
+  }
+
+
+  .login-card {
+    padding: 25px 18px;
+  }
+
+
+  .type-buttons {
+    gap: 8px;
+  }
+
+
+  .bottom-nav {
+    height: 64px;
+  }
+
+}
+
+
+/* -----------------------------------------
+   小さいスマホ
+   ----------------------------------------- */
+
+@media (max-width: 380px) {
+
+  .header-logo {
+    font-size: 14px;
+  }
+
+
+  .page-title h1 {
+    font-size: 20px;
+  }
+
+
+  .sos-card-header {
+    gap: 6px;
+  }
+
+
+  .sos-status,
+  .resolved-status {
+    font-size: 11px;
+
+    padding: 3px 7px;
+  }
+
+
+  .bottom-nav a {
+    font-size: 18px;
+  }
+
+}
+/* -----------------------------------------
+   サイドメニュー（オーバーレイ・スライド）
+   ----------------------------------------- */
+
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  
+  /* 初期状態は非表示 */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.menu-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  right: -280px; /* 初期状態は画面の右外に隠す */
+  width: 280px;
+  height: 100vh;
+  background: #fff;
+  z-index: 1001;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+  padding: 20px;
+  
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  
+  /* スライドインのアニメーション */
+  transition: right 0.3s ease;
+}
+
+.side-menu.open {
+  right: 0; /* クラスが付与されたら画面内にスライド */
+}
+
+.menu-close {
+  align-self: flex-end;
+  background: transparent;
+  border: none;
+  font-size: 32px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.side-menu h2 {
+  font-size: 18px;
+  margin: 0 0 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.side-menu a {
+  display: block;
+  padding: 12px 0;
+  font-weight: 700;
+  color: #333;
+  border-bottom: 1px dashed #eee;
+}
+
+.side-menu .menu-group a {
+  border-bottom: none;
+}
+
+.side-menu .menu-sub {
+  padding: 8px 0 8px 20px;
+  font-weight: normal;
+  font-size: 14px;
+  color: #555;
+  border-bottom: none;
+}
+
+.menu-separator {
+  height: 1px;
+  background: #eee;
+  margin: 15px 0;
+}
+/* -----------------------------------------
+   サイドメニュー（スライド表示用CSS）
+   ----------------------------------------- */
+
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.menu-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  right: -280px;
+  width: 280px;
+  height: 100vh;
+  background: #fff;
+  z-index: 1001;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  transition: right 0.3s ease;
+}
+
+.side-menu.open {
+  right: 0;
+}
+
+.menu-close {
+  align-self: flex-end;
+  background: transparent;
+  border: none;
+  font-size: 32px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.side-menu h2 {
+  font-size: 18px;
+  margin: 0 0 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.side-menu a {
+  display: block;
+  padding: 12px 0;
+  font-weight: 700;
+  color: #333;
+  border-bottom: 1px dashed #eee;
+}
+
+.side-menu .menu-group a {
+  border-bottom: none;
+}
+
+.side-menu .menu-sub {
+  padding: 8px 0 8px 20px;
+  font-weight: normal;
+  font-size: 14px;
+  color: #555;
+  border-bottom: none;
+}
+
+.menu-separator {
+  height: 1px;
+  background: #eee;
+  margin: 15px 0;
+}
