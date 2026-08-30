@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+  <title>ワンニャンSOS熊本｜動物支援マッチング</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body style="background-color: #f7fafc;">
+
+  <header class="app-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;">
+    <div class="header-logo">
+      🐕🐈 <span>ワンニャンSOS熊本</span>
+    </div>
+    
+    <!-- 右上ハンバーガーメニュー（三本線） -->
+    <div class="menu-dropdown" style="position: relative;">
+      <button id="menuBtn" aria-label="メニュー" style="background: none; border: none; font-size: 24px; cursor: pointer; padding: 4px 8px; color: #2d3748;">
+        ☰
+      </button>
+      <div id="dropdownMenu" style="display: none; position: absolute; right: 0; top: 40px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 190px; z-index: 1000;">
+        <a href="sos.html" style="display: block; padding: 12px 16px; color: #2d3748; text-decoration: none; border-bottom: 1px solid #edf2f7; font-size: 14px;">🆘 SOS一覧を見る</a>
+        <a href="javascript:void(0)" onclick="handlePostClick()" style="display: block; padding: 12px 16px; color: #e53e3e; text-decoration: none; border-bottom: 1px solid #edf2f7; font-size: 14px; font-weight: bold;">＋ SOSを投稿する</a>
+        <a href="mypage.html" style="display: block; padding: 12px 16px; color: #2d3748; text-decoration: none; border-bottom: 1px solid #edf2f7; font-size: 14px;">👤 マイページ（会員の方）</a>
+        <a href="register.html" style="display: block; padding: 12px 16px; color: #2b6cb0; text-decoration: none; border-bottom: 1px solid #edf2f7; font-size: 14px;">✨ 新規会員登録</a>
+        <a href="terms.html" style="display: block; padding: 12px 16px; color: #718096; text-decoration: none; font-size: 13px;">📜 利用規約</a>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding-bottom: 80px;">
+    <!-- LPメインビジュアル -->
+    <div style="background: #fff; text-align: center; border-bottom: 1px solid #e2e8f0; overflow: hidden;">
+      
+      <!-- メインイラスト画像 -->
+      <div style="max-width: 600px; margin: 0 auto; padding: 15px 15px 0 15px;">
+        <img src="wannyansos.png" alt="人と動物の手がつながる温かいイラスト" style="width: 100%; height: auto; border-radius: 12px; display: block; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+      </div>
+
+      <div style="padding: 20px 20px 25px 20px;">
+        <h1 style="font-size: 20px; color: #2d3748; margin-bottom: 8px; line-height: 1.4;">動物専用SOS<br>支援マッチング掲示板</h1>
+        <p style="font-size: 13px; color: #4a5568; line-height: 1.6; margin: 0;">
+          物資・捜索・搬送・一時預かりなど、動物に関する「助けて」と」できます」をつなぐプラットフォームです。<br>できる人が、できる時に、できる事を。<br>
+          投稿や連絡を行うには、無料のユーザー登録が必要です。
+        </p>
+      </div>
+    </div>
+
+    <div class="sos-container" style="padding-top: 25px;">
+      
+      <!-- メインアクション案内（ボタン2分岐） -->
+      <div style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; margin-bottom: 20px;">
+        <h2 style="font-size: 15px; color: #2d3748; margin-top: 0; margin-bottom: 12px;">ご利用メニュー</h2>
+        
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- 1. 新規会員登録（目立つメインボタン） -->
+          <a href="register.html" class="sos-submit-button" style="text-align: center; text-decoration: none; font-size: 15px; padding: 14px; background: #2b6cb0;">
+            ✨ はじめての方（新規会員登録）
+          </a>
+
+          <!-- 2. 会員の方（マイページ / ログイン） -->
+          <a href="mypage.html" style="text-align: center; text-decoration: none; font-size: 14px; padding: 12px; border: 1px solid #cbd5e0; color: #2d3748; background: #f7fafc; border-radius: 8px; font-weight: bold;">
+            👤 会員の方（マイページ / ログイン）
+          </a>
+
+          <!-- 3. SOS投稿（未登録なら自動で登録画面へ案内） -->
+          <button onclick="handlePostClick()" style="padding: 12px; font-weight: bold; font-size: 14px; border: 2px solid #e53e3e; color: #e53e3e; background: #fff; cursor: pointer; border-radius: 8px; margin-top: 4px;">
+            🆘 SOSを投稿する
+          </button>
+        </div>
+      </div>
+
+      <!-- 右上三本線メニューの補足案内 -->
+      <div style="background: #edf2f7; padding: 12px 15px; border-radius: 8px; font-size: 12px; color: #4a5568; text-align: center; line-height: 1.5;">
+        💡 掲載中のSOS一覧（公開情報）は、画面右上の<strong>メニュー（三本線 ☰）</strong>から登録なしでも確認いただけます。
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    (function(){
+      "use strict";
+
+      // ドロップダウンメニューの開閉処理
+      const menuBtn = document.getElementById('menuBtn');
+      const dropdownMenu = document.getElementById('dropdownMenu');
+
+      menuBtn.addEventListener('click', function(e){
+        e.stopPropagation();
+        const isShown = dropdownMenu.style.display === 'block';
+        dropdownMenu.style.display = isShown ? 'none' : 'block';
+      });
+
+      document.addEventListener('click', function(){
+        dropdownMenu.style.display = 'none';
+      });
+    })();
+
+    // 投稿ボタンクリック時の未登録判定＆誘導処理
+    function handlePostClick() {
+      const isLoggedIn = sessionStorage.getItem('wannyanSOS_loggedIn');
+      const hasProfile = localStorage.getItem('wanSOS_profile');
+
+      if (isLoggedIn === 'true' && hasProfile) {
+        window.location.href = "sos-create.html";
+      } else {
+        alert("SOSを投稿するには、ユーザー登録と利用規約への同意が必要です。登録画面へ移動します。");
+        window.location.href = "register.html";
+      }
+    }
+  </script>
+
+</body>
+</html>

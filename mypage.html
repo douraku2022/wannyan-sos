@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+  <title>マイページ｜ワンニャンSOS熊本</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Supabase 公式CDNライブラリ -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- 共通接続設定 -->
+  <script src="supabase-config.js"></script>
+</head>
+
+<body>
+
+  <!-- ヘッダー -->
+  <header class="app-header">
+    <div class="header-logo">
+      🐕🐈
+      <span>ワンニャンSOS熊本</span>
+    </div>
+    <button type="button" id="menuButton" class="menu-button" aria-label="メニュー">☰</button>
+  </header>
+
+  <!-- サイドメニュー -->
+  <div id="menuOverlay" class="menu-overlay" aria-hidden="true"></div>
+  <aside id="sideMenu" class="side-menu" aria-label="メニュー" aria-hidden="true">
+    <button type="button" id="menuClose" class="menu-close" aria-label="メニューを閉じる">×</button>
+    <h2>☰ メニュー</h2>
+    <a href="sos.html">🏠 ホーム（SOS一覧）</a>
+    <a href="mypage.html">👤 マイページ</a>
+    <div class="menu-group">
+      <a href="#" id="guideToggle">📖 ご利用について ⌄</a>
+      <div id="guideLinks" style="display:none;">
+        <a class="menu-sub" href="guide.html">ご利用ガイド</a>
+        <a class="menu-sub" href="terms.html">利用規約</a>
+        <a class="menu-sub" href="privacy.html">プライバシーポリシー</a>
+        <a class="menu-sub" href="disclaimer.html">免責事項・安全上の注意</a>
+      </div>
+    </div>
+    <a href="info.html">ℹ️ ワンニャンSOSについて</a>
+    <div class="menu-separator"></div>
+    <a href="#" id="logoutLink">ログアウト</a>
+  </aside>
+
+
+  <!-- メインコンテンツ -->
+  <main class="sos-container">
+
+    <div class="page-title">
+      <div>
+        <h1>👤 マイページ</h1>
+        <p>登録情報と投稿履歴の管理</p>
+      </div>
+    </div>
+
+    <!-- ユーザープロフィール情報 -->
+    <section class="profile-card" style="background:#fff; padding:16px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:20px;">
+      <h2 style="font-size:16px; margin:0 0 8px 0; color:#2d3748;" id="userNickname">読み込み中...</h2>
+      <p style="font-size:13px; color:#718096; margin:0;" id="userRole">アカウント種別：一般会員</p>
+    </section>
+
+    <!-- 自分が投稿したSOS一覧（ここから編集可能） -->
+    <section class="my-posts-section">
+      <h2 style="font-size:16px; margin-bottom:12px; color:#2d3748;">📝 あなたが投稿したSOS</h2>
+      <div id="mySosList">
+        <div class="empty-message">投稿履歴を読み込み中...</div>
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- 下部ナビ -->
+  <nav class="bottom-nav">
+    <a href="sos.html">🆘<span>SOS</span></a>
+    <a href="sos-create.html">＋<span>投稿</span></a>
+    <a href="mypage.html" class="active">👤<span>マイページ</span></a>
+  </nav>
+
+
+  <!-- サイドメニュー制御スクリプト -->
+  <script>
+  (function(){
+    "use strict";
+    const button = document.getElementById('menuButton');
+    const menu = document.getElementById('sideMenu');
+    const overlay = document.getElementById('menuOverlay');
+    const close = document.getElementById('menuClose');
+    const toggle = document.getElementById('guideToggle');
+    const links = document.getElementById('guideLinks');
+    const logout = document.getElementById('logoutLink');
+
+    function openMenu(){ if(menu&&overlay){ menu.classList.add('open'); overlay.classList.add('open'); } }
+    function closeMenu(){ if(menu&&overlay){ menu.classList.remove('open'); overlay.classList.remove('open'); } }
+
+    if(button) button.addEventListener('click', openMenu);
+    if(close) close.addEventListener('click', closeMenu);
+    if(overlay) overlay.addEventListener('click', closeMenu);
+
+    if(toggle&&links){
+      toggle.addEventListener('click', function(e){
+        e.preventDefault();
+        const open = links.style.display !== 'none';
+        links.style.display = open ? 'none' : 'block';
+        toggle.innerHTML = open ? '📖 ご利用について ⌄' : '📖 ご利用について ⌃';
+      });
+    }
+    if(logout){
+      logout.addEventListener('click', function(e){
+        e.preventDefault();
+        sessionStorage.removeItem('wannyanSOS_loggedIn');
+        window.location.href = 'index.html';
+      });
+    }
+  })();
+  </script>
+
+
+  <!-- マイページ・投稿履歴＆編集リンク読み込みスクリプト -->
+  <script>
+  (function(){
+    "use strict";
+
+    const userNicknameEl = document.getElementById('userNickname');
+    const userRoleEl = document.getElementById('userRole');
+    const mySosListEl = document.getElementById('mySosList');
+
+    function esc(v){
+      return String(v ?? '').replace(/[&<>'"]/g, function(c){
+        return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];
+      });
+    }
+
+    // ログインユーザー情報の取得
+    let profile = {};
+    try {
+      profile = JSON.parse(localStorage.getItem('wanSOS_profile') || '{}');
+    } catch(e) {}
+
+    const myName = profile.nickname || 'ゲスト';
+    userNicknameEl.textContent = "👤 " + myName + " さんのページ";
+    if (profile.type) userRoleEl.textContent = "アカウント種別：" + profile.type;
+
+    async function loadMyPosts() {
+      if (!window.supabaseClient) {
+        mySosListEl.innerHTML = '<div class="empty-message">データベース未接続です。</div>';
+        return;
+      }
+
+      try {
+        // 自分が投稿したSOSを取得
+        const { data, error } = await window.supabaseClient
+          .from('sos_items')
+          .select('*')
+          .eq('poster_name', myName)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          mySosListEl.innerHTML = '<div class="empty-message">あなたが投稿したSOSはまだありません。</div>';
+          return;
+        }
+
+        mySosListEl.innerHTML = '';
+
+        data.forEach(item => {
+          const card = document.createElement('article');
+          card.style.cssText = "background:#fff; padding:14px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:12px;";
+
+          const animal = item.animal_type || '🐾';
+          const d = new Date(item.created_at);
+          const dateStr = isNaN(d) ? '' : (d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate());
+
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span style="font-size:11px; color:#718096; font-weight:bold;">${esc(item.id)}</span>
+              <span style="font-size:12px; color:#dd6b20; font-weight:bold;">${esc(item.urgency || '')}</span>
+            </div>
+            <h3 style="font-size:15px; margin:0 0 6px 0; color:#2d3748;">${esc(animal)} ${esc(item.title)}</h3>
+            <p style="font-size:12px; color:#718096; margin:0 0 10px 0;">投稿日：${dateStr} ／ 📍${esc(item.city)}</p>
+            
+            <div style="display:flex; gap:8px;">
+              <a href="sos-detail.html?id=${encodeURIComponent(item.id)}" style="flex:1; text-align:center; text-decoration:none; padding:8px; background:#edf2f7; color:#2d3748; border-radius:6px; font-size:13px; font-weight:bold;">
+                詳細を見る
+              </a>
+              <a href="sos-edit.html?id=${encodeURIComponent(item.id)}" style="flex:1; text-align:center; text-decoration:none; padding:8px; background:#fff8e6; color:#b78103; border:1px solid #ffe082; border-radius:6px; font-size:13px; font-weight:bold;">
+                ✏️ 編集する
+              </a>
+            </div>
+          `;
+
+          mySosListEl.appendChild(card);
+        });
+
+      } catch (err) {
+        console.error("投稿取得エラー:", err);
+        mySosListEl.innerHTML = '<div class="empty-message">データの読み込みに失敗しました。</div>';
+      }
+    }
+
+    loadMyPosts();
+  })();
+  </script>
+
+</body>
+</html>

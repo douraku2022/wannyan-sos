@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+  <title>SOSを編集｜ワンニャンSOS熊本</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
+  <!-- ★【修正】登録済みプロフィールがあればスムーズに通すガード処理 -->
+  <script>
+    (function(){
+      const hasProfile = localStorage.getItem('wanSOS_profile');
+
+      if (!hasProfile) {
+        alert("編集を行うには会員登録・ログインが必要です。");
+        window.location.href = "register.html";
+      } else {
+        // ログイン状態フラグを補完
+        sessionStorage.setItem('wannyanSOS_loggedIn', 'true');
+      }
+    })();
+  </script>
+</head>
+
+<body>
+
+  <header class="app-header">
+    <a href="javascript:history.back()" class="back-button" aria-label="戻る">←</a>
+    <div class="header-logo">
+      🐕🐈 <span>ワンニャンSOS熊本</span>
+    </div>
+    <div class="header-space"></div>
+  </header>
+
+  <main class="create-container">
+    <section class="create-card">
+
+      <div class="page-title">
+        <div>
+          <h1>✏️ SOS内容の編集</h1>
+          <p>投稿内容の更新・修正を行えます</p>
+        </div>
+      </div>
+
+      <!-- 読み込み中表示 -->
+      <div id="loadingMessage" style="text-align: center; padding: 20px; color: #718096; font-size: 14px;">
+        データを読み込んでいます...
+      </div>
+
+      <form id="sosEditForm" style="display: none;">
+
+        <!-- 投稿ID（非表示） -->
+        <input type="hidden" id="postId" name="postId">
+
+        <!-- 対象 -->
+        <div class="form-group">
+          <label>🐕🐈 対象 <span class="required">必須</span></label>
+          <div class="choice-grid">
+            <label class="choice-card"><input type="radio" name="animal" value="🐕 犬"><span>🐕 犬</span></label>
+            <label class="choice-card"><input type="radio" name="animal" value="🐈 猫"><span>🐈 猫</span></label>
+            <label class="choice-card"><input type="radio" name="animal" value="🐾 その他"><span>🐾 その他</span></label>
+          </div>
+        </div>
+
+        <!-- タイトル -->
+        <div class="form-group">
+          <label for="title">タイトル <span class="required">必須</span></label>
+          <input type="text" id="title" name="title" required maxlength="100">
+        </div>
+
+        <!-- 市区町村 -->
+        <div class="form-group">
+          <label for="city">📍 市区町村 <span class="required">必須</span></label>
+          <input type="text" id="city" name="city" required maxlength="50">
+        </div>
+
+        <!-- 地域詳細 -->
+        <div class="form-group">
+          <label for="area">📍 おおまかなエリア・目印（詳細住所は記入不可）</label>
+          <input type="text" id="area" name="area" maxlength="100">
+        </div>
+
+        <!-- 対応期限 -->
+        <div class="form-group">
+          <label>⏱ 対応期限 <span class="required">必須</span></label>
+          <div class="urgency-list">
+            <label class="urgency-card"><input type="radio" name="urgency" value="🚨 今すぐ対応が必要"><span>🔴 今すぐ</span></label>
+            <label class="urgency-card"><input type="radio" name="urgency" value="⏳ 3〜7日以内"><span>🟠 2〜3日</span></label>
+            <label class="urgency-card"><input type="radio" name="urgency" value="🔄 持続的な支援"><span>🟢 持続的</span></label>
+          </div>
+        </div>
+
+        <!-- 詳しい状況 -->
+        <div class="form-group">
+          <label for="description">📝 詳しい状況 <span class="required">必須</span></label>
+          <textarea id="description" name="description" rows="6" required maxlength="2000"></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn" class="sos-submit-button">
+          💾 変更内容を保存する
+        </button>
+
+      </form>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="sos.html">🆘<span>SOS</span></a>
+    <a href="javascript:void(0)" onclick="history.back()">←<span>戻る</span></a>
+    <a href="mypage.html">👤<span>マイページ</span></a>
+  </nav>
+
+  <script>
+  (function(){
+    "use strict";
+
+    const form = document.getElementById("sosEditForm");
+    const loadingMessage = document.getElementById("loadingMessage");
+    const submitBtn = document.getElementById("submitBtn");
+
+    // URLパラメータから投稿IDを取得
+    const urlParams = new URLSearchParams(window.location.search);
+    const postId = urlParams.get('id');
+
+    if (!postId) {
+      alert("編集対象の投稿IDが見つかりません。");
+      window.location.href = "sos.html";
+      return;
+    }
+
+    // 既存投稿データの取得とフォーム初期セット
+    async function loadPostData() {
+      try {
+        let postData = null;
+
+        if (window.supabaseClient) {
+          const { data, error } = await window.supabaseClient
+            .from('sos_items')
+            .select('*')
+            .eq('id', postId)
+            .single();
+
+          if (error) throw error;
+          postData = data;
+        }
+
+        if (!postData) {
+          alert("該当の投稿データが存在しません。");
+          window.location.href = "sos.html";
+          return;
+        }
+
+        // フォームに値をセット
+        document.getElementById('postId').value = postData.id;
+        document.getElementById('title').value = postData.title || '';
+        document.getElementById('city').value = postData.city || '';
+        document.getElementById('area').value = postData.area || '';
+        document.getElementById('description').value = postData.description || '';
+
+        // ラジオボタン（対象）のセット
+        const animalValue = postData.category || postData.animal_type || '🐕 犬';
+        const animalRadio = Array.from(document.querySelectorAll('input[name="animal"]'))
+          .find(r => r.value.includes(animalValue) || animalValue.includes(r.value.replace(/[🐕🐈🐾\s]/g, '')));
+        if (animalRadio) animalRadio.checked = true;
+
+        // ラジオボタン（緊急度）のセット
+        const urgencyValue = postData.urgency || '🚨 今すぐ対応が必要';
+        const urgencyRadio = Array.from(document.querySelectorAll('input[name="urgency"]'))
+          .find(r => r.value.includes(urgencyValue) || urgencyValue.includes(r.value.replace(/[🚨⏳🔄🔴🟠🟢\s]/g, '')));
+        if (urgencyRadio) urgencyRadio.checked = true;
+
+        loadingMessage.style.display = 'none';
+        form.style.display = 'block';
+
+      } catch (err) {
+        console.error("データ読み込みエラー:", err);
+        alert("データの読み込みに失敗しました：" + err.message);
+        window.location.href = "sos.html";
+      }
+    }
+
+    // 変更内容の更新処理
+    form.addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "更新中...";
+
+      const animal = document.querySelector('input[name="animal"]:checked')?.value || '🐾 その他';
+      const urgency = document.querySelector('input[name="urgency"]:checked')?.value || '🚨 今すぐ対応が必要';
+
+      const updateData = {
+        title: document.getElementById('title').value.trim(),
+        animal_type: animal.includes('犬') ? '🐕' : (animal.includes('猫') ? '🐈' : '🐾'),
+        category: animal,
+        city: document.getElementById('city').value.trim(),
+        area: document.getElementById('area').value.trim(),
+        urgency: urgency,
+        description: document.getElementById('description').value.trim(),
+        updated_at: new Date().toISOString()
+      };
+
+      try {
+        if (window.supabaseClient) {
+          const { error } = await window.supabaseClient
+            .from('sos_items')
+            .update(updateData)
+            .eq('id', postId);
+
+          if (error) throw error;
+        }
+
+        alert("投稿内容を更新しました！");
+        window.location.href = "sos.html";
+
+      } catch (err) {
+        console.error("更新エラー:", err);
+        alert("更新に失敗しました：" + err.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = "💾 変更内容を保存する";
+      }
+    });
+
+    loadPostData();
+  })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>ワンニャンSOS｜管理者ログイン</title>
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f7f4ef;
+    color: #333;
+    font-family:
+      -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+      "Yu Gothic", "YuGothic", sans-serif;
+  }
+
+  .login-card {
+    width: min(92vw, 420px);
+    background: #fff;
+    border-radius: 18px;
+    padding: 32px 26px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.08);
+  }
+
+  .logo {
+    text-align: center;
+    font-size: 38px;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    margin: 0;
+    text-align: center;
+    font-size: 22px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #777;
+    margin: 8px 0 28px;
+    font-size: 14px;
+  }
+
+  label {
+    display: block;
+    margin: 16px 0 7px;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  input {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 16px;
+    background: #fff;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: #888;
+  }
+
+  button {
+    width: 100%;
+    margin-top: 24px;
+    padding: 14px;
+    border: 0;
+    border-radius: 10px;
+    background: #333;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  button:active {
+    transform: translateY(1px);
+  }
+
+  .error {
+    min-height: 22px;
+    margin-top: 14px;
+    color: #b33;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .notice {
+    margin-top: 22px;
+    padding: 12px;
+    border-radius: 10px;
+    background: #f5f5f5;
+    color: #666;
+    font-size: 12px;
+    line-height: 1.6;
+    text-align: center;
+  }
+</style>
+</head>
+
+<body>
+
+<main class="login-card">
+
+  <div class="logo">🐕🐈</div>
+
+  <h1>ワンニャンSOS</h1>
+
+  <p class="subtitle">管理者ログイン</p>
+
+  <form id="adminLoginForm">
+
+    <label for="adminId">管理者ID</label>
+    <input
+      id="adminId"
+      name="adminId"
+      type="text"
+      autocomplete="username"
+      required
+    >
+
+    <label for="adminPassword">パスワード</label>
+    <input
+      id="adminPassword"
+      name="adminPassword"
+      type="password"
+      autocomplete="current-password"
+      required
+    >
+
+    <button type="submit">
+      管理画面へログイン
+    </button>
+
+    <div
+      id="loginError"
+      class="error"
+      aria-live="polite"
+    ></div>
+
+  </form>
+
+  <div class="notice">
+    管理者専用ページです。<br>
+    運営：どうらくいちば
+  </div>
+
+</main>
+
+<script>
+(function () {
+
+  /*
+   * 本番公開前のテスト用管理者認証。
+   *
+   * 現段階はHTML＋localStorage方式なので、
+   * 本当の意味での安全な認証ではありません。
+   * 公開版ではサーバー側認証へ移行してください。
+   */
+
+  const ADMIN_ID = "douraku";
+  const ADMIN_PASSWORD = "wansos";
+
+  const SESSION_KEY =
+    "wanSOS_admin_authenticated";
+
+  const form =
+    document.getElementById(
+      "adminLoginForm"
+    );
+
+  const error =
+    document.getElementById(
+      "loginError"
+    );
+
+
+  form.addEventListener(
+    "submit",
+    function (event) {
+
+      event.preventDefault();
+
+      const id =
+        document.getElementById(
+          "adminId"
+        ).value.trim();
+
+      const password =
+        document.getElementById(
+          "adminPassword"
+        ).value;
+
+
+      if (
+        id === ADMIN_ID &&
+        password === ADMIN_PASSWORD
+      ) {
+
+        sessionStorage.setItem(
+          SESSION_KEY,
+          "true"
+        );
+
+        window.location.href =
+          "admin.html";
+
+        return;
+      }
+
+
+      error.textContent =
+        "管理者IDまたはパスワードが違います。";
+
+    }
+  );
+
+})();
+</script>
+
+</body>
+</html>

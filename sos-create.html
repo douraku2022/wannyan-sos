@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+  <title>SOSを投稿｜ワンニャンSOS熊本</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
+  <!-- 未登録者のアクセス遮断ガード -->
+  <script>
+    (function(){
+      const isLoggedIn = sessionStorage.getItem('wannyanSOS_loggedIn');
+      const hasProfile = localStorage.getItem('wanSOS_profile');
+
+      if (isLoggedIn !== 'true' || !hasProfile) {
+        alert("SOSを投稿するには、先にユーザー登録と利用規約への同意が必要です。");
+        window.location.href = "register.html";
+      }
+    })();
+  </script>
+</head>
+
+<body>
+
+  <header class="app-header">
+    <a href="javascript:history.back()" class="back-button" aria-label="戻る">←</a>
+    <div class="header-logo">
+      🐕🐈
+      <span>ワンニャンSOS熊本</span>
+    </div>
+    <div class="header-space"></div>
+  </header>
+
+  <main class="create-container">
+    <section class="create-card">
+
+      <div class="page-title">
+        <div>
+          <h1>🆘 新しいSOSを投稿</h1>
+          <p>困っている状況を入力してください</p>
+        </div>
+      </div>
+
+      <!-- 個人情報非開示の注意喚起 -->
+      <div style="background:#fff5f5; border:2px solid #feb2b2; padding:12px; border-radius:10px; margin-bottom:20px; font-size:13px; color:#9b2c2c; line-height:1.5;">
+        <strong style="font-size:14px; display:block; margin-bottom:4px;">🚨 個人情報の掲載に関するご注意</strong>
+        本掲示板はどなたでも閲覧できる公開エリアです。<br>
+        <strong>電話番号・本名・詳細な住所（丁目・番地・部屋番号）は本文内に絶対に記入しないでください。</strong><br>
+        <span style="font-size:12px; color:#c53030;">※詳しい連絡先や住所の交換は、マッチング後の個別チャットで行ってください。</span>
+      </div>
+
+      <form id="sosCreateForm">
+
+        <!-- 対象 -->
+        <div class="form-group">
+          <label>🐕🐈 対象 <span class="required">必須</span></label>
+          <div class="choice-grid">
+            <label class="choice-card"><input type="radio" name="animal" value="🐕 犬"><span>🐕 犬</span></label>
+            <label class="choice-card"><input type="radio" name="animal" value="🐈 猫" checked><span>🐈 猫</span></label>
+            <label class="choice-card"><input type="radio" name="animal" value="🐾 その他"><span>🐾 その他</span></label>
+          </div>
+        </div>
+
+        <!-- タイトル -->
+        <div class="form-group">
+          <label for="title">タイトル <span class="required">必須</span></label>
+          <input type="text" id="title" name="title" placeholder="例：フードと毛布が不足しています" required maxlength="100">
+        </div>
+
+        <!-- 市区町村 -->
+        <div class="form-group">
+          <label for="city">📍 市区町村 <span class="required">必須</span></label>
+          <input type="text" id="city" name="city" placeholder="例：熊本市中央区" required maxlength="50">
+        </div>
+
+        <!-- 地域詳細 -->
+        <div class="form-group">
+          <label for="area">📍 おおまかなエリア・目印（詳細住所は記入不可）</label>
+          <input type="text" id="area" name="area" placeholder="例：○○避難所付近、○○駅北口周辺" maxlength="100">
+        </div>
+
+        <!-- 対応期限 -->
+        <div class="form-group">
+          <label>⏱ 対応期限 <span class="required">必須</span></label>
+          <div class="urgency-list">
+            <label class="urgency-card"><input type="radio" name="urgency" value="🚨 今すぐ対応が必要" checked><span>🔴 今すぐ</span></label>
+            <label class="urgency-card"><input type="radio" name="urgency" value="⏳ 3〜7日以内"><span>🟠 2〜3日</span></label>
+            <label class="urgency-card"><input type="radio" name="urgency" value="🔄 持続的な支援"><span>🟢 持続的</span></label>
+          </div>
+        </div>
+
+        <!-- 詳しい状況 -->
+        <div class="form-group">
+          <label for="description">📝 詳しい状況 <span class="required">必須</span></label>
+          <textarea id="description" name="description" rows="6" placeholder="具体的な状況や必要な支援内容を入力してください（※電話番号や個人情報は記載しないでください）" required maxlength="2000"></textarea>
+        </div>
+
+        <!-- 簡易リマインド表示 -->
+        <p style="font-size:12px; color:#718096; text-align:center; margin:15px 0 10px; line-height:1.4;">
+          ※登録時に同意いただいた利用規約・免責事項を遵守の上、個人情報を含めずに投稿してください。
+        </p>
+
+        <button type="submit" id="submitBtn" class="sos-submit-button">
+          🆘 SOSを投稿する
+        </button>
+
+      </form>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="sos.html">🆘<span>SOS</span></a>
+    <a href="sos-create.html" class="active">＋<span>投稿</span></a>
+    <a href="mypage.html">👤<span>マイページ</span></a>
+  </nav>
+
+  <script>
+  (function(){
+    "use strict";
+
+    const form = document.getElementById("sosCreateForm");
+    const submitBtn = document.getElementById("submitBtn");
+
+    // 入力内容の一時保存・自動復元
+    const DRAFT_KEY = 'wanSOS_post_draft';
+
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(DRAFT_KEY) || '{}');
+      if (saved.title) document.getElementById('title').value = saved.title;
+      if (saved.city) document.getElementById('city').value = saved.city;
+      if (saved.area) document.getElementById('area').value = saved.area;
+      if (saved.description) document.getElementById('description').value = saved.description;
+    } catch(e) {}
+
+    form.addEventListener('input', function() {
+      const draft = {
+        title: document.getElementById('title').value,
+        city: document.getElementById('city').value,
+        area: document.getElementById('area').value,
+        description: document.getElementById('description').value
+      };
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    });
+
+    let profile = {};
+    try {
+      profile = JSON.parse(localStorage.getItem('wanSOS_profile') || '{}');
+    } catch(e) {}
+    const posterName = profile.nickname || '匿名';
+
+    // 投稿処理
+    form.addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "送信中...";
+
+      const animal = document.querySelector('input[name="animal"]:checked')?.value || '🐾 その他';
+      const urgency = document.querySelector('input[name="urgency"]:checked')?.value || '🚨 今すぐ対応が必要';
+
+      // ★【エラー修正】idにランダムなUUID（投稿ID）を付与
+      const generatedId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
+
+      const newSOS = {
+        id: generatedId,
+        title: document.getElementById('title').value.trim(),
+        animal_type: animal.includes('犬') ? '🐕' : (animal.includes('猫') ? '🐈' : '🐾'),
+        category: animal,
+        city: document.getElementById('city').value.trim(),
+        area: document.getElementById('area').value.trim(),
+        urgency: urgency,
+        description: document.getElementById('description').value.trim(),
+        poster_name: posterName
+      };
+
+      try {
+        if (window.supabaseClient) {
+          const { error } = await window.supabaseClient
+            .from('sos_items')
+            .insert([newSOS]);
+
+          if (error) throw error;
+        }
+
+        sessionStorage.removeItem(DRAFT_KEY);
+        alert("SOSの投稿が完了しました！");
+        window.location.href = "sos.html";
+
+      } catch (err) {
+        console.error("投稿エラー:", err);
+        alert("投稿に失敗しました：" + err.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = "🆘 SOSを投稿する";
+      }
+    });
+
+  })();
+  </script>
+
+</body>
+</html>

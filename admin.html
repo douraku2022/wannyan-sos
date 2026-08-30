@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+  <title>管理画面｜ワンニャンSOS熊本</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <script>
+  (function () {
+    const ADMIN_SESSION_KEY = "wanSOS_admin_authenticated";
+
+    if (sessionStorage.getItem(ADMIN_SESSION_KEY) !== "true") {
+      window.location.replace("admin-login.html");
+    }
+  })();
+  </script>
+</head>
+
+<body>
+
+  <!-- 管理画面ヘッダー -->
+  <header class="app-header admin-header">
+    <div class="header-logo">
+      🐕🐈
+      <span>ワンニャンSOS熊本</span>
+    </div>
+    <span class="admin-label">
+      どうらくいちば
+    </span>
+  </header>
+
+
+  <main class="admin-container">
+
+    <!-- 管理者情報 -->
+    <section class="admin-profile">
+      <div>
+        <h1>どうらくいちば 管理画面</h1>
+        <p>運営：どうらくいちば</p>
+      </div>
+      <span class="admin-badge">管理者</span>
+    </section>
+
+
+    <!-- 状況サマリー -->
+    <section class="admin-summary">
+      <div class="summary-card">
+        <span class="summary-number" id="currentSosCount">0</span>
+        <span>現在のSOS</span>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-number" id="recruitingSosCount">0</span>
+        <span>支援者募集中</span>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-number" id="resolvedSosCount">0</span>
+        <span>解決済み</span>
+      </div>
+    </section>
+
+
+    <!-- SOS終了申請 -->
+    <section class="admin-section">
+      <div class="admin-section-header">
+        <h2>🟡 SOS終了申請</h2>
+        <span id="terminationRequestCount">0件</span>
+      </div>
+
+      <div id="terminationRequests"></div>
+      <p id="noTerminationRequests" class="empty-message">
+        現在、確認待ちの終了申請はありません。
+      </p>
+    </section>
+
+
+    <!-- 支援状況 -->
+    <section class="admin-section">
+      <div class="admin-section-header">
+        <h2>🤝 支援状況</h2>
+      </div>
+      <div class="support-overview">
+        <div class="support-overview-row"><span>🔎 捜索</span><strong><span id="supportSearchCount">0</span>件</strong></div>
+        <div class="support-overview-row"><span>🚗 移動</span><strong><span id="supportMoveCount">0</span>件</strong></div>
+        <div class="support-overview-row"><span>🏠 一時預かり</span><strong><span id="supportFosterCount">0</span>件</strong></div>
+        <div class="support-overview-row"><span>🍚 フード</span><strong><span id="supportFoodCount">0</span>件</strong></div>
+        <div class="support-overview-row"><span>🏥 医療</span><strong><span id="supportMedicalCount">0</span>件</strong></div>
+      </div>
+    </section>
+
+
+    <!-- ログアウト -->
+    <button type="button" id="adminLogout" class="logout-button">
+      管理画面からログアウト
+    </button>
+
+  </main>
+
+
+  <script>
+  (function () {
+
+    const SOS_KEY = "wanSOS_items";
+    const SUPPORT_KEYS = [
+      "wannyan_supports",
+      "wanSOS_supports"
+    ];
+
+    function readArray(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || "[]");
+        return Array.isArray(value) ? value : [];
+      } catch (error) {
+        console.error(error);
+        return [];
+      }
+    }
+
+    function getSOSItems() {
+      return readArray(SOS_KEY);
+    }
+
+    function saveSOSItems(items) {
+      localStorage.setItem(SOS_KEY, JSON.stringify(items));
+    }
+
+    function getSupports() {
+      const all = [];
+      SUPPORT_KEYS.forEach(function (key) {
+        readArray(key).forEach(function (item) {
+          all.push(item);
+        });
+      });
+      return all;
+    }
+
+    function renderSummary() {
+      const items = getSOSItems();
+
+      const active = items.filter(function (item) {
+        return (
+          !item.status ||
+          item.status === "active" ||
+          item.status === "termination_pending"
+        );
+      });
+
+      const recruiting = items.filter(function (item) {
+        return (!item.status || item.status === "active");
+      });
+
+      const resolved = items.filter(function (item) {
+        return item.status === "resolved";
+      });
+
+      const current = document.getElementById("currentSosCount");
+      const recruit = document.getElementById("recruitingSosCount");
+      const resolvedCount = document.getElementById("resolvedSosCount");
+
+      if (current) current.textContent = active.length;
+      if (recruit) recruit.textContent = recruiting.length;
+      if (resolvedCount) resolvedCount.textContent = resolved.length;
+    }
+
+
+    function renderSupportSummary() {
+      const supports = getSupports();
+      const counts = { search: 0, move: 0, foster: 0, food: 0, medical: 0 };
+
+      supports.forEach(function (support) {
+        const label = String(support.helpLabel || support.helpType || "");
+
+        if (label.includes("捜索") || label.includes("探")) counts.search++;
+        if (label.includes("移動") || label.includes("搬送")) counts.move++;
+        if (label.includes("預か") || label.includes("一時")) counts.foster++;
+        if (label.includes("フード") || label.includes("物資") || label.includes("用品")) counts.food++;
+        if (label.includes("医療") || label.includes("病院") || label.includes("通院")) counts.medical++;
+      });
+
+      const map = {
+        supportSearchCount: counts.search,
+        supportMoveCount: counts.move,
+        supportFosterCount: counts.foster,
+        supportFoodCount: counts.food,
+        supportMedicalCount: counts.medical
+      };
+
+      Object.keys(map).forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = map[id];
+      });
+    }
+
+
+    function renderTerminationRequests() {
+      const items = getSOSItems();
+
+      const pending = items.filter(function (item) {
+        return (
+          item.status === "termination_pending" &&
+          item.terminationRequest &&
+          item.terminationRequest.status !== "approved" &&
+          item.terminationRequest.status !== "rejected"
+        );
+      });
+
+      const box = document.getElementById("terminationRequests");
+      const empty = document.getElementById("noTerminationRequests");
+      const count = document.getElementById("terminationRequestCount");
+
+      if (!box || !empty || !count) return;
+
+      box.innerHTML = "";
+      count.textContent = pending.length + "件";
+      empty.style.display = pending.length ? "none" : "block";
+
+      pending.forEach(function (sos) {
+        const request = sos.terminationRequest;
+
+        const card = document.createElement("article");
+        card.className = "admin-sos-item";
+
+        const main = document.createElement("div");
+        main.className = "admin-sos-main";
+
+        const id = document.createElement("span");
+        id.className = "sos-id";
+        id.textContent = sos.id || "";
+
+        const title = document.createElement("h3");
+        title.textContent = sos.title || "SOS";
+
+        const location = document.createElement("p");
+        location.textContent = sos.location ? "📍 " + sos.location : "";
+
+        const reason = document.createElement("p");
+        reason.textContent = "終了理由：" + (request.reason || "");
+
+        const note = document.createElement("p");
+        note.textContent = request.note ? "申請メモ：" + request.note : "申請メモ：なし";
+
+        main.appendChild(id);
+        main.appendChild(title);
+        if (sos.location) main.appendChild(location);
+        main.appendChild(reason);
+        main.appendChild(note);
+
+        const actions = document.createElement("div");
+        actions.className = "admin-sos-actions";
+
+        const status = document.createElement("span");
+        status.className = "admin-status";
+        status.textContent = "🟡 確認中";
+
+        const detail = document.createElement("a");
+        detail.href = "sos-detail.html?id=" + encodeURIComponent(sos.id || "");
+        detail.textContent = "詳細";
+
+        const approve = document.createElement("button");
+        approve.type = "button";
+        approve.className = "resolve-button";
+        approve.textContent = "承認";
+        approve.addEventListener("click", function () {
+          approveTermination(sos.id);
+        });
+
+        const reject = document.createElement("button");
+        reject.type = "button";
+        reject.className = "reject-button";
+        reject.textContent = "却下";
+        reject.style.marginLeft = "8px";
+        reject.addEventListener("click", function () {
+          rejectTermination(sos.id);
+        });
+
+        actions.appendChild(status);
+        actions.appendChild(detail);
+        actions.appendChild(approve);
+        actions.appendChild(reject);
+
+        card.appendChild(main);
+        card.appendChild(actions);
+
+        box.appendChild(card);
+      });
+    }
+
+
+    function approveTermination(id) {
+      if (!confirm("このSOSを解決済みにしますか？")) return;
+
+      const items = getSOSItems();
+      const sos = items.find(function (item) { return item.id === id; });
+
+      if (!sos) {
+        alert("SOSが見つかりません。");
+        return;
+      }
+
+      sos.status = "resolved";
+      sos.resolvedAt = new Date().toISOString();
+
+      if (sos.terminationRequest) {
+        sos.terminationRequest.status = "approved";
+        sos.terminationRequest.reviewedAt = new Date().toISOString();
+      }
+
+      saveSOSItems(items);
+      renderSummary();
+      renderTerminationRequests();
+
+      alert("SOSを解決済みにしました。");
+    }
+
+
+    function rejectTermination(id) {
+      if (!confirm("この終了申請を却下しますか？")) return;
+
+      const items = getSOSItems();
+      const sos = items.find(function (item) { return item.id === id; });
+
+      if (!sos) {
+        alert("SOSが見つかりません。");
+        return;
+      }
+
+      sos.status = "active";
+
+      if (sos.terminationRequest) {
+        sos.terminationRequest.status = "rejected";
+        sos.terminationRequest.reviewedAt = new Date().toISOString();
+      }
+
+      saveSOSItems(items);
+      renderSummary();
+      renderTerminationRequests();
+
+      alert("終了申請を却下しました。");
+    }
+
+
+    const adminLogout = document.getElementById("adminLogout");
+
+    if (adminLogout) {
+      adminLogout.addEventListener("click", function () {
+        if (confirm("管理画面からログアウトしますか？")) {
+          sessionStorage.removeItem("wanSOS_admin_authenticated");
+          window.location.href = "admin-login.html";
+        }
+      });
+    }
+
+    renderSummary();
+    renderSupportSummary();
+    renderTerminationRequests();
+
+  })();
+  </script>
+</body>
+</html>

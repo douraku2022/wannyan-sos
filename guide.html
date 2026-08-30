@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>ご利用ガイド｜ワンニャンSOS熊本</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- 統一ヘッダー -->
+  <header class="app-header">
+    <a href="sos.html" class="back-button" aria-label="戻る">←</a>
+    <div class="header-logo">
+      🐕🐈
+      <span>ワンニャンSOS熊本</span>
+    </div>
+    <button type="button" id="menuButton" class="menu-button" aria-label="メニュー">☰</button>
+  </header>
+
+  <!-- サイドメニュー -->
+  <div id="menuOverlay" class="menu-overlay" aria-hidden="true"></div>
+  <aside id="sideMenu" class="side-menu" aria-label="メニュー" aria-hidden="true">
+    <button type="button" id="menuClose" class="menu-close" aria-label="メニューを閉じる">×</button>
+    <h2>☰ メニュー</h2>
+    <a href="sos.html">🏠 ホーム（SOS一覧）</a>
+    <a href="mypage.html">👤 マイページ</a>
+    <div class="menu-group">
+      <a href="#" id="guideToggle">📖 ご利用について ⌄</a>
+      <div id="guideLinks" style="display:none;">
+        <a class="menu-sub" href="guide.html">ご利用ガイド</a>
+        <a class="menu-sub" href="terms.html">利用規約</a>
+        <a class="menu-sub" href="privacy.html">プライバシーポリシー</a>
+        <a class="menu-sub" href="disclaimer.html">免責事項・安全上の注意</a>
+      </div>
+    </div>
+    <a href="info.html">ℹ️ ワンニャンSOSについて</a>
+    <div class="menu-separator"></div>
+    <a href="#" id="logoutLink">ログアウト</a>
+  </aside>
+
+  <!-- メインコンテンツ -->
+  <main class="sos-container">
+    <h1>📖 ご利用ガイド</h1>
+    <p>ワンニャンSOS熊本は、動物に関する支援を必要とする方とサポートできる方をつなぐ、会員制の相互支援プラットフォームです。</p>
+
+    <div class="poster-notice" style="background:#fff4e8; border:1px solid #edd1ae; padding:15px; border-radius:8px; margin-bottom:20px;">
+      <strong>⚠️ 緊急時のご注意</strong><br>
+      生命に直ちに危険がある場合や重篤な状況の際は、本サービスへの投稿だけに頼らず、必要な公的機関、医療機関、動物病院等へ直接連絡を行ってください。
+    </div>
+
+    <h2>1. SOSを投稿する（応援を求める）</h2>
+    <ol style="padding-left:20px; margin-bottom:20px;">
+      <li>下部メニューの「＋投稿」または画面指示に従い、SOS作成ページを開きます。</li>
+      <li>支援の種類（物資支援・一時預かり・搬送サポート等）、対象の動物、おおまかなエリアを入力します。</li>
+      <li>詳細本文には具体的な困りごとを記入してください。（※本名や詳しい住所などの個人情報は投稿本文に書かないようご注意ください）</li>
+    </ol>
+
+    <h2>2. 支援を申し出る（可能なサポートを伝える）</h2>
+    <p style="margin-bottom:20px;">SOS一覧から内容を確認し、ご自身が対応可能な案件があれば「連絡する」等から投稿者へ可能なサポートを伝えます。</p>
+
+    <h2>3. 案件チャット・直接連絡</h2>
+    <p style="margin-bottom:20px;">当事者同士でのやり取りは表示名で行われます。</p>
+
+    <h2>4. 解決済みに切り替える（SOS終了）</h2>
+    <p style="margin-bottom:20px;">必要な対応が完了した場合は、投稿者本人が「マイページ」より対象の投稿を「解決済み」に変更を行ってください。</p>
+
+    <h2>5. 安心・安全のためのお約束</h2>
+    <ul style="padding-left:20px; margin-bottom:20px;">
+      <li><strong>金銭のやり取りは全面禁止</strong>：名目を問わず、現金の要求・振込・電子マネーのやり取りは禁止です。</li>
+      <li><strong>生体販売・売買の禁止</strong>：生体の売買や有料引き取り等、営利目的の利用は一切禁止です。</li>
+      <li><strong>18歳以上限定</strong>：本サービスは18歳以上の成人のみを対象としています。</li>
+    </ul>
+
+    <div style="margin-top: 30px; text-align: center;">
+      <a href="sos.html" class="secondary-button">← SOS一覧へ戻る</a>
+    </div>
+  </main>
+
+  <!-- 下部ナビ -->
+  <nav class="bottom-nav">
+    <a href="sos.html">🆘<span>SOS</span></a>
+    <a href="sos-create.html">＋<span>投稿</span></a>
+    <a href="mypage.html">👤<span>マイページ</span></a>
+  </nav>
+
+  <script>
+  (function(){
+    "use strict";
+    const button = document.getElementById('menuButton');
+    const menu = document.getElementById('sideMenu');
+    const overlay = document.getElementById('menuOverlay');
+    const close = document.getElementById('menuClose');
+    const toggle = document.getElementById('guideToggle');
+    const links = document.getElementById('guideLinks');
+    const logout = document.getElementById('logoutLink');
+
+    function openMenu(){ if(menu&&overlay){ menu.classList.add('open'); overlay.classList.add('open'); } }
+    function closeMenu(){ if(menu&&overlay){ menu.classList.remove('open'); overlay.classList.remove('open'); } }
+
+    if(button) button.addEventListener('click', openMenu);
+    if(close) close.addEventListener('click', closeMenu);
+    if(overlay) overlay.addEventListener('click', closeMenu);
+
+    if(toggle&&links){
+      toggle.addEventListener('click', function(e){
+        e.preventDefault();
+        const open = links.style.display !== 'none';
+        links.style.display = open ? 'none' : 'block';
+        toggle.innerHTML = open ? '📖 ご利用について ⌄' : '📖 ご利用について ⌃';
+      });
+    }
+    if(logout){
+      logout.addEventListener('click', function(e){
+        e.preventDefault();
+        sessionStorage.removeItem('wannyanSOS_loggedIn');
+        window.location.href = 'index.html';
+      });
+    }
+  })();
+  </script>
+</body>
+</html>
