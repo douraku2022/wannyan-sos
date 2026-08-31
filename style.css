@@ -1,0 +1,59 @@
+@charset "UTF-8";
+
+/* ----------------------------------
+   全体共通設定
+---------------------------------- */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  background-color: #dbe2e8;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #2d3748;
+  -webkit-text-size-adjust: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+/* ----------------------------------
+   共通UI要素
+---------------------------------- */
+/* ボタンのタップ感 */
+button:active, .v-btn:active, .top-btn:active {
+  opacity: 0.85;
+}
+
+/* 入力フォーム共通 */
+input[type="text"],
+input[type="tel"],
+input[type="password"],
+textarea,
+select {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #cbd5e0;
+  border-radius: 8px;
+  font-size: 13px;
+  background-color: #ffffff;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #3182ce;
+  outline: none;
+}
+
+/* カード共通シャドウ */
+.card-shadow {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}

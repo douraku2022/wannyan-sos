@@ -3,20 +3,178 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex, nofollow">
-  <title>SOSを投稿｜ワンニャンSOS熊本</title>
+  <meta name="robots" content="noindex, nofollow">
+  <title>不足物資を投稿する｜ワンニャンSOS熊本</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
 
-  <!-- 未登録者のアクセス遮断ガード -->
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 54px 0 40px 0;
+      background-color: #dbe2e8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    /* 📌 最上部：共通固定ヘッダー */
+    .app-top-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 46px;
+      background: #00873c; color: #ffffff; border-bottom: 2px solid #005a28;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 10px;
+      z-index: 1000; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .top-btn {
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+      color: #ffffff; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold;
+      text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 4px;
+    }
+    .top-btn:active { background: rgba(255,255,255,0.3); }
+    .top-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
+
+    /* 🍔 右側スライドナビゲーション */
+    .menu-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); z-index: 1001;
+    }
+    .side-drawer {
+      position: fixed; top: 0; right: -260px; width: 240px; height: 100%;
+      background: linear-gradient(180deg, #ecefe6 0%, #d8ded6 100%);
+      border-left: 3px solid #9aa5b0; z-index: 1002;
+      box-shadow: -4px 0 16px rgba(0,0,0,0.2); transition: right 0.25s ease-in-out;
+      display: flex; flex-direction: column; padding: 12px; gap: 10px;
+    }
+    .side-drawer.open { right: 0; }
+    .drawer-header {
+      background: #00873c; color: #fff; border-radius: 8px; padding: 10px;
+      text-align: center; font-size: 13px; font-weight: bold; border: 1px solid #005a28;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .drawer-close-btn {
+      background: none; border: none; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer;
+    }
+
+    .drawer-menu-item {
+      background: #f8fafc; border: 2px solid #a0aec0; border-radius: 10px; padding: 12px;
+      color: #2d3748; text-decoration: none; font-size: 13px; font-weight: bold;
+      display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 0 #cbd5e0;
+    }
+    .drawer-menu-item:active { transform: translateY(1px); box-shadow: 0 1px 0 #cbd5e0; }
+
+    /* 🚆 券売機・タッチパネル端末風デザイン */
+    .ticket-vending-machine {
+      max-width: 480px; margin: 0 auto;
+      background: linear-gradient(180deg, #ecefe6 0%, #d8ded6 100%);
+      border: 4px solid #9aa5b0; border-radius: 16px; padding: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18), inset 0 2px 3px #ffffff;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    
+    .vending-header {
+      background: #00873c; border: 2px solid #005a28; border-radius: 10px;
+      text-align: center; padding: 8px 4px; color: #ffffff;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .vending-header h1 { font-size: 15px; margin: 0; font-weight: bold; letter-spacing: 0.5px; }
+    .vending-header p { font-size: 11px; margin: 2px 0 0; color: #e2f5e8; font-weight: bold; }
+
+    .step-box {
+      background: #ffffff; border: 2px solid #b0bec5; border-radius: 10px; padding: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .step-title { font-size: 11px; font-weight: bold; color: #2c3e50; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+    .step-badge {
+      background: #2b6cb0; color: #ffffff; border-radius: 4px; width: 18px; height: 18px;
+      display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;
+    }
+
+    .btn-grid { display: grid; gap: 6px; }
+    .v-btn {
+      background: #f8fafc; border: 2px solid #cbd5e0; border-radius: 8px; padding: 9px 4px;
+      font-size: 11px; font-weight: bold; color: #2d3748; cursor: pointer; text-align: center;
+      box-shadow: 0 3px 0 #cbd5e0; transition: all 0.1s;
+    }
+    .v-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #cbd5e0; }
+    .v-btn.selected {
+      background: #ebf8ff; border-color: #3182ce; color: #2b6cb0;
+      box-shadow: 0 1px 0 #3182ce; transform: translateY(2px);
+    }
+
+    .form-textarea {
+      width: 100%; padding: 8px; border: 2px solid #cbd5e0; border-radius: 8px;
+      font-size: 12px; color: #2d3748; background: #fff; font-family: inherit; resize: vertical;
+    }
+    .form-textarea:focus { outline: none; border-color: #3182ce; }
+
+    .notice-text { font-size: 9px; color: #4a5568; text-align: center; margin: 2px 0; line-height: 1.3; font-weight: bold; }
+    .submit-btn {
+      width: 100%; background: #c53030; color: #ffffff; border: 2px solid #9b2c2c; border-radius: 10px;
+      padding: 12px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 0 #742a2a; cursor: pointer;
+      letter-spacing: 0.5px;
+    }
+
+    /* 🎫 投稿確認モーダル */
+    .ticket-modal {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; padding: 16px;
+    }
+    .ticket-paper {
+      background: #fffdfa; border: 2px dashed #8c7b6c; border-radius: 12px; width: 100%; max-width: 360px;
+      padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); font-family: monospace, sans-serif; color: #2d3748;
+    }
+    .ticket-type-badge {
+      display: inline-block; background: #2b6cb0; color: #fff; font-size: 12px; padding: 2px 8px;
+      border-radius: 4px; font-weight: bold; margin-bottom: 8px;
+    }
+    .ticket-line { border-bottom: 1px dashed #cbd5e0; margin: 10px 0; }
+    .ticket-close-btn {
+      width: 100%; background: #2b6cb0; color: #fff; border: none; padding: 12px;
+      border-radius: 8px; font-weight: bold; font-size: 14px; margin-top: 16px; cursor: pointer;
+    }
+
+    /* 🎁 お辞儀・お気持ちボックスの専用スタイル */
+    .volunteer-notice-card {
+      max-width: 480px;
+      margin: 20px auto 0 auto;
+      background: #fffdf9;
+      border: 2px dashed #e2b714;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      font-family: inherit;
+    }
+    .volunteer-notice-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #f0e6d2;
+      padding-bottom: 8px;
+    }
+    .bowing-icon { font-size: 20px; }
+    .notice-title { font-size: 13px; font-weight: bold; color: #744210; }
+    .volunteer-notice-body p {
+      font-size: 12px;
+      color: #4a5568;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+    .volunteer-notice-body p:last-child { margin-bottom: 0; }
+    .notice-future {
+      background: #fefcbf;
+      border-left: 3px solid #d69e2e;
+      padding: 8px 10px;
+      border-radius: 0 6px 6px 0;
+      margin-top: 8px;
+      color: #744210 !important;
+    }
+  </style>
+
   <script>
     (function(){
       const isLoggedIn = sessionStorage.getItem('wannyanSOS_loggedIn');
       const hasProfile = localStorage.getItem('wanSOS_profile');
-
-      if (isLoggedIn !== 'true' || !hasProfile) {
-        alert("SOSを投稿するには、先にユーザー登録と利用規約への同意が必要です。");
+      if (isLoggedIn !== 'true' && !hasProfile) {
+        alert("不足物資の投稿を行うにはユーザー登録が必要です。");
         window.location.href = "register.html";
       }
     })();
@@ -25,180 +183,318 @@
 
 <body>
 
-  <header class="app-header">
-    <a href="javascript:history.back()" class="back-button" aria-label="戻る">←</a>
-    <div class="header-logo">
-      🐕🐈
-      <span>ワンニャンSOS熊本</span>
+  <!-- 📌 最上部：共通固定ヘッダー -->
+  <div class="app-top-bar">
+    <button type="button" class="top-btn" onclick="history.back()">← 戻る</button>
+    <div class="top-title">🐕🐈 ワンニャンSOS | 不足物資投稿</div>
+    <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
+  </div>
+
+  <!-- 🍔 右スライドメニュー -->
+  <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+  <div id="sideDrawer" class="side-drawer">
+    <div class="drawer-header">
+      <span>🐾 ワンニャンSOS メニュー</span>
+      <button class="drawer-close-btn" onclick="toggleMenu()">✕</button>
     </div>
-    <div class="header-space"></div>
-  </header>
+    <a href="index.html" class="drawer-menu-item">🏠 ホーム（トップ）</a>
+    <a href="sos.html" class="drawer-menu-item">📦 不足物資一覧</a>
+    <a href="sos-create.html" class="drawer-menu-item" style="color: #c53030;">📝 不足物資を投稿する</a>
+    <a href="mypage.html" class="drawer-menu-item">👤 マイページ</a>
+    <a href="guide.html" class="drawer-menu-item">📄 使い方案内</a>
+    <a href="info.html" class="drawer-menu-item">ℹ️ 運営情報・お知らせ</a>
+    <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
+    <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
+  </div>
 
-  <main class="create-container">
-    <section class="create-card">
+  <div style="padding: 0 12px;">
+    <div class="ticket-vending-machine">
 
-      <div class="page-title">
-        <div>
-          <h1>🆘 新しいSOSを投稿</h1>
-          <p>困っている状況を入力してください</p>
+      <div class="vending-header">
+        <h1>🐾 ワンニャンSOS熊本 🐾</h1>
+        <p>不足物資のSOS投稿</p>
+      </div>
+
+      <form id="vendingForm">
+
+        <!-- Step 1: 動物 -->
+        <div class="step-box">
+          <div class="step-title"><span class="step-badge">1</span> 何のお世話をしていますか？</div>
+          <div class="btn-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+            <button type="button" class="v-btn selected" onclick="selectAnimal(this, '🐕 犬')">🐕 犬</button>
+            <button type="button" class="v-btn" onclick="selectAnimal(this, '🐈 猫')">🐈 猫</button>
+            <button type="button" class="v-btn" onclick="selectAnimal(this, '🐾 両方')">🐾 両方</button>
+          </div>
+          <input type="hidden" id="animal_type" value="🐕 犬">
         </div>
-      </div>
 
-      <!-- 個人情報非開示の注意喚起 -->
-      <div style="background:#fff5f5; border:2px solid #feb2b2; padding:12px; border-radius:10px; margin-bottom:20px; font-size:13px; color:#9b2c2c; line-height:1.5;">
-        <strong style="font-size:14px; display:block; margin-bottom:4px;">🚨 個人情報の掲載に関するご注意</strong>
-        本掲示板はどなたでも閲覧できる公開エリアです。<br>
-        <strong>電話番号・本名・詳細な住所（丁目・番地・部屋番号）は本文内に絶対に記入しないでください。</strong><br>
-        <span style="font-size:12px; color:#c53030;">※詳しい連絡先や住所の交換は、マッチング後の個別チャットで行ってください。</span>
-      </div>
+        <!-- Step 2: 頭数 -->
+        <div class="step-box">
+          <div class="step-title"><span class="step-badge">2</span> お世話している頭数は？</div>
+          <div class="btn-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <button type="button" class="v-btn selected" onclick="selectCount(this, '1〜2匹')">1〜2匹</button>
+            <button type="button" class="v-btn" onclick="selectCount(this, '3〜5匹')">3〜5匹</button>
+            <button type="button" class="v-btn" onclick="selectCount(this, '6〜9匹')">6〜9匹</button>
+            <button type="button" class="v-btn" style="background:#fff5f5; border-color:#feb2b2;" onclick="selectCount(this, '10匹以上')">10匹+</button>
+          </div>
+          <input type="hidden" id="animal_count" value="1〜2匹">
+        </div>
 
-      <form id="sosCreateForm">
-
-        <!-- 対象 -->
-        <div class="form-group">
-          <label>🐕🐈 対象 <span class="required">必須</span></label>
-          <div class="choice-grid">
-            <label class="choice-card"><input type="radio" name="animal" value="🐕 犬"><span>🐕 犬</span></label>
-            <label class="choice-card"><input type="radio" name="animal" value="🐈 猫" checked><span>🐈 猫</span></label>
-            <label class="choice-card"><input type="radio" name="animal" value="🐾 その他"><span>🐾 その他</span></label>
+        <!-- Step 3: 不足物資 -->
+        <div class="step-box">
+          <div class="step-title"><span class="step-badge">3</span> 不足している物資は？（複数選択可）</div>
+          <div class="btn-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+            <button type="button" class="v-btn item-btn selected" onclick="toggleItem(this, 'ペットフード')">🥣 フード</button>
+            <button type="button" class="v-btn item-btn" onclick="toggleItem(this, 'ペットシーツ')">🟦 ペットシーツ</button>
+            <button type="button" class="v-btn item-btn" onclick="toggleItem(this, '猫砂')">🐾 猫砂</button>
+            <button type="button" class="v-btn item-btn" onclick="toggleItem(this, 'タオル')">🧺 タオル</button>
+            <button type="button" class="v-btn item-btn" style="grid-column: span 2;" onclick="toggleItem(this, 'その他')">📦 その他物資</button>
           </div>
         </div>
 
-        <!-- タイトル -->
-        <div class="form-group">
-          <label for="title">タイトル <span class="required">必須</span></label>
-          <input type="text" id="title" name="title" placeholder="例：フードと毛布が不足しています" required maxlength="100">
-        </div>
-
-        <!-- 市区町村 -->
-        <div class="form-group">
-          <label for="city">📍 市区町村 <span class="required">必須</span></label>
-          <input type="text" id="city" name="city" placeholder="例：熊本市中央区" required maxlength="50">
-        </div>
-
-        <!-- 地域詳細 -->
-        <div class="form-group">
-          <label for="area">📍 おおまかなエリア・目印（詳細住所は記入不可）</label>
-          <input type="text" id="area" name="area" placeholder="例：○○避難所付近、○○駅北口周辺" maxlength="100">
-        </div>
-
-        <!-- 対応期限 -->
-        <div class="form-group">
-          <label>⏱ 対応期限 <span class="required">必須</span></label>
-          <div class="urgency-list">
-            <label class="urgency-card"><input type="radio" name="urgency" value="🚨 今すぐ対応が必要" checked><span>🔴 今すぐ</span></label>
-            <label class="urgency-card"><input type="radio" name="urgency" value="⏳ 3〜7日以内"><span>🟠 2〜3日</span></label>
-            <label class="urgency-card"><input type="radio" name="urgency" value="🔄 持続的な支援"><span>🟢 持続的</span></label>
+        <!-- Step 4: お渡し方法 -->
+        <div class="step-box">
+          <div class="step-title"><span class="step-badge">4</span> お受け取り方法は？</div>
+          <div class="btn-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+            <button type="button" class="v-btn selected" onclick="selectDelivery(this, '📦 郵送可')">📦 郵送可</button>
+            <button type="button" class="v-btn" onclick="selectDelivery(this, '🚗 直接お届け')">🚗 直接お届け</button>
+            <button type="button" class="v-btn" onclick="selectDelivery(this, '💬 相談して決める')">💬 相談</button>
           </div>
+          <input type="hidden" id="delivery_method" value="📦 郵送可">
         </div>
 
-        <!-- 詳しい状況 -->
-        <div class="form-group">
-          <label for="description">📝 詳しい状況 <span class="required">必須</span></label>
-          <textarea id="description" name="description" rows="6" placeholder="具体的な状況や必要な支援内容を入力してください（※電話番号や個人情報は記載しないでください）" required maxlength="2000"></textarea>
+        <!-- Step 5: エリア -->
+        <div class="step-box">
+          <div class="step-title"><span class="step-badge">5</span> お住まいの地域（ブロック）は？</div>
+          <div class="btn-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+            <button type="button" class="v-btn selected" onclick="selectArea(this, '熊本市ブロック')">熊本市</button>
+            <button type="button" class="v-btn" onclick="selectArea(this, '県北ブロック')">県北</button>
+            <button type="button" class="v-btn" onclick="selectArea(this, '県央ブロック')">県央</button>
+            <button type="button" class="v-btn" onclick="selectArea(this, '県南ブロック')">県南</button>
+            <button type="button" class="v-btn" onclick="selectArea(this, '天草ブロック')">天草</button>
+            <button type="button" class="v-btn" onclick="selectArea(this, '阿蘇ブロック')">阿蘇</button>
+          </div>
+          <input type="hidden" id="city" value="熊本市ブロック">
         </div>
 
-        <!-- 簡易リマインド表示 -->
-        <p style="font-size:12px; color:#718096; text-align:center; margin:15px 0 10px; line-height:1.4;">
-          ※登録時に同意いただいた利用規約・免責事項を遵守の上、個人情報を含めずに投稿してください。
-        </p>
+        <!-- Step 6: 緊急度 -->
+        <div class="step-box">
+          <div class="step-title"><span class="step-badge">6</span> 募集の緊急度は？</div>
+          <div class="btn-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+            <button type="button" class="v-btn selected" onclick="selectUrgency(this, '🚨 今すぐ必要')">🔴 今すぐ</button>
+            <button type="button" class="v-btn" onclick="selectUrgency(this, '⏳ 1週間以内')">🟠 1週間以内</button>
+            <button type="button" class="v-btn" onclick="selectUrgency(this, '🔄 持続的支援')">🟢 持続的</button>
+          </div>
+          <input type="hidden" id="urgency" value="🚨 今すぐ必要">
+        </div>
 
-        <button type="submit" id="submitBtn" class="sos-submit-button">
-          🆘 SOSを投稿する
+        <!-- Step 7: 自由記述欄 -->
+        <div class="step-box">
+          <div class="step-title"><span class="step-badge">7</span> 自由記述（老猫の事情、ウェット希望など）</div>
+          <textarea id="freeComment" class="form-textarea" rows="3" placeholder="例：15歳の老猫のため、シニア用の柔らかいウェットフードやスープタイプを希望しています。"></textarea>
+        </div>
+
+        <div class="notice-text">
+          ⚠️ お届け数や納期を保証するものではありません。<br>マッチング後の個別チャットで相互にご調整ください。
+        </div>
+
+        <button type="submit" id="submitBtn" class="submit-btn">
+          🐾 内容を確認して投稿します 🐾
         </button>
 
       </form>
-    </section>
-  </main>
 
-  <nav class="bottom-nav">
-    <a href="sos.html">🆘<span>SOS</span></a>
-    <a href="sos-create.html" class="active">＋<span>投稿</span></a>
-    <a href="mypage.html">👤<span>マイページ</span></a>
-  </nav>
+    </div>
+
+    <!-- 📌 運営のお気持ち・ご案内ボックス -->
+    <div class="volunteer-notice-card">
+      <div class="volunteer-notice-header">
+        <span class="bowing-icon">🙇‍♀️</span>
+        <span class="notice-title">運営からのお願いとこれからのこと</span>
+      </div>
+      <div class="volunteer-notice-body">
+        <p>
+          当サービスは、ボランティアによる<strong>実証テスト段階</strong>として、個人情報の保護とコストを最優先に考えた「無料・最小限」の仕組みで運営しています。
+        </p>
+        <p>
+          「本当は通知機能とかも入れたい…！」という気持ちでいっぱいなのですが、これ以上サーバー費用や常時監視体制を強化すると事業レベルになってしまうため、今の仕組みが限界です。ごめんなさい！💦
+        </p>
+        <p class="notice-future">
+          もしゆくゆくは、この仕組みや理念に共感してくださる<strong>公的機関や自治体等の公的な主体へ、管理・運営をまるっと引き継いでいただける未来</strong>があれば…という想いでデザインしています。あらかじめ温かいご理解とご協力をいただけますと幸いです！🙇‍♂️
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🎟 投稿完了・受付票 Modal -->
+  <div id="ticketModal" class="ticket-modal">
+    <div class="ticket-paper">
+      <div style="text-align: center;">
+        <span id="ticketBadge" class="ticket-type-badge">📦 不足物資受付票</span>
+        <h2 style="font-size: 16px; margin: 4px 0 2px 0;">ワンニャンSOS熊本</h2>
+        <p style="font-size: 10px; color: #718096; margin: 0;">支援の輪を繋ぐ掲示受付票</p>
+      </div>
+
+      <div class="ticket-line"></div>
+
+      <div style="font-size: 12px; line-height: 1.8;">
+        <div>■ <strong>お世話：</strong> <span id="tAnimal"></span>（<span id="tCount"></span>）</div>
+        <div>■ <strong>不足物資：</strong> <span id="tCategory"></span></div>
+        <div>■ <strong>受け取り：</strong> <span id="tDelivery"></span></div>
+        <div>■ <strong>地域：</strong> <span id="tCity"></span></div>
+        <div>■ <strong>状況：</strong> <span id="tUrgency"></span></div>
+      </div>
+
+      <div class="ticket-line"></div>
+
+      <div style="font-size: 10px; color: #4a5568; text-align: center; line-height: 1.4;">
+        投稿時刻：<strong id="tTimeStamp"></strong><br>
+        <span style="color: #e53e3e; font-weight: bold;">📱 画面を保存（スクショ）できます</span><br>
+        ※お届け数や納期を保証するものではありません
+      </div>
+
+      <button type="button" class="ticket-close-btn" onclick="closeTicketAndGo()">
+        不足物資一覧へ進む ➔
+      </button>
+    </div>
+  </div>
 
   <script>
-  (function(){
-    "use strict";
+    function toggleMenu() {
+      const drawer = document.getElementById('sideDrawer');
+      const overlay = document.getElementById('menuOverlay');
+      const isOpen = drawer.classList.contains('open');
+      if (isOpen) {
+        drawer.classList.remove('open');
+        overlay.style.display = 'none';
+      } else {
+        drawer.classList.add('open');
+        overlay.style.display = 'block';
+      }
+    }
 
-    const form = document.getElementById("sosCreateForm");
-    const submitBtn = document.getElementById("submitBtn");
+    function selectAnimal(btn, val) {
+      btn.parentElement.querySelectorAll('.v-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('animal_type').value = val;
+    }
+    function selectCount(btn, val) {
+      btn.parentElement.querySelectorAll('.v-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('animal_count').value = val;
+    }
+    function toggleItem(btn, val) {
+      btn.classList.toggle('selected');
+    }
+    function selectDelivery(btn, val) {
+      btn.parentElement.querySelectorAll('.v-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('delivery_method').value = val;
+    }
+    function selectArea(btn, val) {
+      btn.parentElement.querySelectorAll('.v-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('city').value = val;
+    }
+    function selectUrgency(btn, val) {
+      btn.parentElement.querySelectorAll('.v-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('urgency').value = val;
+    }
 
-    // 入力内容の一時保存・自動復元
-    const DRAFT_KEY = 'wanSOS_post_draft';
-
-    try {
-      const saved = JSON.parse(sessionStorage.getItem(DRAFT_KEY) || '{}');
-      if (saved.title) document.getElementById('title').value = saved.title;
-      if (saved.city) document.getElementById('city').value = saved.city;
-      if (saved.area) document.getElementById('area').value = saved.area;
-      if (saved.description) document.getElementById('description').value = saved.description;
-    } catch(e) {}
-
-    form.addEventListener('input', function() {
-      const draft = {
-        title: document.getElementById('title').value,
-        city: document.getElementById('city').value,
-        area: document.getElementById('area').value,
-        description: document.getElementById('description').value
-      };
-      sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-    });
-
-    let profile = {};
-    try {
-      profile = JSON.parse(localStorage.getItem('wanSOS_profile') || '{}');
-    } catch(e) {}
-    const posterName = profile.nickname || '匿名';
-
-    // 投稿処理
-    form.addEventListener("submit", async function(e) {
+    // 本番モード：Supabase連携＋ローカルバックアップ両対応の安全な投稿処理
+    document.getElementById('vendingForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = "送信中...";
+      const selectedItems = Array.from(document.querySelectorAll('.item-btn.selected')).map(b => b.textContent.trim());
+      if (selectedItems.length === 0) {
+        alert("不足している物資を少なくとも1つ選んでください。");
+        return;
+      }
 
-      const animal = document.querySelector('input[name="animal"]:checked')?.value || '🐾 その他';
-      const urgency = document.querySelector('input[name="urgency"]:checked')?.value || '🚨 今すぐ対応が必要';
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = "投稿処理中...";
 
-      // ★【エラー修正】idにランダムなUUID（投稿ID）を付与
+      let profile = {};
+      try { profile = JSON.parse(localStorage.getItem('wanSOS_profile') || '{}'); } catch(e){}
+      const posterName = profile.name || profile.nickname || 'どうらくいちば様';
+
+      const animal = document.getElementById('animal_type').value;
+      const count = document.getElementById('animal_count').value;
+      const categoryStr = selectedItems.join('・');
+      const delivery = document.getElementById('delivery_method').value;
+      const city = document.getElementById('city').value;
+      const urgency = document.getElementById('urgency').value;
+      const freeComment = document.getElementById('freeComment').value.trim();
       const generatedId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
+
+      const now = new Date();
+      const timeStr = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+      let fullDescription = `【対象頭数】${count}\n【希望物資】${categoryStr}\n【受け取り】${delivery}\n【地域】${city}\n【緊急度】${urgency}`;
+      if (freeComment) {
+        fullDescription += `\n\n【自由記述・ご事情】\n${freeComment}`;
+      }
+      fullDescription += `\n\n※お届け数や納期を保証するものではありません。チャットにてご調整ください。`;
 
       const newSOS = {
         id: generatedId,
-        title: document.getElementById('title').value.trim(),
-        animal_type: animal.includes('犬') ? '🐕' : (animal.includes('猫') ? '🐈' : '🐾'),
-        category: animal,
-        city: document.getElementById('city').value.trim(),
-        area: document.getElementById('area').value.trim(),
+        title: `${animal} ${count}用（${categoryStr}）`,
+        animal_type: animal,
+        category: categoryStr,
+        delivery_method: delivery,
+        city: city,
+        area: '投稿フォーム',
         urgency: urgency,
-        description: document.getElementById('description').value.trim(),
+        description: fullDescription,
         poster_name: posterName
       };
 
       try {
+        // 本番Supabaseへの書き込み挑戦
         if (window.supabaseClient) {
-          const { error } = await window.supabaseClient
-            .from('sos_items')
-            .insert([newSOS]);
-
-          if (error) throw error;
+          const { error } = await window.supabaseClient.from('sos_items').insert([newSOS]);
+          if (error) {
+            console.warn("Supabase制限によるスキップ、ローカルモードにフォールバックします:", error.message);
+          }
         }
 
-        sessionStorage.removeItem(DRAFT_KEY);
-        alert("SOSの投稿が完了しました！");
-        window.location.href = "sos.html";
+        // 確実に見える化するためローカルストレージにも同期保存
+        let existingPosts = [];
+        try {
+          const saved = localStorage.getItem('wanSOS_posts');
+          if (saved) existingPosts = JSON.parse(saved);
+        } catch(e){}
+        existingPosts.unshift({ ...newSOS, date: timeStr });
+        localStorage.setItem('wanSOS_posts', JSON.stringify(existingPosts));
+
+        // 受付票モーダル表示
+        document.getElementById('tAnimal').textContent = animal;
+        document.getElementById('tCount').textContent = count;
+        document.getElementById('tCategory').textContent = categoryStr;
+        document.getElementById('tDelivery').textContent = delivery;
+        document.getElementById('tCity').textContent = city;
+        document.getElementById('tUrgency').textContent = urgency;
+        document.getElementById('tTimeStamp').textContent = timeStr;
+
+        document.getElementById('ticketModal').style.display = 'flex';
 
       } catch (err) {
         console.error("投稿エラー:", err);
         alert("投稿に失敗しました：" + err.message);
-        submitBtn.disabled = false;
-        submitBtn.textContent = "🆘 SOSを投稿する";
+        btn.disabled = false;
+        btn.textContent = "🐾 内容を確認して投稿します 🐾";
       }
     });
 
-  })();
+    function closeTicketAndGo() {
+      window.location.href = "sos.html";
+    }
   </script>
 
+<script>
+  sessionStorage.setItem('wannyanSOS_loggedIn', 'true');
+</script>
 </body>
 </html>

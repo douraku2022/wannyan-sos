@@ -1,127 +1,156 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>免責事項・安全上の注意｜ワンニャンSOS熊本</title>
+  <title>免責事項・注意事項｜ワンニャンSOS熊本</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 54px 0 40px 0;
+      background-color: #dbe2e8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    /* 📌 最上部：共通固定ヘッダー */
+    .app-top-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 46px;
+      background: #00873c; color: #ffffff; border-bottom: 2px solid #005a28;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 10px;
+      z-index: 1000; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .top-btn {
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+      color: #ffffff; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold;
+      text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 4px;
+    }
+    .top-btn:active { background: rgba(255,255,255,0.3); }
+    .top-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
+
+    /* 🍔 右側スライドナビゲーション */
+    .menu-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); z-index: 1001;
+    }
+    .side-drawer {
+      position: fixed; top: 0; right: -260px; width: 240px; height: 100%;
+      background: linear-gradient(180deg, #ecefe6 0%, #d8ded6 100%);
+      border-left: 3px solid #9aa5b0; z-index: 1002;
+      box-shadow: -4px 0 16px rgba(0,0,0,0.2); transition: right 0.25s ease-in-out;
+      display: flex; flex-direction: column; padding: 12px; gap: 10px;
+    }
+    .side-drawer.open { right: 0; }
+    .drawer-header {
+      background: #00873c; color: #fff; border-radius: 8px; padding: 10px;
+      text-align: center; font-size: 13px; font-weight: bold; border: 1px solid #005a28;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .drawer-close-btn {
+      background: none; border: none; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer;
+    }
+
+    .drawer-menu-item {
+      background: #f8fafc; border: 2px solid #a0aec0; border-radius: 10px; padding: 12px;
+      color: #2d3748; text-decoration: none; font-size: 13px; font-weight: bold;
+      display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 0 #cbd5e0;
+    }
+    .drawer-menu-item:active { transform: translateY(1px); box-shadow: 0 1px 0 #cbd5e0; }
+
+    .disclaimer-container { max-width: 480px; margin: 0 auto; padding: 0 12px; }
+
+    .disclaimer-card {
+      background: #ffffff; border: 2px solid #b0bec5; border-radius: 12px;
+      padding: 16px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      font-size: 12px; color: #2d3748; line-height: 1.7;
+    }
+    .disclaimer-title {
+      font-size: 14px; font-weight: bold; color: #00873c; margin-bottom: 10px;
+      border-bottom: 2px solid #00873c; padding-bottom: 4px;
+    }
+
+    .sec-title {
+      font-size: 12px; font-weight: bold; color: #2b6cb0; margin: 12px 0 4px 0;
+    }
+
+    .warning-box {
+      background: #fff5f5; border: 1px dashed #feb2b2; border-radius: 8px; padding: 10px;
+      font-size: 11px; color: #c53030; line-height: 1.5; font-weight: bold; margin-top: 8px;
+    }
+  </style>
 </head>
+
 <body>
 
-  <!-- 統一ヘッダー -->
-  <header class="app-header">
-    <a href="sos.html" class="back-button" aria-label="戻る">←</a>
-    <div class="header-logo">
-      🐕🐈
-      <span>ワンニャンSOS熊本</span>
-    </div>
-    <button type="button" id="menuButton" class="menu-button" aria-label="メニュー">☰</button>
-  </header>
+  <!-- 📌 最上部：共通固定ヘッダー -->
+  <div class="app-top-bar">
+    <button type="button" class="top-btn" onclick="history.back()">← 戻る</button>
+    <div class="top-title">🐕🐈 ワンニャンSOS | 免責・注意事項</div>
+    <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
+  </div>
 
-  <!-- サイドメニュー -->
-  <div id="menuOverlay" class="menu-overlay" aria-hidden="true"></div>
-  <aside id="sideMenu" class="side-menu" aria-label="メニュー" aria-hidden="true">
-    <button type="button" id="menuClose" class="menu-close" aria-label="メニューを閉じる">×</button>
-    <h2>☰ メニュー</h2>
-    <a href="sos.html">🏠 ホーム（SOS一覧）</a>
-    <a href="mypage.html">👤 マイページ</a>
-    <div class="menu-group">
-      <a href="#" id="guideToggle">📖 ご利用について ⌄</a>
-      <div id="guideLinks" style="display:none;">
-        <a class="menu-sub" href="guide.html">ご利用ガイド</a>
-        <a class="menu-sub" href="terms.html">利用規約</a>
-        <a class="menu-sub" href="privacy.html">プライバシーポリシー</a>
-        <a class="menu-sub" href="disclaimer.html">免責事項・安全上の注意</a>
+  <!-- 🍔 右スライドメニュー -->
+  <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+  <div id="sideDrawer" class="side-drawer">
+    <div class="drawer-header">
+      <span>🐾 ワンニャンSOS メニュー</span>
+      <button class="drawer-close-btn" onclick="toggleMenu()">✕</button>
+    </div>
+
+    <a href="index.html" class="drawer-menu-item">🏠 ホーム（トップ）</a>
+    <a href="sos.html" class="drawer-menu-item">📦 不足物資一覧</a>
+    <a href="sos-create.html" class="drawer-menu-item" style="color: #c53030;">📝 不足物資を投稿する</a>
+    <a href="mypage.html" class="drawer-menu-item">👤 マイページ</a>
+    <a href="guide.html" class="drawer-menu-item">📄 使い方案内</a>
+    <a href="info.html" class="drawer-menu-item">ℹ️ 運営情報・お知らせ</a>
+    <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
+    <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
+  </div>
+
+  <div class="disclaimer-container">
+
+    <div class="disclaimer-card">
+      <div class="disclaimer-title">⚠️ ご利用上の注意事項・免責事項</div>
+
+      <div class="sec-title">1. 施設・団体でご利用の場合</div>
+      <div>シェルター、各種施設、ボランティア団体等でご利用される場合は、トラブル防止のため個人名のみではなく<strong>「団体名＋担当者（責任者）名」</strong>にてユーザー登録・投稿を行ってください。</div>
+
+      <div class="sec-title">2. 物資限定（金銭取引の禁止）</div>
+      <div>当プラットフォームは動物お世話のための<strong>物品（物資支援）専用</strong>です。現金、ギフト券、電子マネーの請求や受渡しは固く禁止しております。発見された場合は即座にアカウント停止措置をとります。</div>
+
+      <div class="sec-title">3. お届け数量・納期の非保証</div>
+      <div>掲示板に投稿された内容に対し、支援物資の数量や到着時期（日数）を運営側が保証するものではありません。お受け取り・お渡しの調整は、当事者同士の個別チャットにて相互にご調整ください。</div>
+
+      <div class="sec-title">4. 当事者間における責任の所在</div>
+      <div>物資の発送・受領・受け渡し等に関する一切のやり取りは、当事者間の合意に基づき自己責任にて行っていただきます。配送事故やトラブル等について運営側では責任を負いかねます。</div>
+
+      <div class="sec-title">5. 投稿状態の更新お願い</div>
+      <div>支援が完了した場合、または募集を取りやめる場合は、重複受領を防ぐため、速やかにマイページの「修正・状態変更」より「支援完了」または「取り消し」へ状態を更新してください。</div>
+
+      <div class="warning-box">
+        ⚠️ 安全で健全な支援活動を継続するため、皆さまのご理解とご協力をお願い申し上げます。
       </div>
     </div>
-    <a href="info.html">ℹ️ ワンニャンSOSについて</a>
-    <div class="menu-separator"></div>
-    <a href="#" id="logoutLink">ログアウト</a>
-  </aside>
 
-  <!-- メインコンテンツ -->
-  <main class="sos-container">
-    <h1>⚠️ 免責事項・安全上の注意</h1>
-    
-    <div class="poster-notice" style="background:#fff4e8; border:1px solid #edd1ae; padding:15px; border-radius:8px; margin-bottom:20px;">
-      <strong>ワンニャンSOS熊本は、支援を必要とする人と支援できる人をつなぐ情報掲示（プラットフォーム）サービスです。救助・保護・搬送・医療その他の支援業務そのものを代行・保証するものではありません。</strong>
-    </div>
-
-    <p style="margin-bottom: 20px;">本サービスは、登録者が提供する情報を集積し、利用者間で交換するための場所を提供するものです。運営者は、個々の掲載情報の内容について、確認、認証または保証を行うものではありません。</p>
-
-    <h2>1. 緊急時の対応について</h2>
-    <p>生命や身体に直ちに危険がある場合、火災、事故、災害、動物の重篤な状態などの緊急案件では、本サービスへの投稿だけに頼らず、必要な公的機関、医療機関、動物病院、消防・警察等へ直接連絡を行ってください。</p>
-
-    <h2>2. 掲載情報について</h2>
-    <p>本サービスに掲載されるSOS、支援情報、プロフィールその他の情報は、各登録者が自ら入力・掲載した情報です。</p>
-    <p><strong>運営者は、掲載情報について、その正確性、完全性、真実性、最新性、適法性、妥当性その他一切の事項について、確認、認証、評価または保証を行いません。</strong></p>
-
-    <h2>3. 利用者同士のやり取りと免責</h2>
-    <p>支援者とSOS投稿者との間で行われる連絡、約束、移動、支援物資の受け渡し、一時預かり等は、すべて利用者自身の判断と責任で行ってください。</p>
-    <p>ユーザー間または第三者との間で生じた事故、ケガ、物損、動物のトラブル、紛争その他一切の損害について、運営者は理由のいかんを問わず一切の責任を負いません。ただし、運営者の故意又は重大な過失による場合を除きます。</p>
-
-    <h2>4. 絶対禁止事項（重要）</h2>
-    <ul>
-      <li><strong>金銭やり取りの全面禁止</strong>：医療費・交通費等、名目を問わず金銭（現金・振込・電子マネー等）の要求や募集は一切禁止です。</li>
-      <li><strong>生体の譲渡・売買・里親募集の禁止</strong>：本サービスは一次的な緊急支援（物資・預かり・搬送等）に限られます。</li>
-      <li><strong>18歳未満の利用禁止</strong>：本サービスは18歳以上の成人のみを対象としています。</li>
-    </ul>
-
-    <h2>5. 安全確保・防犯対策</h2>
-    <ul>
-      <li>一人で危険な場所や密室へ行かないようにしてください。</li>
-      <li>見知らぬ相手との対面・物品受け渡しは、日中の明るい場所や複数の人数で行ってください。</li>
-      <li>不審な依頼、金銭の要求、過度な個人情報の提供要求には絶対に応じないでください。</li>
-      <li>万が一、詐欺・盗難・嫌がらせ等の悪質行為が疑われる場合は、直ちに警察へご相談ください。公的機関からの正式な開示請求があった場合、運営者は登録されている本人情報（氏名・住所・電話番号等）を捜査機関へ提供いたします。</li>
-    </ul>
-
-    <div style="margin-top: 30px; text-align: center;">
-      <a href="sos.html" class="secondary-button">← SOS一覧へ戻る</a>
-    </div>
-  </main>
-
-  <!-- 下部ナビ -->
-  <nav class="bottom-nav">
-    <a href="sos.html">🆘<span>SOS</span></a>
-    <a href="sos-create.html">＋<span>投稿</span></a>
-    <a href="mypage.html">👤<span>マイページ</span></a>
-  </nav>
+  </div>
 
   <script>
-  (function(){
-    "use strict";
-    const button = document.getElementById('menuButton');
-    const menu = document.getElementById('sideMenu');
-    const overlay = document.getElementById('menuOverlay');
-    const close = document.getElementById('menuClose');
-    const toggle = document.getElementById('guideToggle');
-    const links = document.getElementById('guideLinks');
-    const logout = document.getElementById('logoutLink');
-
-    function openMenu(){ if(menu&&overlay){ menu.classList.add('open'); overlay.classList.add('open'); } }
-    function closeMenu(){ if(menu&&overlay){ menu.classList.remove('open'); overlay.classList.remove('open'); } }
-
-    if(button) button.addEventListener('click', openMenu);
-    if(close) close.addEventListener('click', closeMenu);
-    if(overlay) overlay.addEventListener('click', closeMenu);
-
-    if(toggle&&links){
-      toggle.addEventListener('click', function(e){
-        e.preventDefault();
-        const open = links.style.display !== 'none';
-        links.style.display = open ? 'none' : 'block';
-        toggle.innerHTML = open ? '📖 ご利用について ⌄' : '📖 ご利用について ⌃';
-      });
+    function toggleMenu() {
+      const drawer = document.getElementById('sideDrawer');
+      const overlay = document.getElementById('menuOverlay');
+      const isOpen = drawer.classList.contains('open');
+      if (isOpen) {
+        drawer.classList.remove('open');
+        overlay.style.display = 'none';
+      } else {
+        drawer.classList.add('open');
+        overlay.style.display = 'block';
+      }
     }
-    if(logout){
-      logout.addEventListener('click', function(e){
-        e.preventDefault();
-        sessionStorage.removeItem('wannyanSOS_loggedIn');
-        window.location.href = 'index.html';
-      });
-    }
-  })();
   </script>
+
 </body>
 </html>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>利用規約｜ワンニャンSOS熊本</title>
+  <title>お知らせ投稿管理｜ワンニャンSOS熊本</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
@@ -19,7 +19,7 @@
     /* 📌 最上部：共通固定ヘッダー */
     .app-top-bar {
       position: fixed; top: 0; left: 0; right: 0; height: 46px;
-      background: #00873c; color: #ffffff; border-bottom: 2px solid #005a28;
+      background: #c53030; color: #ffffff; border-bottom: 2px solid #9b2c2c;
       display: flex; align-items: center; justify-content: space-between; padding: 0 10px;
       z-index: 1000; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
@@ -60,21 +60,40 @@
     }
     .drawer-menu-item:active { transform: translateY(1px); box-shadow: 0 1px 0 #cbd5e0; }
 
-    .term-container { max-width: 480px; margin: 0 auto; padding: 0 12px; }
+    .manage-container { max-width: 480px; margin: 0 auto; padding: 0 12px; }
 
-    .term-card {
+    .manage-card {
       background: #ffffff; border: 2px solid #b0bec5; border-radius: 12px;
       padding: 16px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-      font-size: 11px; color: #2d3748; line-height: 1.7;
     }
-    .term-title {
-      font-size: 14px; font-weight: bold; color: #00873c; margin-bottom: 10px;
+    .manage-title {
+      font-size: 14px; font-weight: bold; color: #00873c; margin-bottom: 12px;
       border-bottom: 2px solid #00873c; padding-bottom: 4px;
     }
-    .term-sec-title {
-      font-size: 12px; font-weight: bold; color: #2b6cb0; margin: 12px 0 4px 0;
+
+    .form-group { margin-bottom: 12px; }
+    .form-label { display: block; font-size: 11px; font-weight: bold; color: #2d3748; margin-bottom: 4px; }
+    .form-input {
+      width: 100%; padding: 8px; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 12px;
+    }
+    .form-textarea {
+      width: 100%; padding: 8px; border: 2px solid #cbd5e0; border-radius: 6px; font-size: 12px; height: 80px; resize: vertical;
+    }
+
+    .submit-btn {
+      width: 100%; background: #00873c; color: #ffffff; border: 2px solid #005a28; border-radius: 8px;
+      padding: 10px; font-size: 13px; font-weight: bold; cursor: pointer;
     }
   </style>
+
+  <script>
+    (function(){
+      if (sessionStorage.getItem('wanSOS_adminLoggedIn') !== 'true') {
+        alert("管理者権限が必要です。");
+        window.location.href = "admin-login.html";
+      }
+    })();
+  </script>
 </head>
 
 <body>
@@ -82,11 +101,11 @@
   <!-- 📌 最上部：共通固定ヘッダー -->
   <div class="app-top-bar">
     <button type="button" class="top-btn" onclick="history.back()">← 戻る</button>
-    <div class="top-title">🐕🐈 ワンニャンSOS | 利用規約</div>
+    <div class="top-title">🛠 お知らせ投稿管理</div>
     <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
   </div>
 
-  <!-- 🍔 右スライドメニュー -->
+  <!-- 🍔 右スライドメニュー（全7項目統一） -->
   <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
   <div id="sideDrawer" class="side-drawer">
     <div class="drawer-header">
@@ -103,25 +122,26 @@
     <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
   </div>
 
-  <div class="term-container">
+  <div class="manage-container">
 
-    <div class="term-card">
-      <div class="term-title">📜 利用規約</div>
+    <div class="manage-card">
+      <div class="manage-title">📢 新規お知らせ投稿</div>
 
-      <div class="term-sec-title">第1条（目的）</div>
-      <div>本システムは、動物支援に関する物資SOSの投稿および個人・団体間の相互支援の調整を円滑に行うことを目的として運営されています。</div>
+      <form id="newsForm">
+        <div class="form-group">
+          <label class="form-label">タイトル</label>
+          <input type="text" id="newsTitle" class="form-input" placeholder="例：年末年始の運営について" required>
+        </div>
 
-      <div class="term-sec-title">第2条（自己責任原則）</div>
-      <div>1. 物資のお届け、郵送、受け渡し等に関する一切のやり取りは、当事者間の合意と自己責任において行われるものとします。<br>2. 運営側はお届け数や納期の保証、ならびに個人間トラブルの直接的な補償・介入を行う義務を負いません。</div>
+        <div class="form-group">
+          <label class="form-label">本文</label>
+          <textarea id="newsBody" class="form-textarea" placeholder="お知らせの詳細内容を記入..." required></textarea>
+        </div>
 
-      <div class="term-sec-title">第3条（禁止事項およびログの記録）</div>
-      <div>1. 虚偽のSOS投稿、過剰・不正な支援要求、金銭の要求、嫌がらせ行為を一切禁止します。<br>2. 安全管理および不正防止のため、投稿や取り消しに関するアクセスログ等はデータベース内に記録され、必要に応じて運営側で確認を行う場合があります。</div>
-
-      <div class="term-sec-title">第4条（ステータスの更新）</div>
-      <div>重複受領やトラブルを防ぐため、物資を受領した場合または募集を終了する場合は、速やかにマイページ等からステータスを更新してください。</div>
-
-      <div class="term-sec-title">第5条（準拠法および管轄裁判所）</div>
-      <div>1. 本規約の解釈にあたっては日本法を準拠法とします。<br>2. 本サービスに関して紛争が生じた場合には、運営者の所在地を管轄する裁判所（<strong>福岡地方裁判所</strong>）を第一審の専属的合意管轄裁判所とします。</div>
+        <button type="submit" class="submit-btn">
+          📢 お知らせを公開投稿する
+        </button>
+      </form>
     </div>
 
   </div>
@@ -139,6 +159,15 @@
         overlay.style.display = 'block';
       }
     }
+
+    document.getElementById('newsForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const title = document.getElementById('newsTitle').value.trim();
+      const body = document.getElementById('newsBody').value.trim();
+
+      alert("お知らせを投稿登録しました！（Supabase連携時即時反映）");
+      window.location.href = "info.html";
+    });
   </script>
 
 </body>

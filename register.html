@@ -4,211 +4,319 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>新規ユーザー登録 - ワンニャンSOS熊本</title>
+  <title>新規ユーザー登録｜ワンニャンSOS熊本</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      background-color: #f8f9fa;
-      padding-bottom: 40px;
+      margin: 0; padding: 54px 0 70px 0;
+      background-color: #dbe2e8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-    .app-header {
-      background-color: #ffffff;
-      height: 56px;
-      padding: 0 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid #e0e0e0;
-      position: sticky;
-      top: 0;
-      z-index: 100;
+
+    /* 📌 最上部：共通固定ヘッダー */
+    .app-top-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 46px;
+      background: #00873c; color: #ffffff; border-bottom: 2px solid #005a28;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 10px;
+      z-index: 1000; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
-    .back-button {
-      font-size: 20px;
-      color: #333;
-      text-decoration: none;
+    .top-btn {
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+      color: #ffffff; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold;
+      text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 4px;
     }
-    .header-logo {
-      font-size: 16px;
-      font-weight: bold;
-      color: #2c3e50;
+    .top-btn:active { background: rgba(255,255,255,0.3); }
+    .top-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
+
+    /* 📱 下部固定ボトムナビゲーション（公式LINE風・4ボタン） */
+    .app-bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 56px;
+      background: #ffffff; border-top: 1px solid #cbd5e0;
+      display: flex; align-items: center; justify-content: space-around;
+      z-index: 1000; box-shadow: 0 -2px 6px rgba(0,0,0,0.06);
     }
-    .container {
-      max-width: 500px;
-      margin: 20px auto;
-      padding: 0 16px;
+    .nav-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-decoration: none; color: #4a5568; font-size: 10px; font-weight: bold; height: 100%;
+      background: none; border: none; cursor: pointer; gap: 2px;
     }
-    .card {
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 24px 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    .nav-item.active { color: #00873c; }
+    .nav-item span.icon { font-size: 18px; line-height: 1; }
+    .nav-item:active { background: #f7fafc; }
+
+    /* 🍔 右側スライドナビゲーション */
+    .menu-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); z-index: 1001;
     }
-    h1 {
-      font-size: 20px;
-      margin-bottom: 8px;
-      color: #2c3e50;
-      text-align: center;
+    .side-drawer {
+      position: fixed; top: 0; right: -260px; width: 240px; height: 100%;
+      background: linear-gradient(180deg, #ecefe6 0%, #d8ded6 100%);
+      border-left: 3px solid #9aa5b0; z-index: 1002;
+      box-shadow: -4px 0 16px rgba(0,0,0,0.2); transition: right 0.25s ease-in-out;
+      display: flex; flex-direction: column; padding: 12px; gap: 10px;
     }
-    .subtitle {
-      font-size: 13px;
-      color: #666;
-      text-align: center;
-      margin-bottom: 20px;
+    .side-drawer.open { right: 0; }
+    .drawer-header {
+      background: #00873c; color: #fff; border-radius: 8px; padding: 10px;
+      text-align: center; font-size: 13px; font-weight: bold; border: 1px solid #005a28;
+      display: flex; justify-content: space-between; align-items: center;
     }
-    .form-group {
-      margin-bottom: 16px;
+    .drawer-close-btn {
+      background: none; border: none; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer;
     }
-    label {
-      display: block;
-      font-size: 13px;
-      font-weight: bold;
-      margin-bottom: 6px;
-      color: #444;
+    .drawer-menu-item {
+      background: #f8fafc; border: 2px solid #a0aec0; border-radius: 10px; padding: 12px;
+      color: #2d3748; text-decoration: none; font-size: 13px; font-weight: bold;
+      display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 0 #cbd5e0;
     }
-    .required {
-      color: #e74c3c;
-      margin-left: 4px;
+    .drawer-menu-item:active { transform: translateY(1px); box-shadow: 0 1px 0 #cbd5e0; }
+
+    .reg-container { max-width: 480px; margin: 0 auto; padding: 0 12px; }
+
+    .reg-card {
+      background: #ffffff; border: 2px solid #b0bec5; border-radius: 12px;
+      padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
-    input[type="text"],
-    input[type="tel"],
-    input[type="date"],
-    input[type="password"] {
-      width: 100%;
-      padding: 10px 12px;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      background-color: #fff;
+    .reg-title {
+      font-size: 15px; font-weight: bold; color: #00873c; margin-bottom: 12px;
+      text-align: center; border-bottom: 2px solid #00873c; padding-bottom: 6px;
     }
-    input:focus {
-      border-color: #3498db;
-      outline: none;
+
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: 12px; font-weight: bold; color: #2d3748; margin-bottom: 4px; }
+    .form-input, .form-select {
+      width: 100%; padding: 10px; border: 2px solid #cbd5e0; border-radius: 8px;
+      font-size: 13px; font-family: inherit; background-color: #fff;
     }
-    .help-text {
-      font-size: 11px;
-      color: #777;
-      margin-top: 4px;
+    .form-input:focus, .form-select:focus { border-color: #3182ce; outline: none; }
+
+    .birth-select-group {
+      display: flex; gap: 6px; align-items: center;
     }
-    .checkbox-group {
-      margin: 20px 0;
-      padding: 12px;
-      background-color: #fdfbf7;
-      border: 1px solid #f0e6d2;
-      border-radius: 8px;
+    .birth-select-group select {
+      padding: 8px 4px; font-size: 13px; text-align: center;
     }
-    .checkbox-label {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      font-size: 13px;
-      cursor: pointer;
-      font-weight: normal;
+
+    .badge-public {
+      background: #e2e8f0; color: #2d3748; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; margin-left: 6px;
     }
-    .checkbox-label input {
-      margin-top: 3px;
+    .badge-private {
+      background: #fed7d7; color: #9b2c2c; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; margin-left: 6px;
     }
-    .btn-submit {
-      width: 100%;
-      background-color: #27ae60;
-      color: white;
-      border: none;
-      padding: 12px;
-      font-size: 16px;
-      font-weight: bold;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.2s;
+
+    .form-hint { font-size: 10px; color: #718096; margin-top: 2px; line-height: 1.4; }
+
+    .notice-box {
+      background: #ebf8ff; border: 1px solid #bee3f8; border-radius: 8px; padding: 8px;
+      font-size: 11px; color: #2b6cb0; margin-bottom: 14px; line-height: 1.4;
     }
-    .btn-submit:hover {
-      background-color: #219653;
+
+    .submit-btn {
+      width: 100%; background: #00873c; color: #ffffff; border: 2px solid #005a28; border-radius: 10px;
+      padding: 12px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 0 #005a28; cursor: pointer;
     }
-    .error-message {
-      color: #e74c3c;
-      font-size: 13px;
-      margin-bottom: 12px;
-      display: none;
-    }
+    .submit-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #005a28; }
+
+    .link-row { text-align: center; margin-top: 12px; font-size: 12px; }
+    .link-row a { color: #3182ce; font-weight: bold; text-decoration: none; }
   </style>
 </head>
+
 <body>
 
-  <header class="app-header">
-    <a href="javascript:history.back()" class="back-button" aria-label="戻る">←</a>
-    <div class="header-logo">🐕🐈 ワンニャンSOS熊本</div>
-    <div style="width: 24px;"></div>
-  </header>
+  <!-- 📌 最上部：共通固定ヘッダー -->
+  <div class="app-top-bar">
+    <button type="button" class="top-btn" onclick="history.back()">← 戻る</button>
+    <div class="top-title">🐕🐈 ワンニャンSOS | 新規登録</div>
+    <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
+  </div>
 
-  <div class="container">
-    <div class="card">
-      <h1>新規ユーザー登録</h1>
-      <p class="subtitle">安全な相互支援のため、本人確認情報をご入力ください</p>
+  <!-- 🍔 右スライドメニュー -->
+  <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+  <div id="sideDrawer" class="side-drawer">
+    <div class="drawer-header">
+      <span>🐾 ワンニャンSOS メニュー</span>
+      <button class="drawer-close-btn" onclick="toggleMenu()">✕</button>
+    </div>
+    <a href="index.html" class="drawer-menu-item">🏠 ホーム（トップ）</a>
+    <a href="sos.html" class="drawer-menu-item">📦 不足物資一覧</a>
+    <a href="sos-create.html" class="drawer-menu-item" style="color: #c53030;">📝 不足物資を投稿する</a>
+    <a href="mypage.html" class="drawer-menu-item">👤 マイページ</a>
+    <a href="guide.html" class="drawer-menu-item">📄 使い方案内</a>
+    <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
+    <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
+  </div>
 
-      <div id="errorMessage" class="error-message"></div>
+  <div class="reg-container">
+    <div class="reg-card">
+      <div class="reg-title">✨ 新規ユーザー登録</div>
 
-      <form id="registerForm">
+      <div class="notice-box">
+        🔒 命に関わる現場の安全を守るため、完全クローズドで運用を行っています。<br>
+        ※本名・住所・電話番号などの個人情報は厳重に管理され、一般に公開されることは一切ありません。
+      </div>
+
+      <form id="regForm">
+        <!-- 🌐 画面上表示（公開） -->
         <div class="form-group">
-          <label for="fullName">氏名（本名）<span class="required">*</span></label>
-          <input type="text" id="fullName" placeholder="例：熊本 太郎" required>
-          <p class="help-text">※緊急時・捜査協力時の本人確認用です。他ユーザーには公開されません。</p>
-        </div>
-
-        <div class="form-group">
-          <label for="birthdate">生年月日<span class="required">*</span></label>
-          <input type="date" id="birthdate" required>
-          <p class="help-text">※本サービスは18歳以上の方のみご利用いただけます。</p>
-        </div>
-
-        <div class="form-group">
-          <label for="address">住所<span class="required">*</span></label>
-          <input type="text" id="address" placeholder="例：熊本市中央区手取本町1-1" required>
-        </div>
-
-        <div class="form-group">
-          <label for="phone">電話番号<span class="required">*</span></label>
-          <input type="tel" id="phone" placeholder="例：09012345678" required>
-        </div>
-
-        <div class="form-group">
-          <label for="displayName">表示名（ニックネーム）<span class="required">*</span></label>
-          <input type="text" id="displayName" placeholder="例：くまモンママ" required>
-          <p class="help-text">※掲示板やマイページで他のユーザーに公開されるお名前です。</p>
-        </div>
-
-        <div class="form-group">
-          <label for="password">パスワード<span class="required">*</span></label>
-          <input type="password" id="password" placeholder="6文字以上で入力" minlength="6" required>
-        </div>
-
-        <div class="checkbox-group">
-          <label class="checkbox-label">
-            <input type="checkbox" id="agreeTerms" required>
-            <span>私は18歳以上であり、<a href="terms.html" target="_blank">利用規約</a>および<a href="privacy.html" target="_blank">プライバシーポリシー</a>の内容に同意します。</span>
+          <label class="form-label">
+            表示名（ニックネーム） <span style="color:#c53030;">*</span>
+            <span class="badge-public">🌐 画面上に公開</span>
           </label>
+          <input type="text" id="regNickname" class="form-input" placeholder="例：ボランティア太郎" required[cite: 2]>
+          <div class="form-hint">※掲示板やチャットで他ユーザーに表示されるお名前です[cite: 2]。</div>
         </div>
 
-        <button type="submit" class="btn-submit">登録する</button>
+        <!-- 🔒 本人確認・防犯用（非公開） -->
+        <div class="form-group">
+          <label class="form-label">
+            氏名（本名）または 正式団体名 <span style="color:#c53030;">*</span>
+            <span class="badge-private">🔒 非公開（管理用）</span>
+          </label>
+          <input type="text" id="regFullName" class="form-input" placeholder="例：山田 花子 / ○○保護の会" required[cite: 2]>
+          <div class="form-hint">※施設・団体の場合は「団体名＋担当者名」をご記入ください[cite: 2]。</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            生年月日（利用資格・年齢確認用） <span style="color:#c53030;">*</span>
+            <span class="badge-private">🔒 非公開（管理用）</span>
+          </label>
+          <div class="birth-select-group">
+            <select id="birthYear" class="form-select" required>
+              <option value="">年</option>
+            </select>
+            <span>年</span>
+            <select id="birthMonth" class="form-select" required>
+              <option value="">月</option>
+            </select>
+            <span>月</span>
+            <select id="birthDay" class="form-select" required>
+              <option value="">日</option>
+            </select>
+            <span>日</span>
+          </div>
+          <div class="form-hint">※18歳未満の方はご利用いただけません[cite: 2]。</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            電話番号（連絡先） <span style="color:#c53030;">*</span>
+            <span class="badge-private">🔒 非公開（管理用）</span>
+          </label>
+          <input type="tel" id="regPhone" class="form-input" placeholder="例：09012345678" required[cite: 2]>
+          <div class="form-hint">※本人確認・緊急連絡用です[cite: 2]。</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            お住まいの地域・市区町村（住所） <span style="color:#c53030;">*</span>
+            <span class="badge-private">🔒 非公開（管理用）</span>
+          </label>
+          <input type="text" id="regAddress" class="form-input" placeholder="例：熊本市中央区" required[cite: 2]>
+          <div class="form-hint">※防犯およびトラブル防止のための管理用情報です[cite: 2]。</div>
+        </div>
+
+        <div style="font-size: 11px; color: #4a5568; margin-bottom: 12px;">
+          登録ボタンを押すことで、<a href="terms.html" target="_blank" style="color:#3182ce; font-weight:bold;">利用規約</a>および<a href="disclaimer.html" target="_blank" style="color:#3182ce; font-weight:bold;">免責事項</a>に同意したものとみなします[cite: 2]。
+        </div>
+
+        <button type="submit" class="submit-btn">
+          🐾 入力内容を確認して登録する ➔
+        </button>
       </form>
     </div>
   </div>
 
-  <script>
-    document.getElementById('registerForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const birthdateVal = document.getElementById('birthdate').value;
-      if (!birthdateVal) return;
+  <!-- 📱 公式LINE風 ボトムフッターナビゲーション -->
+  <nav class="app-bottom-nav">
+    <a href="index.html" class="nav-item">
+      <span class="icon">🏠</span>
+      <span>ホーム</span>
+    </a>
+    <button type="button" class="nav-item" onclick="window.location.href='sos.html'">
+      <span class="icon">📦</span>
+      <span>一覧</span>
+    </button>
+    <a href="mypage.html" class="nav-item">
+      <span class="icon">👤</span>
+      <span>マイページ</span>
+    </a>
+    <button type="button" class="nav-item" onclick="window.location.href='sos-create.html'" style="color: #c53030;">
+      <span class="icon">📝</span>
+      <span>投稿する</span>
+    </button>
+  </nav>
 
-      // 年齢計算 (18歳以上判定)
-      const birthDate = new Date(birthdateVal);
+  <script>
+    // 生年月日プルダウン自動生成
+    window.addEventListener('DOMContentLoaded', () => {
+      const yearSelect = document.getElementById('birthYear');
+      const monthSelect = document.getElementById('birthMonth');
+      const daySelect = document.getElementById('birthDay');
+
+      const currentYear = new Date().getFullYear();
+
+      for (let y = currentYear; y >= currentYear - 100; y--) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = y;
+        yearSelect.appendChild(opt);
+      }
+
+      for (let m = 1; m <= 12; m++) {
+        const opt = document.createElement('option');
+        opt.value = m < 10 ? '0' + m : m;
+        opt.textContent = m;
+        monthSelect.appendChild(opt);
+      }
+
+      for (let d = 1; d <= 31; d++) {
+        const opt = document.createElement('option');
+        opt.value = d < 10 ? '0' + d : d;
+        opt.textContent = d;
+        daySelect.appendChild(opt);
+      }
+    });
+
+    function toggleMenu() {
+      const drawer = document.getElementById('sideDrawer');
+      const overlay = document.getElementById('menuOverlay');
+      const isOpen = drawer.classList.contains('open');
+      if (isOpen) {
+        drawer.classList.remove('open');
+        overlay.style.display = 'none';
+      } else {
+        drawer.classList.add('open');
+        overlay.style.display = 'block';
+      }
+    }
+
+    // 登録処理（確認プレビュー付き）
+    document.getElementById('regForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const nickname = document.getElementById('regNickname').value.trim();
+      const fullName = document.getElementById('regFullName').value.trim();
+      const year = document.getElementById('birthYear').value;
+      const month = document.getElementById('birthMonth').value;
+      const day = document.getElementById('birthDay').value;
+      const phone = document.getElementById('regPhone').value.trim();
+      const address = document.getElementById('regAddress').value.trim();
+
+      if (!nickname || !fullName || !year || !month || !day || !phone || !address) {
+        alert("すべての項目を入力（選択）してください[cite: 2]。");
+        return;
+      }
+
+      const birthStr = `${year}-${month}-${day}`;
+      const birthDate = new Date(year, parseInt(month) - 1, day);
       const today = new Date();
+      
       let age = today.getFullYear() - birthDate.getFullYear();
       const m = today.getMonth() - birthDate.getMonth();
       if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
@@ -216,15 +324,30 @@
       }
 
       if (age < 18) {
-        const errorEl = document.getElementById('errorMessage');
-        errorEl.textContent = '本サービスは18歳未満の方はご利用いただけません。';
-        errorEl.style.display = 'block';
-        window.scrollTo(0, 0);
+        alert("本サービスは18歳未満の方はご利用いただけません[cite: 2]。");
         return;
       }
 
-      // Supabase等への登録処理をここに記述
-      alert('登録処理へ進みます');
+      // 🔍 登録前の確認プレビュー
+      const previewMsg = `【登録内容の確認】\n\n・表示名: ${nickname}\n・本名/団体名: ${fullName}\n・生年月日: ${birthStr}\n・電話番号: ${phone}\n・地域: ${address}\n\nこの内容で登録を完了しますか？`;
+      if (!confirm(previewMsg)) {
+        return;
+      }
+
+      const profile = {
+        nickname: nickname,
+        fullName: fullName,
+        birth: birthStr,
+        phone: phone,
+        address: address,
+        registeredAt: new Date().toISOString()
+      };
+
+      localStorage.setItem('wanSOS_profile', JSON.stringify(profile));
+      sessionStorage.setItem('wannyanSOS_loggedIn', 'true');
+
+      alert("🎉 ユーザー登録が完了しました！マイページに移動します。");
+      window.location.href = "mypage.html";
     });
   </script>
 

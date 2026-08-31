@@ -3,254 +3,358 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex, nofollow">
-  <title>個別チャット｜ワンニャンSOS熊本</title>
+  <meta name="robots" content="noindex, nofollow">
+  <title>支援調整チャット｜ワンニャンSOS熊本</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 54px 0 90px 0;
+      background-color: #dbe2e8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    /* 📌 最上部：共通固定ヘッダー */
+    .app-top-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 46px;
+      background: #00873c; color: #ffffff; border-bottom: 2px solid #005a28;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 10px;
+      z-index: 1000; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .top-btn {
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+      color: #ffffff; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold;
+      text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 4px;
+    }
+    .top-btn:active { background: rgba(255,255,255,0.3); }
+    .top-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
+
+    /* 🍔 右側スライドナビゲーション */
+    .menu-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); z-index: 1001;
+    }
+    .side-drawer {
+      position: fixed; top: 0; right: -260px; width: 240px; height: 100%;
+      background: linear-gradient(180deg, #ecefe6 0%, #d8ded6 100%);
+      border-left: 3px solid #9aa5b0; z-index: 1002;
+      box-shadow: -4px 0 16px rgba(0,0,0,0.2); transition: right 0.25s ease-in-out;
+      display: flex; flex-direction: column; padding: 12px; gap: 10px;
+    }
+    .side-drawer.open { right: 0; }
+    .drawer-header {
+      background: #00873c; color: #fff; border-radius: 8px; padding: 10px;
+      text-align: center; font-size: 13px; font-weight: bold; border: 1px solid #005a28;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .drawer-close-btn {
+      background: none; border: none; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer;
+    }
+
+    .drawer-menu-item {
+      background: #f8fafc; border: 2px solid #a0aec0; border-radius: 10px; padding: 12px;
+      color: #2d3748; text-decoration: none; font-size: 13px; font-weight: bold;
+      display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 0 #cbd5e0;
+    }
+    .drawer-menu-item:active { transform: translateY(1px); box-shadow: 0 1px 0 #cbd5e0; }
+
+    /* チャットコンテナ */
+    .chat-container { max-width: 480px; margin: 0 auto; padding: 0 12px; }
+
+    /* 対象投稿のミニカード */
+    .target-ticket-summary {
+      background: #fffdfa; border: 2px dashed #b0bec5; border-radius: 10px; padding: 10px 12px;
+      margin-bottom: 12px; font-size: 11px; color: #2d3748;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+
+    /* 💬 メッセージ吹き出しエリア */
+    .message-list {
+      display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;
+    }
+    .msg-bubble {
+      max-width: 80%; padding: 10px 12px; border-radius: 14px; font-size: 13px;
+      line-height: 1.5; word-break: break-all; position: relative;
+    }
+    .msg-left {
+      align-self: flex-start; background: #ffffff; color: #2d3748;
+      border: 1px solid #cbd5e0; border-bottom-left-radius: 2px;
+    }
+    .msg-right {
+      align-self: flex-end; background: #3182ce; color: #ffffff;
+      border-bottom-right-radius: 2px;
+    }
+    .msg-sender { font-size: 10px; font-weight: bold; margin-bottom: 2px; color: #718096; }
+    .msg-right .msg-sender { color: #ebf8ff; text-align: right; }
+    .msg-time { font-size: 9px; margin-top: 4px; text-align: right; opacity: 0.7; }
+
+    /* 💬 送信固定フォーム（画面下部固定） */
+    .chat-input-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #ffffff; border-top: 2px solid #cbd5e0; padding: 8px 12px;
+      display: flex; gap: 8px; justify-content: center; z-index: 999;
+    }
+    .chat-input-inner {
+      max-width: 480px; width: 100%; display: flex; gap: 8px;
+    }
+    .chat-textarea {
+      flex: 1; border: 2px solid #cbd5e0; border-radius: 8px; padding: 8px;
+      font-size: 13px; font-family: inherit; resize: none; height: 38px;
+    }
+    .chat-send-btn {
+      background: #00873c; color: #ffffff; border: 1px solid #005a28; border-radius: 8px;
+      padding: 0 16px; font-weight: bold; font-size: 13px; cursor: pointer; white-space: nowrap;
+    }
+
+    .empty-chat {
+      background: #ffffff; border: 2px dashed #cbd5e0; border-radius: 10px;
+      padding: 20px; text-align: center; color: #718096; font-size: 12px;
+    }
+
+    /* 🎁 お辞儀・お気持ちボックスの専用スタイル（チャット内調整版） */
+    .volunteer-notice-card {
+      width: 100%;
+      margin: 20px 0 30px 0;
+      background: #fffdf9;
+      border: 2px dashed #e2b714;
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      font-family: inherit;
+    }
+    .volunteer-notice-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #f0e6d2;
+      padding-bottom: 6px;
+    }
+    .bowing-icon { font-size: 18px; }
+    .notice-title { font-size: 12px; font-weight: bold; color: #744210; }
+    .volunteer-notice-body p {
+      font-size: 11px;
+      color: #4a5568;
+      line-height: 1.5;
+      margin-bottom: 6px;
+    }
+    .volunteer-notice-body p:last-child { margin-bottom: 0; }
+    .notice-future {
+      background: #fefcbf;
+      border-left: 3px solid #d69e2e;
+      padding: 6px 8px;
+      border-radius: 0 6px 6px 0;
+      margin-top: 6px;
+      color: #744210 !important;
+    }
+  </style>
 </head>
+
 <body>
 
-<header class="app-header">
-  <a id="backButton" href="sos.html" class="back-button">←</a>
-  <div class="header-logo">
-    💬
-    <span>個別チャット</span>
+  <!-- 📌 最上部：共通固定ヘッダー -->
+  <div class="app-top-bar">
+    <button type="button" class="top-btn" onclick="history.back()">← 戻る</button>
+    <div class="top-title">🐕🐈 ワンニャンSOS | 支援調整</div>
+    <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
   </div>
-  <div class="header-space"></div>
-</header>
 
-<main class="chat-container">
-
-  <section class="chat-sos-info">
-    <span class="sos-id" id="sosId">SOS</span>
-    <h1 id="sosTitle">SOS情報を読み込み中</h1>
-    <p id="sosLocation"></p>
-  </section>
-
-  <section class="chat-partner">
-    <div>
-      <span>個別チャット</span>
-      <strong id="partnerName">支援者</strong>
+  <!-- 🍔 右スライドメニュー（全7項目統一） -->
+  <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+  <div id="sideDrawer" class="side-drawer">
+    <div class="drawer-header">
+      <span>🐾 ワンニャンSOS メニュー</span>
+      <button class="drawer-close-btn" onclick="toggleMenu()">✕</button>
     </div>
-    <span class="chat-help-type" id="helpType">支援</span>
-  </section>
-
-  <div class="chat-notice">
-    🔒
-    このチャットはSOSの当事者同士の連絡用です。<br>
-    通報があった場合など、管理者が内容を確認することがあります。
+    <a href="sos.html" class="drawer-menu-item">📦 不足物資一覧（ホーム）</a>
+    <a href="sos-create.html" class="drawer-menu-item">📝 不足物資を投稿する</a>
+    <a href="mypage.html" class="drawer-menu-item">👤 マイページ</a>
+    <a href="guide.html" class="drawer-menu-item">📄 使い方案内</a>
+    <a href="info.html" class="drawer-menu-item">ℹ️ 運営情報・お知らせ</a>
+    <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
+    <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
   </div>
 
-  <section class="chat-area" id="chatArea">
-    <p class="empty-message" id="chatEmpty">まだメッセージはありません。</p>
-  </section>
+  <div class="chat-container">
 
-  <section class="chat-input-area" id="chatInputArea">
-    <form id="chatForm">
-      <textarea
-        id="chatInput"
-        rows="2"
-        maxlength="1000"
-        placeholder="メッセージを入力"
-        required
-      ></textarea>
-      <button type="submit" class="chat-send-button">送信</button>
-    </form>
-  </section>
+    <!-- 📦 対象の投稿概要 -->
+    <div id="ticketSummary" class="target-ticket-summary">
+      <div>投稿情報を確認中...</div>
+    </div>
 
-  <section class="chat-end-section">
-    <button type="button" id="endChatButton" class="end-chat-button">
-      ✓ この相手とのやり取りを終了
-    </button>
-    <p>
-      このSOSそのものを終了する場合は、<br>
-      SOS詳細画面から「終了する」を選んでください。
-    </p>
-  </section>
+    <!-- 💬 チャット履歴 -->
+    <div id="messageList" class="message-list">
+      <div class="empty-chat">メッセージを読み込んでいます...</div>
+    </div>
 
-</main>
+    <!-- 📌 チャット内お気持ちボックス（送信バーに隠れない位置） -->
+    <div class="volunteer-notice-card">
+      <div class="volunteer-notice-header">
+        <span class="bowing-icon">🙇‍♀️</span>
+        <span class="notice-title">運営からのお願いとこれからのこと</span>
+      </div>
+      <div class="volunteer-notice-body">
+        <p>
+          当サービスは、ボランティアによる<strong>実証テスト段階</strong>として、個人情報の保護とコストを最優先に考えた「無料・最小限」の仕組みで運営しています。
+        </p>
+        <p>
+          「本当は通知機能とかも入れたい…！」という気持ちでいっぱいなのですが、これ以上サーバー費用や常時監視体制を強化すると事業レベルになってしまうため、今の仕組みが限界です。ごめんなさい！💦
+        </p>
+        <p class="notice-future">
+          もしゆくゆくは、この仕組みや理念に共感してくださる<strong>公的機関や自治体等の公的な主体へ、管理・運営をまるっと引き継いでいただける未来</strong>があれば…という想いでデザインしています。あらかじめ温かいご理解とご協力をいただけますと幸いです！🙇‍♂️
+        </p>
+      </div>
+    </div>
 
-<nav class="bottom-nav">
-  <a href="sos.html">🆘<span>SOS</span></a>
-  <a href="sos-create.html">＋<span>投稿</span></a>
-  <a href="mypage.html">👤<span>マイページ</span></a>
-</nav>
+  </div>
 
-<script>
-(function () {
-  "use strict";
+  <!-- 💬 固定送信エリア -->
+  <div class="chat-input-bar">
+    <div class="chat-input-inner">
+      <textarea id="chatInput" class="chat-textarea" placeholder="お渡し場所や日時のご相談を入力..."></textarea>
+      <button type="button" class="chat-send-btn" onclick="sendMessage()">送信</button>
+    </div>
+  </div>
 
-  const SOS_KEY = "wannyan_sos";
-  const SUPPORT_KEY = "wannyan_supports";
-  const CHAT_KEY = "wannyan_chats";
+  <script>
+    function toggleMenu() {
+      const drawer = document.getElementById('sideDrawer');
+      const overlay = document.getElementById('menuOverlay');
+      const isOpen = drawer.classList.contains('open');
+      if (isOpen) {
+        drawer.classList.remove('open');
+        overlay.style.display = 'none';
+      } else {
+        drawer.classList.add('open');
+        overlay.style.display = 'block';
+      }
+    }
 
-  const params = new URLSearchParams(window.location.search);
-  const requestedSosId = params.get("id");
-  const requestedPartner = params.get("partner");
-  const requestedHelp = params.get("help");
+    const urlParams = new URLSearchParams(window.location.search);
+    const sosId = urlParams.get('sos_id');
 
-  function readJson(key, fallback) {
+    let currentUserName = 'ゲスト支援者';
     try {
-      const value = JSON.parse(localStorage.getItem(key) || "null");
-      return value === null ? fallback : value;
-    } catch (error) {
-      return fallback;
-    }
-  }
+      const profile = JSON.parse(localStorage.getItem('wanSOS_profile') || '{}');
+      if (profile.nickname) currentUserName = profile.nickname;
+    } catch(e){}
 
-  const sosList = readJson(SOS_KEY, []);
-  const sosId = requestedSosId || localStorage.getItem("wannyan_last_sos_id") || "";
-  const sos = sosList.find(function (item) {
-    return String(item.id) === String(sosId);
-  });
-
-  if (!sos) {
-    document.querySelector("main").innerHTML = `
-      <section class="chat-sos-info">
-        <h1>SOS情報を確認できません</h1>
-        <p>チャットを開くSOSが見つかりません。</p>
-        <a href="sos.html" class="primary-button">SOS一覧へ戻る</a>
-      </section>
-    `;
-    return;
-  }
-
-  const animalLabel = sos.animalLabel || "";
-  const title = sos.title || "SOS";
-  const location = [sos.city, sos.area].filter(Boolean).join(" ");
-
-  document.getElementById("sosId").textContent = sos.id;
-  document.getElementById("sosTitle").textContent = (animalLabel ? animalLabel + " " : "") + title;
-  document.getElementById("sosLocation").textContent = location ? "📍 " + location : "";
-
-  const supports = readJson(SUPPORT_KEY, []).filter(function (item) {
-    return String(item.sosId) === String(sos.id);
-  });
-
-  const support = supports.find(function (item) {
-    return !requestedHelp || item.helpLabel === requestedHelp || item.helpType === requestedHelp;
-  }) || supports[0];
-
-  const partnerName = requestedPartner || (support && (support.nickname || support.name)) || "支援者";
-  const helpLabel = requestedHelp || (support && (support.helpLabel || support.helpType)) || "支援";
-
-  document.getElementById("partnerName").textContent = partnerName;
-  document.getElementById("helpType").textContent = helpLabel;
-
-  document.getElementById("backButton").href = "sos-detail.html?id=" + encodeURIComponent(sos.id);
-
-  const chatKey = String(sos.id) + "::" + String(partnerName);
-  const chats = readJson(CHAT_KEY, {});
-  const messages = Array.isArray(chats[chatKey]) ? chats[chatKey] : [];
-
-  const chatArea = document.getElementById("chatArea");
-  const chatEmpty = document.getElementById("chatEmpty");
-  const chatInputArea = document.getElementById("chatInputArea");
-  const endChatButton = document.getElementById("endChatButton");
-
-  function saveChats() {
-    chats[chatKey] = messages;
-    localStorage.setItem(CHAT_KEY, JSON.stringify(chats));
-  }
-
-  function formatTime(value) {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "";
-    return date.toLocaleTimeString("ja-JP", {
-      hour: "2-digit",
-      minute: "2-digit"
+    document.addEventListener("DOMContentLoaded", () => {
+      loadTicketSummary();
+      loadMessages();
+      // 5秒ごとに自動更新（簡易リアルタイム）
+      setInterval(loadMessages, 5000);
     });
-  }
 
-  function renderMessages() {
-    chatArea.innerHTML = "";
-
-    if (messages.length === 0) {
-      chatArea.appendChild(chatEmpty);
-      return;
-    }
-
-    messages.forEach(function (message) {
-      const wrapper = document.createElement("div");
-      wrapper.className = message.from === "me"
-        ? "message message-me"
-        : "message message-other";
-
-      if (message.from !== "me") {
-        const name = document.createElement("div");
-        name.className = "message-name";
-        name.textContent = message.name || partnerName;
-        wrapper.appendChild(name);
+    async function loadTicketSummary() {
+      const summaryEl = document.getElementById('ticketSummary');
+      if (!sosId || !window.supabaseClient) {
+        summaryEl.innerHTML = '<div>対象の投稿指定なし</div>';
+        return;
       }
 
-      const bubble = document.createElement("div");
-      bubble.className = "message-bubble";
-      bubble.textContent = message.text || "";
-      wrapper.appendChild(bubble);
+      try {
+        const { data: item } = await window.supabaseClient
+          .from('sos_items')
+          .select('id, title, poster_name, city')
+          .eq('id', sosId)
+          .single();
 
-      const time = document.createElement("time");
-      time.textContent = formatTime(message.createdAt);
-      wrapper.appendChild(time);
-
-      chatArea.appendChild(wrapper);
-    });
-
-    chatArea.scrollTop = chatArea.scrollHeight;
-  }
-
-  renderMessages();
-
-  document.getElementById("chatForm").addEventListener("submit", function (event) {
-    event.preventDefault();
-
-    const input = document.getElementById("chatInput");
-    const text = input.value.trim();
-    if (!text) return;
-
-    messages.push({
-      id: "MSG-" + Date.now(),
-      from: "me",
-      name: "自分",
-      text: text,
-      createdAt: new Date().toISOString()
-    });
-
-    saveChats();
-    input.value = "";
-    renderMessages();
-  });
-
-  const endedChats = readJson("wannyan_chat_status", {});
-  const ended = endedChats[chatKey] === "ended";
-
-  function showEnded() {
-    chatInputArea.style.display = "none";
-    endChatButton.disabled = true;
-    endChatButton.textContent = "✓ やり取り終了済み";
-
-    if (!document.querySelector(".chat-closed-message")) {
-      const closedMessage = document.createElement("div");
-      closedMessage.className = "chat-closed-message";
-      closedMessage.textContent = "この相手とのやり取りは終了しました。";
-      chatArea.appendChild(closedMessage);
+        if (item) {
+          summaryEl.innerHTML = `
+            <div>
+              <strong>📦 ${item.title}</strong><br>
+              <span style="color:#718096; font-size:10px;">投稿者: ${item.poster_name} 様 (${item.city || '熊本'})</span>
+            </div>
+            <a href="sos-detail.html?id=${item.id}" style="color:#3182ce; font-weight:bold; font-size:10px; text-decoration:none;">詳細を見る ➔</a>
+          `;
+        }
+      } catch(e) {
+        console.error(e);
+      }
     }
-  }
 
-  if (ended) showEnded();
+    async function loadMessages() {
+      const listEl = document.getElementById('messageList');
+      if (!sosId || !window.supabaseClient) {
+        listEl.innerHTML = '<div class="empty-chat">Supabaseの接続設定が見つかりません。</div>';
+        return;
+      }
 
-  endChatButton.addEventListener("click", function () {
-    const result = confirm(
-      "「" + partnerName + "」さんとのやり取りを終了しますか？\n\n" +
-      "このSOSそのものは終了しません。"
-    );
+      try {
+        const { data: msgs, error } = await window.supabaseClient
+          .from('chat_messages')
+          .select('*')
+          .eq('sos_id', sosId)
+          .order('created_at', { ascending: true });
 
-    if (!result) return;
+        if (error) throw error;
 
-    endedChats[chatKey] = "ended";
-    localStorage.setItem("wannyan_chat_status", JSON.stringify(endedChats));
-    showEnded();
-  });
-})();
-</script>
+        if (!msgs || msgs.length === 0) {
+          listEl.innerHTML = `
+            <div class="empty-chat">
+              まだメッセージはありません 🐾<br>
+              「受け渡し方法」や「お届け日時」をご相談ください。
+            </div>`;
+          return;
+        }
+
+        listEl.innerHTML = msgs.map(m => {
+          const isMe = m.sender_name === currentUserName;
+          const date = new Date(m.created_at || Date.now());
+          const timeStr = `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+
+          return `
+            <div class="msg-bubble ${isMe ? 'msg-right' : 'msg-left'}">
+              <div class="msg-sender">${m.sender_name || '匿名'}</div>
+              <div>${escapeHtml(m.message)}</div>
+              <div class="msg-time">${timeStr}</div>
+            </div>
+          `;
+        }).join('');
+
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      if (!window.supabaseClient) {
+        alert("Supabase接続エラーです。");
+        return;
+      }
+
+      input.value = '';
+
+      try {
+        const { error } = await window.supabaseClient
+          .from('chat_messages')
+          .insert([{
+            sos_id: sosId,
+            sender_name: currentUserName,
+            message: text
+          }]);
+
+        if (error) throw error;
+        loadMessages();
+
+      } catch(err) {
+        alert("送信に失敗しました：" + err.message);
+      }
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
+    }
+  </script>
 
 </body>
 </html>
