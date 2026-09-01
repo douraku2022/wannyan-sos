@@ -31,7 +31,7 @@
     .top-btn:active { background: rgba(255,255,255,0.3); }
     .top-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
 
-    /* 🍔 右側スライドナビゲーション */
+    /* 🍔 右側スライドナビゲーション（全7項目統一） */
     .menu-overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.5); z-index: 1001;
@@ -104,7 +104,7 @@
     <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
   </div>
 
-  <!-- 🍔 右スライドメニュー（全7項目統一） -->
+  <!-- 🍔 右側スライドメニュー（全7項目統一） -->
   <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
   <div id="sideDrawer" class="side-drawer">
     <div class="drawer-header">
@@ -126,8 +126,8 @@
       <div class="login-title">🔐 登録済みの方のログイン</div>
 
       <div class="notice-box">
-        ご登録時に使用した<strong>電話番号</strong>を入力してください。<br>
-        別のスマホからアクセスする場合や、再ログイン時にご利用いただけます。
+        ご登録時に使用した<strong>お電話番号</strong>を入力してください。<br>
+        クラウドからあなたの登録データを呼び出してログインします。
       </div>
 
       <form id="loginForm">
@@ -161,26 +161,49 @@
       }
     }
 
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
-      const phone = document.getElementById('loginPhone').value.trim();
-      let profile = {};
-      try { profile = JSON.parse(localStorage.getItem('wanSOS_profile') || '{}'); } catch(e){}
-
-      // 既存登録がある場合はログイン処理、端末内に無い場合は電話番号で簡易プロフィール保持
-      if (!profile.nickname) {
-        profile = {
-          nickname: '会員（' + phone.slice(-4) + '）',
-          phone: phone,
-          registeredAt: new Date().toISOString()
-        };
-        localStorage.setItem('wanSOS_profile', JSON.stringify(profile));
+      const phone = document.getElementById('loginPhone').value.trim().replace(/[-\s]/g, '');
+      if (!phone) {
+        alert("お電話番号を入力してください。");
+        return;
       }
 
-      sessionStorage.setItem('wannyanSOS_loggedIn', 'true');
-      alert("ログインが完了しました！");
-      window.location.href = "sos.html";
+      if (!window.supabaseClient) {
+        alert("データベース接続設定が見つかりません。");
+        return;
+      }
+
+      try {
+        const { data, error } = await window.supabaseClient
+          .from('users_profiles')
+          .select('*')
+          .eq('phone', phone)
+          .single();
+
+        if (error || !data) {
+          alert("登録されているお電話番号が見つかりませんでした。\n「新規ユーザー登録」から登録を行ってください。");
+          return;
+        }
+
+        const profile = {
+          nickname: data.nickname,
+          fullName: data.full_name,
+          address: data.address,
+          phone: data.phone,
+          birth: data.birth
+        };
+
+        localStorage.setItem('wanSOS_profile', JSON.stringify(profile));
+        localStorage.setItem('wanSOS_user_phone', data.phone);
+        sessionStorage.setItem('wannyanSOS_loggedIn', 'true');
+
+        alert("🎉 ログインしました！マイページへ移動します。");
+        window.location.href = "mypage.html";
+      } catch (err) {
+        alert("ログイン処理中にエラーが発生しました。");
+      }
     });
   </script>
 
