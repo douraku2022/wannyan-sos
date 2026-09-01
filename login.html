@@ -31,7 +31,7 @@
     .top-btn:active { background: rgba(255,255,255,0.3); }
     .top-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
 
-    /* 🍔 右側スライドナビゲーション */
+    /* 🍔 右側スライドナビゲーション（全7項目統一） */
     .menu-overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.5); z-index: 1001;
@@ -105,7 +105,7 @@
     <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
   </div>
 
-  <!-- 🍔 右側スライドメニュー -->
+  <!-- 🍔 右側スライドメニュー（全7項目統一） -->
   <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
   <div id="sideDrawer" class="side-drawer">
     <div class="drawer-header">
@@ -127,7 +127,7 @@
       <div class="login-title">🔐 登録済みの方のログイン</div>
 
       <div class="notice-box">
-        ご登録時の<strong>お電話番号</strong>と<strong>6桁の暗証番号</strong>を入力してください。<br>
+        ご登録時の<strong>お電話番号</strong>と<strong>4桁の暗証番号</strong>を入力してください。<br>
         クラウドからあなたの登録データを呼び出してログインします。
       </div>
 
@@ -138,9 +138,9 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">暗証番号（6桁）</label>
-          <input type="password" id="loginPin" class="form-input" inputmode="numeric" pattern="[0-9]{6}"
-                 maxlength="6" placeholder="登録時に決めた6桁の番号" required>
+          <label class="form-label">暗証番号（4桁）</label>
+          <input type="password" id="loginPin" class="form-input" inputmode="numeric" pattern="[0-9]{4}"
+                 maxlength="4" placeholder="登録時に決めた4桁の番号" required>
         </div>
 
         <button type="submit" class="submit-btn">
@@ -168,8 +168,16 @@
       }
     }
 
+    // 電話番号を、Supabase Auth用の疑似メールアドレスに変換する共通ルール
+    // register.html 側でも必ず同じ変換ルールを使うこと
     function phoneToPseudoEmail(phone) {
       return `${phone}@wannyansos.local`;
+    }
+
+    // 4桁の暗証番号を、Supabaseの最低文字数(6文字)を満たすパスワードに変換する
+    // register.html 側と必ず同じ変換ルールを使うこと
+    function pinToPassword(pin) {
+      return `wnsos${pin}pin`;
     }
 
     document.getElementById('loginForm').addEventListener('submit', async function (e) {
@@ -182,8 +190,8 @@
         alert("お電話番号を入力してください。");
         return;
       }
-      if (!/^\d{6}$/.test(pin)) {
-        alert("暗証番号は6桁の数字で入力してください。");
+      if (!/^\d{4}$/.test(pin)) {
+        alert("暗証番号は4桁の数字で入力してください。");
         return;
       }
 
@@ -199,7 +207,7 @@
       try {
         const { data, error } = await window.supabaseClient.auth.signInWithPassword({
           email: phoneToPseudoEmail(phone),
-          password: pin
+          password: pinToPassword(pin)
         });
 
         if (error || !data.session) {
@@ -209,6 +217,7 @@
           return;
         }
 
+        // プロフィール情報を取得して画面表示用にキャッシュ（表示専用。権限判定には使わない）
         try {
           const { data: profile } = await window.supabaseClient
             .from('users_profiles')
@@ -227,7 +236,9 @@
             localStorage.setItem('wanSOS_profile', JSON.stringify(profileCache));
             localStorage.setItem('wanSOS_user_phone', profile.phone);
           }
-        } catch (cacheErr) {}
+        } catch (cacheErr) {
+          // 表示用キャッシュの失敗は致命的ではないので無視
+        }
 
         alert("🎉 ログインしました！マイページへ移動します。");
         window.location.href = "mypage.html";
