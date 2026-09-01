@@ -70,7 +70,7 @@
     .welcome-name { font-size: 15px; font-weight: bold; color: #1a202c; }
     .welcome-badge { background: #2f855a; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 6px; font-weight: bold; }
 
-    /* 下部プロファイルカード（スマホでも綺麗に縦並びにする修正） */
+    /* 下部プロファイルカード（完全縦並び・スッキリ修正版） */
     .profile-card {
       background: #ffffff; border: 2px solid #cbd5e0;
       border-radius: 10px; padding: 14px; color: #2d3748; margin: 20px 0 16px 0;
@@ -78,20 +78,20 @@
     }
     .profile-title-area {
       font-weight: bold; font-size: 13px; margin-bottom: 8px; color: #2d3748;
-      display: flex; align-items: center; gap: 4px;
+      display: flex; align-items: center; gap: 6px;
     }
     .details-box {
       background: #f8fafc; border: 1px solid #e2e8f0;
-      border-radius: 8px; padding: 10px; font-size: 12px; margin-bottom: 10px; line-height: 1.6;
+      border-radius: 8px; padding: 10px; font-size: 12px; margin-bottom: 12px; line-height: 1.6;
     }
-    .details-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e0; padding: 4px 0; }
+    .details-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e0; padding: 5px 0; }
     .details-row:last-child { border-bottom: none; }
-    .details-label { color: #718096; }
-    .details-value { font-weight: bold; color: #1a202c; text-align: right; }
+    .details-label { color: #718096; width: 35%; }
+    .details-value { font-weight: bold; color: #1a202c; text-align: right; width: 65%; word-break: break-all; }
 
     .edit-profile-btn {
       display: block; width: 100%; background: #2b6cb0; color: #ffffff; border: 2px solid #2c5282;
-      border-radius: 8px; padding: 9px; text-align: center; font-size: 12px; font-weight: bold;
+      border-radius: 8px; padding: 10px; text-align: center; font-size: 12px; font-weight: bold;
       text-decoration: none; box-shadow: 0 2px 0 #1a365d; cursor: pointer;
     }
     .edit-profile-btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #1a365d; }
