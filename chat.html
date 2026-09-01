@@ -113,7 +113,7 @@
       padding: 20px; text-align: center; color: #718096; font-size: 12px;
     }
 
-    /* 🎁 お辞儀・お気持ちボックスの専用スタイル（チャット内調整版） */
+    /* 🎁 お辞儀・お気持ちボックスの専用スタイル */
     .volunteer-notice-card {
       width: 100%;
       margin: 20px 0 30px 0;
@@ -161,7 +161,7 @@
     <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
   </div>
 
-  <!-- 🍔 右スライドメニュー（全7項目統一） -->
+  <!-- 🍔 右側スライドナビゲーション -->
   <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
   <div id="sideDrawer" class="side-drawer">
     <div class="drawer-header">
@@ -189,7 +189,7 @@
       <div class="empty-chat">メッセージを読み込んでいます...</div>
     </div>
 
-    <!-- 📌 チャット内お気持ちボックス（送信バーに隠れない位置） -->
+    <!-- 📌 チャット内お気持ちボックス -->
     <div class="volunteer-notice-card">
       <div class="volunteer-notice-header">
         <span class="bowing-icon">🙇‍♀️</span>
@@ -235,7 +235,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const sosId = urlParams.get('sos_id');
 
-    let currentUserName = 'ゲスト支援者';
+    let currentUserName = 'どうらくいちば';
     try {
       const profile = JSON.parse(localStorage.getItem('wanSOS_profile') || '{}');
       if (profile.nickname) currentUserName = profile.nickname;
@@ -244,80 +244,116 @@
     document.addEventListener("DOMContentLoaded", () => {
       loadTicketSummary();
       loadMessages();
-      // 5秒ごとに自動更新（簡易リアルタイム）
       setInterval(loadMessages, 5000);
     });
 
     async function loadTicketSummary() {
       const summaryEl = document.getElementById('ticketSummary');
-      if (!sosId || !window.supabaseClient) {
+      if (!sosId) {
         summaryEl.innerHTML = '<div>対象の投稿指定なし</div>';
         return;
       }
 
+      let item = null;
       try {
-        const { data: item } = await window.supabaseClient
-          .from('sos_items')
-          .select('id, title, poster_name, city')
-          .eq('id', sosId)
-          .single();
-
-        if (item) {
-          summaryEl.innerHTML = `
-            <div>
-              <strong>📦 ${item.title}</strong><br>
-              <span style="color:#718096; font-size:10px;">投稿者: ${item.poster_name} 様 (${item.city || '熊本'})</span>
-            </div>
-            <a href="sos-detail.html?id=${item.id}" style="color:#3182ce; font-weight:bold; font-size:10px; text-decoration:none;">詳細を見る ➔</a>
-          `;
+        const localSaved = localStorage.getItem('wanSOS_posts');
+        if (localSaved) {
+          const posts = JSON.parse(localSaved);
+          item = posts.find(p => String(p.id) === String(sosId));
         }
-      } catch(e) {
-        console.error(e);
+      } catch(e){}
+
+      if (!item && window.supabaseClient) {
+        try {
+          const { data } = await window.supabaseClient
+            .from('sos_items')
+            .select('id, title, poster_name, city')
+            .eq('id', sosId)
+            .single();
+          if (data) item = data;
+        } catch(e){}
+      }
+
+      if (item) {
+        summaryEl.innerHTML = `
+          <div>
+            <strong>📦 ${item.title}</strong><br>
+            <span style="color:#718096; font-size:10px;">投稿者: ${item.poster_name || 'どうらくいちば'} 様 (${item.city || '熊本'})</span>
+          </div>
+          <a href="sos-detail.html?id=${item.id}" style="color:#3182ce; font-weight:bold; font-size:10px; text-decoration:none;">詳細を見る ➔</a>
+        `;
+      } else {
+        summaryEl.innerHTML = '<div>対象の投稿情報</div>';
       }
     }
 
     async function loadMessages() {
       const listEl = document.getElementById('messageList');
-      if (!sosId || !window.supabaseClient) {
-        listEl.innerHTML = '<div class="empty-chat">Supabaseの接続設定が見つかりません。</div>';
+      if (!sosId) {
+        listEl.innerHTML = '<div class="empty-chat">投稿IDが指定されていません。</div>';
         return;
       }
 
-      try {
-        const { data: msgs, error } = await window.supabaseClient
-          .from('chat_messages')
-          .select('*')
-          .eq('sos_id', sosId)
-          .order('created_at', { ascending: true });
+      let msgs = [];
 
-        if (error) throw error;
+      // 1. まずSupabaseから正しいカラム名（send_nickname, message_text）で取得を試みる
+      if (window.supabaseClient) {
+        try {
+          const { data, error } = await window.supabaseClient
+            .from('sos_chat_messages')
+            .select('*')
+            .eq('sos_id', sosId)
+            .order('created_at', { ascending: true });
 
-        if (!msgs || msgs.length === 0) {
-          listEl.innerHTML = `
-            <div class="empty-chat">
-              まだメッセージはありません 🐾<br>
-              「受け渡し方法」や「お届け日時」をご相談ください。
-            </div>`;
-          return;
+          if (!error && data) {
+            // カラム名を画面描画用にマッピング変換する
+            msgs = data.map(d => ({
+              sos_id: d.sos_id,
+              sender_name: d.send_nickname,
+              message: d.message_text,
+              created_at: d.created_at
+            }));
+          }
+        } catch(err) {}
+      }
+
+      // 2. Supabaseから取れなかった場合や空のときはローカルストレージのバックアップを見る
+      if (msgs.length === 0) {
+        try {
+          const localChat = localStorage.getItem(`wanSOS_chat_${sosId}`);
+          if (localChat) {
+            msgs = JSON.parse(localChat);
+          }
+        } catch(e) {}
+      }
+
+      if (!msgs || msgs.length === 0) {
+        listEl.innerHTML = `
+          <div class="empty-chat">
+            まだメッセージはありません 🐾<br>
+            「受け渡し方法」や「お届け日時」をご相談ください。
+          </div>`;
+        return;
+      }
+
+      listEl.innerHTML = msgs.map(m => {
+        const isMe = m.sender_name === currentUserName;
+        let timeStr = '本日';
+        if (m.created_at) {
+          const date = new Date(m.created_at);
+          if (!isNaN(date.getTime())) {
+            timeStr = `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+          }
         }
 
-        listEl.innerHTML = msgs.map(m => {
-          const isMe = m.sender_name === currentUserName;
-          const date = new Date(m.created_at || Date.now());
-          const timeStr = `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
-
-          return `
-            <div class="msg-bubble ${isMe ? 'msg-right' : 'msg-left'}">
-              <div class="msg-sender">${m.sender_name || '匿名'}</div>
-              <div>${escapeHtml(m.message)}</div>
-              <div class="msg-time">${timeStr}</div>
-            </div>
-          `;
-        }).join('');
-
-      } catch(err) {
-        console.error(err);
-      }
+        return `
+          <div class="msg-bubble ${isMe ? 'msg-right' : 'msg-left'}">
+            <div class="msg-sender">${m.sender_name || '匿名'}</div>
+            <div>${escapeHtml(m.message)}</div>
+            <div class="msg-time">${timeStr}</div>
+          </div>
+        `;
+      }).join('');
     }
 
     async function sendMessage() {
@@ -325,31 +361,44 @@
       const text = input.value.trim();
       if (!text) return;
 
-      if (!window.supabaseClient) {
-        alert("Supabase接続エラーです。");
-        return;
-      }
-
       input.value = '';
 
+      const newMsg = {
+        sos_id: sosId,
+        sender_name: currentUserName,
+        message: text,
+        created_at: new Date().toISOString()
+      };
+
+      // 1. 端末内ローカルストレージへ即時保存（画面ですぐ見えるようにする）
       try {
-        const { error } = await window.supabaseClient
-          .from('chat_messages')
-          .insert([{
-            sos_id: sosId,
-            sender_name: currentUserName,
-            message: text
-          }]);
+        let localMsgs = [];
+        const existing = localStorage.getItem(`wanSOS_chat_${sosId}`);
+        if (existing) localMsgs = JSON.parse(existing);
+        localMsgs.push(newMsg);
+        localStorage.setItem(`wanSOS_chat_${sosId}`, JSON.stringify(localMsgs));
+      } catch(e){}
 
-        if (error) throw error;
-        loadMessages();
+      loadMessages();
 
-      } catch(err) {
-        alert("送信に失敗しました：" + err.message);
+      // 2. Supabaseの実際のカラム名（send_nickname, message_text）に合わせて保存
+      if (window.supabaseClient) {
+        try {
+          await window.supabaseClient
+            .from('sos_chat_messages')
+            .insert([{
+              sos_id: sosId,
+              send_nickname: newMsg.sender_name,
+              message_text: newMsg.message
+            }]);
+        } catch(err) {
+          console.warn("Supabaseへのチャット保存スキップ:", err);
+        }
       }
     }
 
     function escapeHtml(str) {
+      if (!str) return '';
       return str.replace(/[&<>"']/g, function(m) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
       });

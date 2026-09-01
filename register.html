@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>新規ユーザー登録｜ワンニャンSOS熊本</title>
+  <title>登録情報の確認・変更｜ワンニャンSOS熊本</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
@@ -31,7 +31,7 @@
     .top-btn:active { background: rgba(255,255,255,0.3); }
     .top-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
 
-    /* 📱 下部固定ボトムナビゲーション（公式LINE風・4ボタン） */
+    /* 📱 下部固定ボトムナビゲーション */
     .app-bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0; height: 56px;
       background: #ffffff; border-top: 1px solid #cbd5e0;
@@ -120,9 +120,6 @@
       padding: 12px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 0 #005a28; cursor: pointer;
     }
     .submit-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #005a28; }
-
-    .link-row { text-align: center; margin-top: 12px; font-size: 12px; }
-    .link-row a { color: #3182ce; font-weight: bold; text-decoration: none; }
   </style>
 </head>
 
@@ -130,8 +127,8 @@
 
   <!-- 📌 最上部：共通固定ヘッダー -->
   <div class="app-top-bar">
-    <button type="button" class="top-btn" onclick="history.back()">← 戻る</button>
-    <div class="top-title">🐕🐈 ワンニャンSOS | 新規登録</div>
+    <button type="button" class="top-btn" onclick="window.location.href='mypage.html'">← マイページへ</button>
+    <div class="top-title" id="pageHeaderTitle">🐕🐈 ワンニャンSOS | 新規登録</div>
     <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
   </div>
 
@@ -153,7 +150,7 @@
 
   <div class="reg-container">
     <div class="reg-card">
-      <div class="reg-title">✨ 新規ユーザー登録</div>
+      <div class="reg-title" id="cardTitle">✨ 新規ユーザー登録</div>
 
       <div class="notice-box">
         🔒 命に関わる現場の安全を守るため、完全クローズドで運用を行っています。<br>
@@ -167,8 +164,8 @@
             表示名（ニックネーム） <span style="color:#c53030;">*</span>
             <span class="badge-public">🌐 画面上に公開</span>
           </label>
-          <input type="text" id="regNickname" class="form-input" placeholder="例：ボランティア太郎" required[cite: 2]>
-          <div class="form-hint">※掲示板やチャットで他ユーザーに表示されるお名前です[cite: 2]。</div>
+          <input type="text" id="regNickname" class="form-input" placeholder="例：ボランティア太郎" required>
+          <div class="form-hint">※掲示板やチャットで他ユーザーに表示されるお名前です。</div>
         </div>
 
         <!-- 🔒 本人確認・防犯用（非公開） -->
@@ -177,8 +174,8 @@
             氏名（本名）または 正式団体名 <span style="color:#c53030;">*</span>
             <span class="badge-private">🔒 非公開（管理用）</span>
           </label>
-          <input type="text" id="regFullName" class="form-input" placeholder="例：山田 花子 / ○○保護の会" required[cite: 2]>
-          <div class="form-hint">※施設・団体の場合は「団体名＋担当者名」をご記入ください[cite: 2]。</div>
+          <input type="text" id="regFullName" class="form-input" placeholder="例：山田 花子 / ○○保護の会" required>
+          <div class="form-hint">※施設・団体の場合は「団体名＋担当者名」をご記入ください。</div>
         </div>
 
         <div class="form-group">
@@ -200,7 +197,7 @@
             </select>
             <span>日</span>
           </div>
-          <div class="form-hint">※18歳未満の方はご利用いただけません[cite: 2]。</div>
+          <div class="form-hint">※18歳未満の方はご利用いただけません。</div>
         </div>
 
         <div class="form-group">
@@ -208,8 +205,8 @@
             電話番号（連絡先） <span style="color:#c53030;">*</span>
             <span class="badge-private">🔒 非公開（管理用）</span>
           </label>
-          <input type="tel" id="regPhone" class="form-input" placeholder="例：09012345678" required[cite: 2]>
-          <div class="form-hint">※本人確認・緊急連絡用です[cite: 2]。</div>
+          <input type="tel" id="regPhone" class="form-input" placeholder="例：09012345678" required>
+          <div class="form-hint">※本人確認・緊急連絡用です。</div>
         </div>
 
         <div class="form-group">
@@ -217,15 +214,15 @@
             お住まいの地域・市区町村（住所） <span style="color:#c53030;">*</span>
             <span class="badge-private">🔒 非公開（管理用）</span>
           </label>
-          <input type="text" id="regAddress" class="form-input" placeholder="例：熊本市中央区" required[cite: 2]>
-          <div class="form-hint">※防犯およびトラブル防止のための管理用情報です[cite: 2]。</div>
+          <input type="text" id="regAddress" class="form-input" placeholder="例：熊本市中央区" required>
+          <div class="form-hint">※防犯およびトラブル防止のための管理用情報です。</div>
         </div>
 
         <div style="font-size: 11px; color: #4a5568; margin-bottom: 12px;">
-          登録ボタンを押すことで、<a href="terms.html" target="_blank" style="color:#3182ce; font-weight:bold;">利用規約</a>および<a href="disclaimer.html" target="_blank" style="color:#3182ce; font-weight:bold;">免責事項</a>に同意したものとみなします[cite: 2]。
+          登録ボタンを押すことで、<a href="terms.html" target="_blank" style="color:#3182ce; font-weight:bold;">利用規約</a>および<a href="disclaimer.html" target="_blank" style="color:#3182ce; font-weight:bold;">免責事項</a>に同意したものとみなします。
         </div>
 
-        <button type="submit" class="submit-btn">
+        <button type="submit" class="submit-btn" id="submitBtnText">
           🐾 入力内容を確認して登録する ➔
         </button>
       </form>
@@ -253,7 +250,6 @@
   </nav>
 
   <script>
-    // 生年月日プルダウン自動生成
     window.addEventListener('DOMContentLoaded', () => {
       const yearSelect = document.getElementById('birthYear');
       const monthSelect = document.getElementById('birthMonth');
@@ -281,6 +277,33 @@
         opt.textContent = d;
         daySelect.appendChild(opt);
       }
+
+      // 🔄 すでに登録データがあれば「変更モード」に切り替えて値を自動セットする
+      const savedProfile = localStorage.getItem('wanSOS_profile');
+      if (savedProfile) {
+        try {
+          const profile = JSON.parse(savedProfile);
+          document.getElementById('pageHeaderTitle').textContent = "🐕🐈 ワンニャンSOS | 登録情報変更";
+          document.getElementById('cardTitle').textContent = "✏️ 登録情報の変更";
+          document.getElementById('submitBtnText').textContent = "🐾 変更内容を保存する ➔";
+
+          if (profile.nickname) document.getElementById('regNickname').value = profile.nickname;
+          if (profile.fullName) document.getElementById('regFullName').value = profile.fullName;
+          if (profile.phone) document.getElementById('regPhone').value = profile.phone;
+          if (profile.address) document.getElementById('regAddress').value = profile.address;
+
+          if (profile.birth) {
+            const parts = profile.birth.split('-');
+            if (parts.length === 3) {
+              document.getElementById('birthYear').value = parts[0];
+              document.getElementById('birthMonth').value = parts[1];
+              document.getElementById('birthDay').value = parts[2];
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
     });
 
     function toggleMenu() {
@@ -296,7 +319,7 @@
       }
     }
 
-    // 登録処理（確認プレビュー付き）
+    // 保存・更新処理
     document.getElementById('regForm').addEventListener('submit', function(e) {
       e.preventDefault();
 
@@ -309,7 +332,7 @@
       const address = document.getElementById('regAddress').value.trim();
 
       if (!nickname || !fullName || !year || !month || !day || !phone || !address) {
-        alert("すべての項目を入力（選択）してください[cite: 2]。");
+        alert("すべての項目を入力（選択）してください。");
         return;
       }
 
@@ -324,29 +347,34 @@
       }
 
       if (age < 18) {
-        alert("本サービスは18歳未満の方はご利用いただけません[cite: 2]。");
+        alert("本サービスは18歳未満の方はご利用いただけません。");
         return;
       }
 
-      // 🔍 登録前の確認プレビュー
-      const previewMsg = `【登録内容の確認】\n\n・表示名: ${nickname}\n・本名/団体名: ${fullName}\n・生年月日: ${birthStr}\n・電話番号: ${phone}\n・地域: ${address}\n\nこの内容で登録を完了しますか？`;
+      const previewMsg = `【登録内容の確認】\n\n・表示名: ${nickname}\n・本名/団体名: ${fullName}\n・生年月日: ${birthStr}\n・電話番号: ${phone}\n・地域: ${address}\n\nこの内容で保存しますか？`;
       if (!confirm(previewMsg)) {
         return;
       }
 
-      const profile = {
-        nickname: nickname,
-        fullName: fullName,
-        birth: birthStr,
-        phone: phone,
-        address: address,
-        registeredAt: new Date().toISOString()
-      };
+      let profile = {};
+      const savedProfile = localStorage.getItem('wanSOS_profile');
+      if (savedProfile) {
+        try { profile = JSON.parse(savedProfile); } catch(e){}
+      }
+
+      profile.nickname = nickname;
+      profile.fullName = fullName;
+      profile.birth = birthStr;
+      profile.phone = phone;
+      profile.address = address;
+      if (!profile.registeredAt) {
+        profile.registeredAt = new Date().toISOString();
+      }
 
       localStorage.setItem('wanSOS_profile', JSON.stringify(profile));
       sessionStorage.setItem('wannyanSOS_loggedIn', 'true');
 
-      alert("🎉 ユーザー登録が完了しました！マイページに移動します。");
+      alert("🎉 登録情報の変更が完了しました！マイページに戻ります。");
       window.location.href = "mypage.html";
     });
   </script>

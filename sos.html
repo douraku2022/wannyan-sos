@@ -77,8 +77,7 @@
     .ticket-card {
       background: #fffdfa; border: 2px dashed #b0bec5; border-radius: 12px;
       padding: 14px; text-decoration: none; color: #2d3748; display: block;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06); transition: transform 0.1s;
-      position: relative; font-family: monospace, sans-serif;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06); position: relative; font-family: monospace, sans-serif;
     }
     .ticket-card:active { transform: scale(0.98); }
 
@@ -104,41 +103,23 @@
       padding: 24px; text-align: center; color: #718096; font-size: 13px;
     }
 
-    /* 🎁 お辞儀・お気持ちボックスの専用スタイル */
+    /* 🎁 お辞儀・お気持ちボックス */
     .volunteer-notice-card {
-      width: 100%;
-      margin: 30px 0 20px 0;
-      background: #fffdf9;
-      border: 2px dashed #e2b714;
-      border-radius: 12px;
-      padding: 16px;
+      width: 100%; margin: 30px 0 20px 0; background: #fffdf9;
+      border: 2px dashed #e2b714; border-radius: 12px; padding: 16px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-      font-family: inherit;
     }
     .volunteer-notice-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 10px;
-      border-bottom: 1px solid #f0e6d2;
-      padding-bottom: 8px;
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+      border-bottom: 1px solid #f0e6d2; padding-bottom: 8px;
     }
     .bowing-icon { font-size: 20px; }
     .notice-title { font-size: 13px; font-weight: bold; color: #744210; }
-    .volunteer-notice-body p {
-      font-size: 12px;
-      color: #4a5568;
-      line-height: 1.6;
-      margin-bottom: 8px;
-    }
+    .volunteer-notice-body p { font-size: 12px; color: #4a5568; line-height: 1.6; margin-bottom: 8px; }
     .volunteer-notice-body p:last-child { margin-bottom: 0; }
     .notice-future {
-      background: #fefcbf;
-      border-left: 3px solid #d69e2e;
-      padding: 8px 10px;
-      border-radius: 0 6px 6px 0;
-      margin-top: 8px;
-      color: #744210 !important;
+      background: #fefcbf; border-left: 3px solid #d69e2e;
+      padding: 8px 10px; border-radius: 0 6px 6px 0; margin-top: 8px; color: #744210 !important;
     }
   </style>
 </head>
@@ -172,7 +153,6 @@
   <!-- 📱 メインコンテンツ -->
   <div class="board-container">
 
-    <!-- 📝 不足物資を投稿するボタン -->
     <a href="sos-create.html" class="create-ticket-btn">
       📝 不足物資を投稿する ➔
     </a>
@@ -182,22 +162,16 @@
       <div class="empty-state">不足物資の投稿を読み込み中...</div>
     </div>
 
-    <!-- 📌 運営のお気持ち・ご案内ボックス -->
+    <!-- 📌 運営のお気持ちボックス -->
     <div class="volunteer-notice-card">
       <div class="volunteer-notice-header">
         <span class="bowing-icon">🙇‍♀️</span>
         <span class="notice-title">運営からのお願いとこれからのこと</span>
       </div>
       <div class="volunteer-notice-body">
-        <p>
-          当サービスは、ボランティアによる<strong>実証テスト段階</strong>として、個人情報の保護とコストを最優先に考えた「無料・最小限」の仕組みで運営しています。
-        </p>
-        <p>
-          「本当は通知機能とかも入れたい…！」という気持ちでいっぱいなのですが、これ以上サーバー費用や常時監視体制を強化すると事業レベルになってしまうため、今の仕組みが限界です。ごめんなさい！💦
-        </p>
-        <p class="notice-future">
-          もしゆくゆくは、この仕組みや理念に共感してくださる<strong>公的機関や自治体等の公的な主体へ、管理・運営をまるっと引き継いでいただける未来</strong>があれば…という想いでデザインしています。あらかじめ温かいご理解とご協力をいただけますと幸いです！🙇‍♂️
-        </p>
+        <p>当サービスは、ボランティアによる<strong>実証テスト段階</strong>として、個人情報の保護とコストを最優先に考えた「無料・最小限」の仕組みで運営しています。</p>
+        <p>「本当は通知機能とかも入れたい…！」という気持ちでいっぱいなのですが、これ以上サーバー費用や常時監視体制を強化すると事業レベルになってしまうため、今の仕組みが限界です。ごめんなさい！💦</p>
+        <p class="notice-future">もしゆくゆくは、この仕組みや理念に共感してくださる<strong>公的機関や自治体等の公的な主体へ、管理・運営をまるっと引き継いでいただける未来</strong>があれば…という想いでデザインしています。</p>
       </div>
     </div>
 
@@ -222,76 +196,97 @@
 
     async function fetchTickets() {
       const container = document.getElementById('ticketList');
-      if (!window.supabaseClient) {
-        container.innerHTML = '<div class="empty-state">Supabaseの接続設定が見つかりません。</div>';
+      let combinedItems = [];
+
+      // 1. ローカルストレージから読み込み
+      try {
+        const localSaved = localStorage.getItem('wanSOS_posts');
+        if (localSaved) {
+          combinedItems = JSON.parse(localSaved);
+        }
+      } catch(e) {
+        console.warn("ローカル読込エラー:", e);
+      }
+
+      // 2. Supabaseから読み込み（あれば結合）
+      if (window.supabaseClient) {
+        try {
+          const { data: sosItems, error } = await window.supabaseClient
+            .from('sos_items')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (!error && sosItems) {
+            const existingIds = new Set(combinedItems.map(i => i.id));
+            sosItems.forEach(item => {
+              if (!existingIds.has(item.id)) {
+                combinedItems.push(item);
+              }
+            });
+          }
+        } catch (err) {
+          console.warn("Supabase読込スキップ:", err);
+        }
+      }
+
+      // 3. データなしの場合
+      if (combinedItems.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            現在、不足物資の投稿はありません 🐾<br>
+            必要な物資がある方は上のボタンから投稿してください。
+          </div>`;
         return;
       }
 
-      try {
-        const { data: sosItems, error } = await window.supabaseClient
-          .from('sos_items')
-          .select('*')
-          .order('created_at', { ascending: false });
+      // 4. カード描画
+      container.innerHTML = combinedItems.map(item => {
+        const isPass = item.urgency && (item.urgency.includes('持続') || item.urgency.includes('定期'));
+        const ticketBadgeHtml = isPass
+          ? '<span class="badge badge-pass">🔄 持続支援</span>'
+          : '<span class="badge badge-ticket">📦 単発支援</span>';
 
-        if (error) throw error;
-
-        if (!sosItems || sosItems.length === 0) {
-          container.innerHTML = `
-            <div class="empty-state">
-              現在、不足物資の投稿はありません 🐾<br>
-              必要な物資がある方は上のボタンから投稿してください。
-            </div>`;
-          return;
+        let statusBadgeHtml = '';
+        if (item.status === 'completed') {
+          statusBadgeHtml = '<span class="badge badge-completed">✅ 支援完了</span>';
+        } else if (item.status === 'cancelled') {
+          statusBadgeHtml = '<span class="badge badge-cancelled">⚠️ 取り消し</span>';
         }
 
-        container.innerHTML = sosItems.map(item => {
-          const isPass = item.urgency && (item.urgency.includes('持続') || item.urgency.includes('定期'));
-          const ticketBadgeHtml = isPass
-            ? '<span class="badge badge-pass">🔄 持続支援</span>'
-            : '<span class="badge badge-ticket">📦 単発支援</span>';
+        const deliveryStr = item.delivery_method || '💬 相談';
+        const deliveryBadgeHtml = `<span class="badge badge-delivery">${deliveryStr}</span>`;
 
-          let statusBadgeHtml = '';
-          if (item.status === 'completed') {
-            statusBadgeHtml = '<span class="badge badge-completed">✅ 支援完了</span>';
-          } else if (item.status === 'cancelled') {
-            statusBadgeHtml = '<span class="badge badge-cancelled">⚠️ 取り消し</span>';
-          }
+        let dateStr = item.date;
+        if (!dateStr && item.created_at) {
+          const date = new Date(item.created_at);
+          dateStr = `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+        }
+        if (!dateStr) dateStr = '本日';
 
-          const deliveryStr = item.delivery_method || '💬 相談';
-          const deliveryBadgeHtml = `<span class="badge badge-delivery">${deliveryStr}</span>`;
+        const reasonStr = item.status_reason ? `<br>■ <strong>理由：</strong> ${item.status_reason}` : '';
 
-          const date = new Date(item.created_at || Date.now());
-          const dateStr = `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
-
-          const reasonStr = item.status_reason ? `<br>■ <strong>理由：</strong> ${item.status_reason}` : '';
-
-          return `
-            <a href="sos-detail.html?id=${item.id}" class="ticket-card">
-              <div class="ticket-badge-row">
-                ${statusBadgeHtml}
-                ${ticketBadgeHtml}
-                ${deliveryBadgeHtml}
-                <span class="badge badge-urgency">${item.urgency || '🚨 緊急'}</span>
-              </div>
-              <div class="ticket-title">${item.title || '物資支援希望'}</div>
-              <div class="ticket-info">
-                ■ <strong>地域：</strong> ${item.city || '熊本県内'}<br>
-                ■ <strong>物資：</strong> ${item.category || '物資全般'}<br>
-                ■ <strong>投稿者：</strong> ${item.poster_name || '匿名'} 様
-                ${reasonStr}
-              </div>
-              <div class="ticket-footer">
-                <span>投稿時刻：${dateStr}</span>
-                <span style="color:#2b6cb0; font-weight:bold;">詳細を見る ➔</span>
-              </div>
-            </a>
-          `;
-        }).join('');
-
-      } catch (err) {
-        console.error("データ取得エラー:", err);
-        container.innerHTML = `<div class="empty-state">データの読み込みに失敗しました：<br>${err.message}</div>`;
-      }
+        return `
+          <a href="sos-detail.html?id=${item.id}" class="ticket-card">
+            <div class="ticket-badge-row">
+              ${statusBadgeHtml}
+              ${ticketBadgeHtml}
+              ${deliveryBadgeHtml}
+              <span class="badge badge-urgency">${item.urgency || '🚨 緊急'}</span>
+            </div>
+            <div class="ticket-title">${item.title || '物資支援希望'}</div>
+            <div class="ticket-info">
+              ■ <strong>地域：</strong> ${item.city || '熊本県内'}<br>
+              ■ <strong>物資：</strong> ${item.category || '物資全般'}<br>
+              ■ <strong>投稿者：</strong> ${item.poster_name || 'どうらくいちば'} 様
+              ${reasonStr}
+            </div>
+            <div class="ticket-footer">
+              <span>投稿時刻：${dateStr}</span>
+              <span style="color:#2b6cb0; font-weight:bold;">詳細を見る ➔</span>
+            </div>
+          </a>
+        `;
+      }).join('');
     }
   </script>
 

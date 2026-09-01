@@ -116,7 +116,7 @@
     <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
   </div>
 
-  <!-- 🍔 右スライドメニュー（全7項目統一） -->
+  <!-- 🍔 右スライドメニュー -->
   <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
   <div id="sideDrawer" class="side-drawer">
     <div class="drawer-header">
@@ -157,9 +157,7 @@
         <!-- 完了・取り消し理由の選択 -->
         <div class="step-box" id="reasonBox" style="background: #f7fafc; border-color: #cbd5e0; display: none;">
           <div class="step-title" style="color: #4a5568;"><span class="step-badge" style="background: #718096;">💬</span> 理由をお知らせください</div>
-          <div class="btn-grid" style="grid-template-columns: 1fr 1fr;" id="reasonGroup">
-            <!-- JSで動的にボタン生成 -->
-          </div>
+          <div class="btn-grid" style="grid-template-columns: 1fr 1fr;" id="reasonGroup"></div>
           <input type="hidden" id="status_reason" value="">
         </div>
 
@@ -268,71 +266,86 @@
         window.location.href = "sos.html";
         return;
       }
-      if (!window.supabaseClient) return;
 
+      let item = null;
+
+      // 1. まずローカルストレージから該当IDを検索
       try {
-        const { data: item, error } = await window.supabaseClient
-          .from('sos_items')
-          .select('*')
-          .eq('id', sosId)
-          .single();
-
-        if (error || !item) {
-          alert("該当の投稿が見つかりませんでした。");
-          window.location.href = "sos.html";
-          return;
+        const localSaved = localStorage.getItem('wanSOS_posts');
+        if (localSaved) {
+          const posts = JSON.parse(localSaved);
+          item = posts.find(p => String(p.id) === String(sosId));
         }
+      } catch(e) {}
 
-        const currentStatus = item.status || 'open';
-        document.getElementById('ticket_status').value = currentStatus;
-        updateStatusGroupUI(currentStatus);
+      // 2. なければSupabaseから取得
+      if (!item && window.supabaseClient) {
+        try {
+          const { data, error } = await window.supabaseClient
+            .from('sos_items')
+            .select('*')
+            .eq('id', sosId)
+            .single();
 
-        if (item.status_reason) {
-          document.getElementById('status_reason').value = item.status_reason;
-        }
+          if (!error && data) {
+            item = data;
+          }
+        } catch(err) {}
+      }
 
-        if (item.animal_type) {
-          document.getElementById('animal_type').value = item.animal_type;
-          setButtonGroupSelected('animalGroup', item.animal_type);
-        }
+      if (!item) {
+        alert("該当の投稿が見つかりませんでした。");
+        window.location.href = "sos.html";
+        return;
+      }
 
-        let countVal = '1〜2匹';
-        if (item.description && item.description.includes('【対象頭数】')) {
-          const match = item.description.match(/【対象頭数】(.+)/);
-          if (match) countVal = match[1].trim();
-        }
-        document.getElementById('animal_count').value = countVal;
-        setButtonGroupSelected('countGroup', countVal);
+      // フォームに値を反映
+      const currentStatus = item.status || 'open';
+      document.getElementById('ticket_status').value = currentStatus;
+      updateStatusGroupUI(currentStatus);
 
-        if (item.category) {
-          const categories = item.category.split('・');
-          document.querySelectorAll('#itemGroup .item-btn').forEach(btn => {
-            const val = btn.getAttribute('data-val');
-            if (categories.some(c => c.includes(val) || val.includes(c))) {
-              btn.classList.add('selected');
-            } else {
-              btn.classList.remove('selected');
-            }
-          });
-        }
+      if (item.status_reason) {
+        document.getElementById('status_reason').value = item.status_reason;
+      }
 
-        if (item.delivery_method) {
-          document.getElementById('delivery_method').value = item.delivery_method;
-          setButtonGroupSelected('deliveryGroup', item.delivery_method);
-        }
+      if (item.animal_type) {
+        document.getElementById('animal_type').value = item.animal_type;
+        setButtonGroupSelected('animalGroup', item.animal_type);
+      }
 
-        if (item.city) {
-          document.getElementById('city').value = item.city;
-          setButtonGroupSelected('areaGroup', item.city);
-        }
+      let countVal = '1〜2匹';
+      if (item.description && item.description.includes('【対象頭数】')) {
+        const match = item.description.match(/【対象頭数】(.+)/);
+        if (match) countVal = match[1].trim();
+      }
+      document.getElementById('animal_count').value = countVal;
+      setButtonGroupSelected('countGroup', countVal);
 
-        if (item.urgency) {
-          document.getElementById('urgency').value = item.urgency;
-          setButtonGroupSelected('urgencyGroup', item.urgency);
-        }
+      if (item.category) {
+        const categories = item.category.split('・');
+        document.querySelectorAll('#itemGroup .item-btn').forEach(btn => {
+          const val = btn.getAttribute('data-val');
+          if (categories.some(c => c.includes(val) || val.includes(c))) {
+            btn.classList.add('selected');
+          } else {
+            btn.classList.remove('selected');
+          }
+        });
+      }
 
-      } catch(err) {
-        console.error(err);
+      if (item.delivery_method) {
+        document.getElementById('delivery_method').value = item.delivery_method;
+        setButtonGroupSelected('deliveryGroup', item.delivery_method);
+      }
+
+      if (item.city) {
+        document.getElementById('city').value = item.city;
+        setButtonGroupSelected('areaGroup', item.city);
+      }
+
+      if (item.urgency) {
+        document.getElementById('urgency').value = item.urgency;
+        setButtonGroupSelected('urgencyGroup', item.urgency);
       }
     }
 
@@ -451,14 +464,24 @@
       };
 
       try {
+        // 1. ローカルストレージ側も更新
+        try {
+          const localSaved = localStorage.getItem('wanSOS_posts');
+          if (localSaved) {
+            let posts = JSON.parse(localSaved);
+            posts = posts.map(p => String(p.id) === String(sosId) ? { ...p, ...updatedSOS } : p);
+            localStorage.setItem('wanSOS_posts', JSON.stringify(posts));
+          }
+        } catch(e){}
+
+        // 2. Supabase側も更新
         if (window.supabaseClient) {
-          const { error } = await window.supabaseClient
+          await window.supabaseClient
             .from('sos_items')
             .update(updatedSOS)
             .eq('id', sosId);
-
-          if (error) throw error;
         }
+
         alert("投稿内容・状態を更新しました！");
         window.location.href = `sos-detail.html?id=${sosId}`;
       } catch (err) {

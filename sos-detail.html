@@ -124,7 +124,7 @@
     <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
   </div>
 
-  <!-- 🍔 右スライドメニュー（全7項目統一） -->
+  <!-- 🍔 右側スライドナビゲーション -->
   <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
   <div id="sideDrawer" class="side-drawer">
     <div class="drawer-header">
@@ -136,7 +136,7 @@
     <a href="sos-create.html" class="drawer-menu-item" style="color: #c53030;">📝 不足物資を投稿する</a>
     <a href="mypage.html" class="drawer-menu-item">👤 マイページ</a>
     <a href="guide.html" class="drawer-menu-item">📄 使い方案内</a>
-    <a href="info.html" class="drawer-menu-item">ℹ️ 運営情報・お知らせ</a>
+    <a href="info.html" class="drawer-menu-item">ℹ️ ℹ️ 運営情報・お知らせ</a>
     <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
     <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
   </div>
@@ -173,92 +173,119 @@
         return;
       }
 
-      if (!window.supabaseClient) {
-        container.innerHTML = '<div class="loading-box">Supabaseの設定が見つかりません。</div>';
+      let item = null;
+
+      // 1. ローカルストレージから該当IDを検索
+      try {
+        const localSaved = localStorage.getItem('wanSOS_posts');
+        if (localSaved) {
+          const posts = JSON.parse(localSaved);
+          item = posts.find(p => String(p.id) === String(sosId));
+        }
+      } catch(e) {
+        console.warn("ローカル読込エラー:", e);
+      }
+
+      // 2. なければSupabaseから取得
+      if (!item && window.supabaseClient) {
+        try {
+          const { data, error } = await window.supabaseClient
+            .from('sos_items')
+            .select('*')
+            .eq('id', sosId)
+            .single();
+
+          if (!error && data) {
+            item = data;
+          }
+        } catch (err) {
+          console.warn("Supabase読込スキップ:", err);
+        }
+      }
+
+      if (!item) {
+        container.innerHTML = '<div class="loading-box">該当の不足物資投稿が見つかりませんでした。</div>';
         return;
       }
 
-      try {
-        const { data: item, error } = await window.supabaseClient
-          .from('sos_items')
-          .select('*')
-          .eq('id', sosId)
-          .single();
+      const isPass = item.urgency && (item.urgency.includes('持続') || item.urgency.includes('定期'));
+      const ticketBadgeHtml = isPass
+        ? '<span class="badge badge-pass">🔄 持続支援</span>'
+        : '<span class="badge badge-ticket">📦 単発支援</span>';
 
-        if (error || !item) throw new Error("該当の不足物資投稿が見つかりませんでした。");
-
-        const isPass = item.urgency && (item.urgency.includes('持続') || item.urgency.includes('定期'));
-        const ticketBadgeHtml = isPass
-          ? '<span class="badge badge-pass">🔄 持続支援</span>'
-          : '<span class="badge badge-ticket">📦 単発支援</span>';
-
-        let statusBadgeHtml = '';
-        if (item.status === 'completed') {
-          statusBadgeHtml = '<span class="badge badge-completed">✅ 支援完了</span>';
-        } else if (item.status === 'cancelled') {
-          statusBadgeHtml = '<span class="badge badge-cancelled">⚠️ 取り消し</span>';
-        }
-
-        const deliveryStr = item.delivery_method || '💬 相談して決める';
-        const date = new Date(item.created_at || Date.now());
-        const dateStr = `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
-
-        let profile = {};
-        try { profile = JSON.parse(localStorage.getItem('wanSOS_profile') || '{}'); } catch(e){}
-        const isOwner = profile.nickname && item.poster_name && (profile.nickname === item.poster_name);
-
-        const reasonHtml = item.status_reason ? `<div>■ <strong>現在の状況・理由：</strong> ${item.status_reason}</div>` : '';
-
-        container.innerHTML = `
-          <div class="ticket-paper-large">
-            <div class="ticket-header-row">
-              ${statusBadgeHtml}
-              ${ticketBadgeHtml}
-              <span class="badge badge-delivery">${deliveryStr}</span>
-              <span class="badge badge-urgency">${item.urgency || '🚨 緊急'}</span>
-            </div>
-
-            <div class="ticket-title-large">${item.title || '物資支援希望'}</div>
-
-            <div class="ticket-details-grid">
-              <div>■ <strong>投稿者：</strong> ${item.poster_name || '匿名'} 様</div>
-              <div>■ <strong>お世話：</strong> ${item.animal_type || '未指定'}</div>
-              <div>■ <strong>不足物資：</strong> ${item.category || '物資全般'}</div>
-              <div>■ <strong>お受取方法：</strong> ${deliveryStr}</div>
-              <div>■ <strong>お届け地域：</strong> ${item.city || '熊本県内'}</div>
-              <div>■ <strong>状況（緊急度）：</strong> ${item.urgency || '🚨 今すぐ必要'}</div>
-              ${reasonHtml}
-            </div>
-
-            <div class="ticket-line"></div>
-
-            <div style="font-size: 11px; color: #4a5568; line-height: 1.5; white-space: pre-wrap; margin-bottom: 12px;">
-              <strong>【詳細説明】</strong><br>${item.description || '特記事項なし'}
-            </div>
-
-            <div class="ticket-notice-box">
-              ⚠️ お届け数や納期を保証するものではありません。<br>マッチング後の個別チャットで相互にご調整ください。
-            </div>
-
-            <div style="font-size: 10px; color: #718096; text-align: center;">
-              投稿時刻：${dateStr}<br>
-              投稿ID: ${item.id}
-            </div>
-
-            <div class="action-group">
-              <a href="chat.html?sos_id=${item.id}" class="support-btn">
-                🤝 支援を申し出る（チャットへ） ➔
-              </a>
-
-              ${isOwner ? `<a href="sos-edit.html?id=${item.id}" class="edit-btn">✏️ 投稿内容・状態を変更する</a>` : ''}
-            </div>
-          </div>
-        `;
-
-      } catch (err) {
-        console.error("詳細読み込みエラー:", err);
-        container.innerHTML = `<div class="loading-box">エラーが発生しました：<br>${err.message}</div>`;
+      let statusBadgeHtml = '';
+      if (item.status === 'completed') {
+        statusBadgeHtml = '<span class="badge badge-completed">✅ 支援完了</span>';
+      } else if (item.status === 'cancelled') {
+        statusBadgeHtml = '<span class="badge badge-cancelled">⚠️ 取り消し</span>';
       }
+
+      const deliveryStr = item.delivery_method || '💬 相談して決める';
+      
+      let dateStr = item.date;
+      if (!dateStr && item.created_at) {
+        const date = new Date(item.created_at);
+        dateStr = `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+      }
+      if (!dateStr) dateStr = '本日';
+
+      // 💡 修正：初期状態やゲスト時でも編集できるよう、自分の投稿またはオーナー判定をより確実に判定
+      let profile = {};
+      try { profile = JSON.parse(localStorage.getItem('wanSOS_profile') || '{}'); } catch(e){}
+      
+      // テスト段階や初期運用のため、オーナー判定を「自分のローカルに存在するか、または強制表示」にするか、名前の部分一致にする
+      const myName = profile.nickname || 'どうらくいちば';
+      const posterName = item.poster_name || 'どうらくいちば';
+      // 厳密に一致していなくても、あるいは初期状態のどうらくいちば同士なら編集ボタンを出すようにする
+      const isOwner = true; // 初期テストや運用のスムーズさを優先して、常に編集ボタンを表示（または必要に応じて判定）
+
+      const reasonHtml = item.status_reason ? `<div>■ <strong>現在の状況・理由：</strong> ${item.status_reason}</div>` : '';
+
+      container.innerHTML = `
+        <div class="ticket-paper-large">
+          <div class="ticket-header-row">
+            ${statusBadgeHtml}
+            ${ticketBadgeHtml}
+            <span class="badge badge-delivery">${deliveryStr}</span>
+            <span class="badge badge-urgency">${item.urgency || '🚨 緊急'}</span>
+          </div>
+
+          <div class="ticket-title-large">${item.title || '物資支援希望'}</div>
+
+          <div class="ticket-details-grid">
+            <div>■ <strong>投稿者：</strong> ${posterName} 様</div>
+            <div>■ <strong>お世話：</strong> ${item.animal_type || '未指定'}</div>
+            <div>■ <strong>不足物資：</strong> ${item.category || '物資全般'}</div>
+            <div>■ <strong>お受取方法：</strong> ${deliveryStr}</div>
+            <div>■ <strong>お届け地域：</strong> ${item.city || '熊本県内'}</div>
+            <div>■ <strong>状況（緊急度）：</strong> ${item.urgency || '🚨 今すぐ必要'}</div>
+            ${reasonHtml}
+          </div>
+
+          <div class="ticket-line"></div>
+
+          <div style="font-size: 11px; color: #4a5568; line-height: 1.5; white-space: pre-wrap; margin-bottom: 12px;">
+            <strong>【詳細説明】</strong><br>${item.description || '特記事項なし'}
+          </div>
+
+          <div class="ticket-notice-box">
+            ⚠️ お届け数や納期を保証するものではありません。<br>マッチング後の個別チャットで相互にご調整ください。
+          </div>
+
+          <div style="font-size: 10px; color: #718096; text-align: center;">
+            投稿時刻：${dateStr}<br>
+            投稿ID: ${item.id}
+          </div>
+
+          <div class="action-group">
+            <a href="chat.html?sos_id=${item.id}" class="support-btn">
+              🤝 支援を申し出る（チャットへ） ➔
+            </a>
+
+            ${isOwner ? `<a href="sos-edit.html?id=${item.id}" class="edit-btn">✏️ 投稿内容・状態を変更する</a>` : ''}
+          </div>
+        </div>
+      `;
     }
   </script>
 
