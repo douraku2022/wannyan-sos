@@ -92,6 +92,7 @@
       padding: 12px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 0 #005a28; cursor: pointer;
     }
     .submit-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #005a28; }
+    .submit-btn:disabled { opacity: 0.6; }
   </style>
 </head>
 
@@ -106,22 +107,41 @@
 
   <div class="reg-container" style="margin-top: 10px;">
     <div class="reg-card">
-      <div class="reg-title" id="cardTitle">✨ ユーザー登録（電話番号認証）</div>
+      <div class="reg-title" id="cardTitle">✨ ユーザー登録（電話番号＋暗証番号）</div>
 
       <div class="notice-box">
-        🔒 パスワード不要：お使いの「お電話番号」があなた専用の合言葉になります。<br>
-        ※登録した電話番号を使って、どの端末からでもマイページを呼び出せます。
+        🔐 お使いの「お電話番号」と、これから決める「4桁の暗証番号」の組み合わせが、あなた専用の鍵になります。<br>
+        ※銀行のキャッシュカードと同じ考え方です。次回ログイン時に両方入力します。
       </div>
 
       <form id="regForm">
         <!-- 📞 電話番号（最重要キー） -->
         <div class="form-group">
           <label class="form-label">
-            お電話番号（マイページ復元の鍵になります） <span style="color:#c53030;">*</span>
+            お電話番号（ログインに使います） <span style="color:#c53030;">*</span>
             <span class="badge-private">🔒 必須（ID代わり）</span>
           </label>
           <input type="tel" id="regPhone" class="form-input" placeholder="例：09012345678" required>
           <div class="form-hint">※ハイフンなしでご入力ください。この番号でデータを保存・復元します。</div>
+        </div>
+
+        <!-- 🔑 暗証番号（新規追加） -->
+        <div class="form-group">
+          <label class="form-label">
+            暗証番号（4桁の数字） <span style="color:#c53030;">*</span>
+            <span class="badge-private">🔒 必須（ログイン時に使用）</span>
+          </label>
+          <input type="password" id="regPin" class="form-input" inputmode="numeric" pattern="[0-9]{4}"
+                 maxlength="4" placeholder="例：1234" required>
+          <div class="form-hint">※次回ログイン時に、電話番号とあわせて入力します。忘れないようにメモしておいてください。</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            暗証番号（確認のためもう一度） <span style="color:#c53030;">*</span>
+          </label>
+          <input type="password" id="regPinConfirm" class="form-input" inputmode="numeric" pattern="[0-9]{4}"
+                 maxlength="4" placeholder="もう一度入力してください" required>
         </div>
 
         <!-- 🌐 画面上表示（公開） -->
@@ -207,6 +227,12 @@
   </nav>
 
   <script>
+    // 電話番号を、Supabase Auth用の疑似メールアドレスに変換する共通ルール
+    // login.html 側でも必ず同じ変換ルールを使うこと
+    function phoneToPseudoEmail(phone) {
+      return `${phone}@wannyansos.local`;
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       const yearSelect = document.getElementById('birthYear');
       const monthSelect = document.getElementById('birthMonth');
@@ -235,6 +261,7 @@
         daySelect.appendChild(opt);
       }
 
+      // 注：暗証番号は保存済みデータから復元しない（セキュリティ上、平文で残さない）
       const savedProfile = localStorage.getItem('wanSOS_profile');
       if (savedProfile) {
         try {
@@ -260,6 +287,8 @@
       e.preventDefault();
 
       const phone = document.getElementById('regPhone').value.trim().replace(/[-\s]/g, '');
+      const pin = document.getElementById('regPin').value.trim();
+      const pinConfirm = document.getElementById('regPinConfirm').value.trim();
       const nickname = document.getElementById('regNickname').value.trim();
       const fullName = document.getElementById('regFullName').value.trim();
       const year = document.getElementById('birthYear').value;
@@ -267,15 +296,25 @@
       const day = document.getElementById('birthDay').value;
       const address = document.getElementById('regAddress').value.trim();
 
-      if (!phone || !nickname || !fullName || !year || !month || !day || !address) {
+      if (!phone || !pin || !pinConfirm || !nickname || !fullName || !year || !month || !day || !address) {
         alert("すべての項目を入力（選択）してください。");
+        return;
+      }
+
+      if (!/^\d{4}$/.test(pin)) {
+        alert("暗証番号は4桁の数字で入力してください。");
+        return;
+      }
+
+      if (pin !== pinConfirm) {
+        alert("暗証番号が一致しません。もう一度ご確認ください。");
         return;
       }
 
       const birthStr = `${year}-${month}-${day}`;
       const birthDate = new Date(year, parseInt(month) - 1, day);
       const today = new Date();
-      
+
       let age = today.getFullYear() - birthDate.getFullYear();
       const m = today.getMonth() - birthDate.getMonth();
       if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
@@ -287,43 +326,81 @@
         return;
       }
 
-      const profileData = {
-        phone: phone,
-        nickname: nickname,
-        full_name: fullName,
-        birth: birthStr,
-        address: address,
-        updated_at: new Date().toISOString()
-      };
-
-      if (window.supabaseClient) {
-        try {
-          const { error } = await window.supabaseClient
-            .from('users_profiles')
-            .upsert(profileData, { onConflict: 'phone' });
-          
-          if (error) {
-            console.warn("Supabase upsert warning (using local fallback):", error.message);
-          }
-        } catch (err) {
-          console.warn("Supabase connection error:", err);
-        }
+      if (!window.supabaseClient) {
+        alert("データベース接続設定が見つかりません。");
+        return;
       }
 
-      const localProfile = {
-        phone: phone,
-        nickname: nickname,
-        fullName: fullName,
-        birth: birthStr,
-        address: address,
-        registeredAt: new Date().toISOString()
-      };
-      localStorage.setItem('wanSOS_profile', JSON.stringify(localProfile));
-      localStorage.setItem('wanSOS_user_phone', phone);
-      sessionStorage.setItem('wannyanSOS_loggedIn', 'true');
+      const submitBtn = document.getElementById('submitBtnText');
+      submitBtn.disabled = true;
+      submitBtn.textContent = "登録中...";
 
-      alert("🎉 登録情報の保存が完了しました！ホームに戻ります。");
-      window.location.href = "home.html";
+      try {
+        // 1. Supabase Authにアカウントを作成（電話番号＋暗証番号）
+        const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
+          email: phoneToPseudoEmail(phone),
+          password: pin
+        });
+
+        if (authError) {
+          if (authError.message && authError.message.toLowerCase().includes('already registered')) {
+            alert("この電話番号はすでに登録されています。\n「ログイン」画面からお進みください。");
+          } else {
+            alert("登録に失敗しました：" + authError.message);
+          }
+          submitBtn.disabled = false;
+          submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
+          return;
+        }
+
+        if (!authData.user) {
+          alert("登録処理が完了しませんでした。時間をおいてもう一度お試しください。");
+          submitBtn.disabled = false;
+          submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
+          return;
+        }
+
+        // 2. プロフィール情報を保存（auth_user_idを紐づける）
+        const profileData = {
+          phone: phone,
+          nickname: nickname,
+          full_name: fullName,
+          birth: birthStr,
+          address: address,
+          auth_user_id: authData.user.id,
+          updated_at: new Date().toISOString()
+        };
+
+        const { error: profileError } = await window.supabaseClient
+          .from('users_profiles')
+          .upsert(profileData, { onConflict: 'phone' });
+
+        if (profileError) {
+          alert("プロフィールの保存に失敗しました：" + profileError.message);
+          submitBtn.disabled = false;
+          submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
+          return;
+        }
+
+        // 画面表示用のキャッシュ（暗証番号は保存しない）
+        const localProfile = {
+          phone: phone,
+          nickname: nickname,
+          fullName: fullName,
+          birth: birthStr,
+          address: address,
+          registeredAt: new Date().toISOString()
+        };
+        localStorage.setItem('wanSOS_profile', JSON.stringify(localProfile));
+        localStorage.setItem('wanSOS_user_phone', phone);
+
+        alert("🎉 登録情報の保存が完了しました！ホームに戻ります。");
+        window.location.href = "home.html";
+      } catch (err) {
+        alert("登録処理中にエラーが発生しました：" + err.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
+      }
     });
   </script>
 

@@ -89,6 +89,7 @@
       padding: 12px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 0 #2c5282; cursor: pointer;
     }
     .submit-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #2c5282; }
+    .submit-btn:disabled { opacity: 0.6; }
 
     .link-row { text-align: center; margin-top: 16px; font-size: 12px; }
     .link-row a { color: #3182ce; font-weight: bold; text-decoration: none; }
@@ -126,7 +127,7 @@
       <div class="login-title">🔐 登録済みの方のログイン</div>
 
       <div class="notice-box">
-        ご登録時に使用した<strong>お電話番号</strong>を入力してください。<br>
+        ご登録時の<strong>お電話番号</strong>と<strong>4桁の暗証番号</strong>を入力してください。<br>
         クラウドからあなたの登録データを呼び出してログインします。
       </div>
 
@@ -134,6 +135,12 @@
         <div class="form-group">
           <label class="form-label">ご登録の電話番号</label>
           <input type="tel" id="loginPhone" class="form-input" placeholder="例：09012345678" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">暗証番号（4桁）</label>
+          <input type="password" id="loginPin" class="form-input" inputmode="numeric" pattern="[0-9]{4}"
+                 maxlength="4" placeholder="登録時に決めた4桁の番号" required>
         </div>
 
         <button type="submit" class="submit-btn">
@@ -161,12 +168,24 @@
       }
     }
 
-    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    // 電話番号を、Supabase Auth用の疑似メールアドレスに変換する共通ルール
+    // register.html 側でも必ず同じ変換ルールを使うこと
+    function phoneToPseudoEmail(phone) {
+      return `${phone}@wannyansos.local`;
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
       e.preventDefault();
 
       const phone = document.getElementById('loginPhone').value.trim().replace(/[-\s]/g, '');
+      const pin = document.getElementById('loginPin').value.trim();
+
       if (!phone) {
         alert("お電話番号を入力してください。");
+        return;
+      }
+      if (!/^\d{4}$/.test(pin)) {
+        alert("暗証番号は4桁の数字で入力してください。");
         return;
       }
 
@@ -175,34 +194,52 @@
         return;
       }
 
-      try {
-        const { data, error } = await window.supabaseClient
-          .from('users_profiles')
-          .select('*')
-          .eq('phone', phone)
-          .single();
+      const submitBtn = e.target.querySelector('.submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = "確認中...";
 
-        if (error || !data) {
-          alert("登録されているお電話番号が見つかりませんでした。\n「新規ユーザー登録」から登録を行ってください。");
+      try {
+        const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+          email: phoneToPseudoEmail(phone),
+          password: pin
+        });
+
+        if (error || !data.session) {
+          alert("お電話番号または暗証番号が正しくありません。\n初めての方は「新規ユーザー登録」から登録を行ってください。");
+          submitBtn.disabled = false;
+          submitBtn.textContent = "🐾 ログインして利用する ➔";
           return;
         }
 
-        const profile = {
-          nickname: data.nickname,
-          fullName: data.full_name,
-          address: data.address,
-          phone: data.phone,
-          birth: data.birth
-        };
+        // プロフィール情報を取得して画面表示用にキャッシュ（表示専用。権限判定には使わない）
+        try {
+          const { data: profile } = await window.supabaseClient
+            .from('users_profiles')
+            .select('*')
+            .eq('phone', phone)
+            .single();
 
-        localStorage.setItem('wanSOS_profile', JSON.stringify(profile));
-        localStorage.setItem('wanSOS_user_phone', data.phone);
-        sessionStorage.setItem('wannyanSOS_loggedIn', 'true');
+          if (profile) {
+            const profileCache = {
+              nickname: profile.nickname,
+              fullName: profile.full_name,
+              address: profile.address,
+              phone: profile.phone,
+              birth: profile.birth
+            };
+            localStorage.setItem('wanSOS_profile', JSON.stringify(profileCache));
+            localStorage.setItem('wanSOS_user_phone', profile.phone);
+          }
+        } catch (cacheErr) {
+          // 表示用キャッシュの失敗は致命的ではないので無視
+        }
 
         alert("🎉 ログインしました！マイページへ移動します。");
         window.location.href = "mypage.html";
       } catch (err) {
         alert("ログイン処理中にエラーが発生しました。");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "🐾 ログインして利用する ➔";
       }
     });
   </script>

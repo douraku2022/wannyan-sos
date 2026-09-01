@@ -6,6 +6,8 @@
   <meta name="robots" content="noindex, nofollow">
   <title>管理者ログイン｜ワンニャンSOS熊本</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -80,6 +82,7 @@
       padding: 12px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 0 #742a2a; cursor: pointer;
     }
     .submit-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #742a2a; }
+    .submit-btn:disabled { opacity: 0.6; }
   </style>
 </head>
 
@@ -92,7 +95,7 @@
     <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
   </div>
 
-  <!-- 🍔 右スライドメニュー（全7項目統一） -->
+  <!-- 🍔 右スライドメニュー -->
   <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
   <div id="sideDrawer" class="side-drawer">
     <div class="drawer-header">
@@ -115,8 +118,8 @@
 
       <form id="adminLoginForm">
         <div class="form-group">
-          <label class="form-label">管理者ID</label>
-          <input type="text" id="adminId" class="form-input" placeholder="admin" required>
+          <label class="form-label">管理者メールアドレス（またはID）</label>
+          <input type="text" id="adminEmail" class="form-input" placeholder="admin@wannyansos.local" required>
         </div>
 
         <div class="form-group">
@@ -145,17 +148,42 @@
       }
     }
 
-    document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+    document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      const id = document.getElementById('adminId').value.trim();
+      const email = document.getElementById('adminEmail').value.trim();
       const pass = document.getElementById('adminPass').value.trim();
 
-      if (id === 'admin' && pass === 'wannyan2026') {
+      if (!window.supabaseClient) {
+        alert("データベース接続設定が見つかりません。");
+        return;
+      }
+
+      const submitBtn = e.target.querySelector('.submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = "認証中...";
+
+      try {
+        // Supabase Authで管理者としてサインイン
+        const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+          email: email.includes('@') ? email : `${email}@wannyansos.local`,
+          password: pass
+        });
+
+        if (error || !data.session) {
+          alert("ログインに失敗しました：IDまたはパスワードが正しくありません。");
+          submitBtn.disabled = false;
+          submitBtn.textContent = "🔑 管理者コンソールへ進む ➔";
+          return;
+        }
+
         sessionStorage.setItem('wanSOS_adminLoggedIn', 'true');
         alert("管理者としてログインしました。");
         window.location.href = "admin.html";
-      } else {
-        alert("IDまたはパスワードが正しくありません。");
+
+      } catch (err) {
+        alert("ログイン処理中にエラーが発生しました：" + err.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = "🔑 管理者コンソールへ進む ➔";
       }
     });
   </script>

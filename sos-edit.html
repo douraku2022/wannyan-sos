@@ -116,7 +116,7 @@
     <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
   </div>
 
-  <!-- 🍔 右スライドメニュー -->
+  <!-- 🍔 右側スライドナビゲーション -->
   <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
   <div id="sideDrawer" class="side-drawer">
     <div class="drawer-header">
@@ -232,6 +232,9 @@
           <input type="hidden" id="urgency" value="🚨 今すぐ必要">
         </div>
 
+        <!-- 隠しフィールド：投稿者の紐付け確認用 -->
+        <input type="hidden" id="itemCreatorId" value="">
+
         <button type="submit" id="submitBtn" class="submit-btn">
           ✏️ 内容・状態を保存（更新）する
         </button>
@@ -298,6 +301,32 @@
         window.location.href = "sos.html";
         return;
       }
+
+      // 🔒 【本人確認ガード】ここで投稿者とログイン中のユーザーが一致するか検証
+      let currentUserId = '';
+      try {
+        const profile = JSON.parse(localStorage.getItem('wanSOS_profile') || '{}');
+        currentUserId = profile.auth_user_id || profile.phone || '';
+      } catch(e){}
+
+      if (window.supabaseClient) {
+        try {
+          const { data: { session } } = await window.supabaseClient.auth.getSession();
+          if (session && session.user) {
+            currentUserId = session.user.id;
+          }
+        } catch(e){}
+      }
+
+      // もし投稿に creator_id が記録されており、かつログイン中ユーザーと一致しない場合
+      if (item.creator_id && currentUserId && item.creator_id !== currentUserId) {
+        alert("⚠️ この投稿を編集する権限がありません。（ご自身の投稿のみ編集できます）");
+        window.location.href = "sos.html";
+        return;
+      }
+
+      // 投稿者のIDをフォームに保持
+      document.getElementById('itemCreatorId').value = item.creator_id || '';
 
       // フォームに値を反映
       const currentStatus = item.status || 'open';
@@ -427,9 +456,31 @@
       document.getElementById('urgency').value = val;
     }
 
-    // フォーム送信
+    // フォーム送信（保存時にも二重で本人確認を実施）
     document.getElementById('editForm').addEventListener('submit', async function(e) {
       e.preventDefault();
+
+      // 🔒 送信時（保存時）の二重チェック
+      let currentUserId = '';
+      try {
+        const profile = JSON.parse(localStorage.getItem('wanSOS_profile') || '{}');
+        currentUserId = profile.auth_user_id || profile.phone || '';
+      } catch(e){}
+
+      if (window.supabaseClient) {
+        try {
+          const { data: { session } } = await window.supabaseClient.auth.getSession();
+          if (session && session.user) {
+            currentUserId = session.user.id;
+          }
+        } catch(e){}
+      }
+
+      const itemCreatorId = document.getElementById('itemCreatorId').value;
+      if (itemCreatorId && currentUserId && itemCreatorId !== currentUserId) {
+        alert("⚠️ 権限エラー：他人の投稿を書き換えることはできません。");
+        return;
+      }
 
       const status = document.getElementById('ticket_status').value;
       const selectedItems = Array.from(document.querySelectorAll('#itemGroup .item-btn.selected')).map(b => b.textContent.trim());

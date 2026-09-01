@@ -190,7 +190,7 @@
     <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
   </div>
 
-  <!-- 🍔 右スライドメニュー -->
+  <!-- 🍔 右側スライドナビゲーション -->
   <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
   <div id="sideDrawer" class="side-drawer">
     <div class="drawer-header">
@@ -420,6 +420,25 @@
       try { profile = JSON.parse(localStorage.getItem('wanSOS_profile') || '{}'); } catch(e){}
       const posterName = profile.name || profile.nickname || 'どうらくいちば様';
 
+      // 👤 投稿者の識別子（creator_id）を取得して紐付け
+      let currentCreatorId = 'anonymous';
+      try {
+        if (profile.auth_user_id) {
+          currentCreatorId = profile.auth_user_id;
+        } else if (profile.phone) {
+          currentCreatorId = profile.phone;
+        }
+      } catch(e){}
+
+      if (window.supabaseClient) {
+        try {
+          const { data: { session } } = await window.supabaseClient.auth.getSession();
+          if (session && session.user) {
+            currentCreatorId = session.user.id;
+          }
+        } catch(e){}
+      }
+
       const animal = document.getElementById('animal_type').value;
       const count = document.getElementById('animal_count').value;
       const categoryStr = selectedItems.join('・');
@@ -448,7 +467,8 @@
         area: '投稿フォーム',
         urgency: urgency,
         description: fullDescription,
-        poster_name: posterName
+        poster_name: posterName,
+        creator_id: currentCreatorId // 👈 ここで誰の投稿かを完全に紐づけます！
       };
 
       try {
