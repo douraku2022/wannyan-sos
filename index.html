@@ -15,48 +15,14 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    /* 📌 最上部：共通固定ヘッダー（46px・緑） */
+    /* 📌 最上部：共通固定ヘッダー（メニューなし・すっきり） */
     .app-top-bar {
       position: fixed; top: 0; left: 0; right: 0; height: 46px;
       background: #00873c; color: #ffffff; border-bottom: 2px solid #005a28;
-      display: flex; align-items: center; justify-content: space-between; padding: 0 10px;
+      display: flex; align-items: center; justify-content: center; padding: 0 10px;
       z-index: 1000; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
-    .top-btn {
-      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
-      color: #ffffff; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold;
-      text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 4px;
-    }
-    .top-btn:active { background: rgba(255,255,255,0.3); }
     .top-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
-
-    /* 🍔 右側スライドナビゲーション */
-    .menu-overlay {
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); z-index: 1001;
-    }
-    .side-drawer {
-      position: fixed; top: 0; right: -260px; width: 240px; height: 100%;
-      background: linear-gradient(180deg, #ecefe6 0%, #d8ded6 100%);
-      border-left: 3px solid #9aa5b0; z-index: 1002;
-      box-shadow: -4px 0 16px rgba(0,0,0,0.2); transition: right 0.25s ease-in-out;
-      display: flex; flex-direction: column; padding: 12px; gap: 10px;
-    }
-    .side-drawer.open { right: 0; }
-    .drawer-header {
-      background: #00873c; color: #fff; border-radius: 8px; padding: 10px;
-      text-align: center; font-size: 13px; font-weight: bold; border: 1px solid #005a28;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .drawer-close-btn {
-      background: none; border: none; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer;
-    }
-    .drawer-menu-item {
-      background: #f8fafc; border: 2px solid #a0aec0; border-radius: 10px; padding: 12px;
-      color: #2d3748; text-decoration: none; font-size: 13px; font-weight: bold;
-      display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 0 #cbd5e0;
-    }
-    .drawer-menu-item:active { transform: translateY(1px); box-shadow: 0 1px 0 #cbd5e0; }
 
     /* LPコンテンツ */
     .lp-container { max-width: 500px; margin: 0 auto; padding: 0 12px; }
@@ -117,33 +83,14 @@
 
 <body>
 
-  <!-- 📌 最上部：共通固定ヘッダー -->
+  <!-- 📌 最上部：共通固定ヘッダー（メニューなし） -->
   <div class="app-top-bar">
-    <div style="width: 50px;"></div>
     <div class="top-title">🐕🐈 ワンニャンSOS熊本</div>
-    <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
   </div>
 
-  <!-- 🍔 右 side-drawer -->
-  <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
-  <div id="sideDrawer" class="side-drawer">
-    <div class="drawer-header">
-      <span>🐾 ワンニャンSOS メニュー</span>
-      <button class="drawer-close-btn" onclick="toggleMenu()">✕</button>
-    </div>
-    <a href="index.html" class="drawer-menu-item">🏠 ホーム（トップ）</a>
-    <a href="javascript:void(0)" onclick="handleProtectedNavigation('sos.html')" class="drawer-menu-item">📦 不足物資一覧</a>
-    <a href="javascript:void(0)" onclick="handleProtectedNavigation('sos-create.html')" class="drawer-menu-item" style="color: #c53030;">📝 不足物資を投稿する</a>
-    <a href="mypage.html" class="drawer-menu-item">👤 マイページ</a>
-    <a href="guide.html" class="drawer-menu-item">📄 使い方案内</a>
-    <a href="info.html" class="drawer-menu-item">ℹ️ 運営情報・お知らせ</a>
-    <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
-    <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
-  </div>
+  <main class="lp-container" style="margin-top: 10px;">
 
-  <main class="lp-container">
-
-    <!-- LPメインビジュアル -->
+    <!-- 🖼️ LPメインビジュアル -->
     <div style="background: #fff; text-align: center; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
       <div style="padding: 12px 12px 0 12px;">
         <img src="wannyansos.png" alt="ワンニャン物資SOS" style="width: 100%; height: auto; border-radius: 8px; display: block;">
@@ -190,24 +137,18 @@
 
     <!-- ご利用メニュー -->
     <div style="background: #fff; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; margin-bottom: 16px;">
-      <h2 style="font-size: 14px; color: #2d3748; margin-top: 0; margin-bottom: 12px; font-weight: bold;">ご利用メニュー</h2>
+      <h2 style="font-size: 14px; color: #2d3748; margin-top: 0; margin-bottom: 12px; font-weight: bold;">ご利用の入り口</h2>
       <div style="display: flex; flex-direction: column; gap: 10px;">
-        <button onclick="handleProtectedNavigation('sos-create.html')" style="padding: 14px; font-weight: bold; font-size: 15px; border: 2px solid #9b2c2c; color: #ffffff; background: #c53030; cursor: pointer; border-radius: 10px; box-shadow: 0 3px 0 #742a2a;">
-          📝 不足物資を投稿する
-        </button>
-        <button onclick="handleProtectedNavigation('sos.html')" style="padding: 12px; font-weight: bold; font-size: 14px; border: 2px solid #2b6cb0; color: #2b6cb0; background: #ebf8ff; cursor: pointer; border-radius: 8px;">
-          📦 不足物資一覧を見る
-        </button>
-        <a href="register.html" style="text-align: center; text-decoration: none; font-size: 13px; padding: 10px; border: 1px solid #cbd5e0; color: #2d3748; background: #f7fafc; border-radius: 8px; font-weight: bold;">
-          ✨ はじめての方（ユーザー登録）
+        <a href="login.html" style="text-align: center; text-decoration: none; padding: 14px; font-weight: bold; font-size: 15px; border: 2px solid #2b6cb0; color: #ffffff; background: #2b6cb0; border-radius: 10px; box-shadow: 0 3px 0 #1a365d; display: block;">
+          🔑 ログインして家へ入る
         </a>
-        <a href="mypage.html" style="text-align: center; text-decoration: none; font-size: 13px; padding: 10px; border: 1px solid #cbd5e0; color: #4a5568; background: #f7fafc; border-radius: 8px;">
-          👤 会員の方（マイページ）
+        <a href="register.html" style="text-align: center; text-decoration: none; font-size: 13px; padding: 12px; border: 2px solid #c53030; color: #c53030; background: #fff5f5; border-radius: 8px; font-weight: bold; display: block;">
+          ✨ はじめての方（新規ユーザー登録）
         </a>
       </div>
     </div>
 
-    <!-- 📌 お知らせカード（ホームに残す分） -->
+    <!-- 📌 お知らせカード -->
     <div class="info-card">
       <div class="info-title">📢 お知らせ</div>
       <div>
@@ -225,7 +166,7 @@
     <div class="volunteer-notice-card">
       <div class="volunteer-notice-header">
         <span class="bowing-icon">🙇‍♀️</span>
-        <span class="notice-title">運営からのお願いとこれからのこと</span>
+        <span class="notice-title">運営の中身とこれからのこと</span>
       </div>
       <div class="volunteer-notice-body">
         <p>
@@ -241,34 +182,6 @@
     </div>
 
   </main>
-
-  <script>
-    function toggleMenu() {
-      const drawer = document.getElementById('sideDrawer');
-      const overlay = document.getElementById('menuOverlay');
-      const isOpen = drawer.classList.contains('open');
-      if (isOpen) {
-        drawer.classList.remove('open');
-        overlay.style.display = 'none';
-      } else {
-        drawer.classList.add('open');
-        overlay.style.display = 'block';
-      }
-    }
-
-    // 会員限定ページの遷移保護チェック
-    function handleProtectedNavigation(targetUrl) {
-      const isLoggedIn = sessionStorage.getItem('wannyanSOS_loggedIn');
-      const hasProfile = localStorage.getItem('wanSOS_profile');
-
-      if (isLoggedIn === 'true' && hasProfile) {
-        window.location.href = targetUrl;
-      } else {
-        alert("当サービスは安全保護のため完全クローズド運用を行っています。一覧閲覧や投稿にはユーザー登録が必要です。");
-        window.location.href = "register.html";
-      }
-    }
-  </script>
 
 </body>
 </html>

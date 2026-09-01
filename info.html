@@ -52,7 +52,6 @@
     .drawer-close-btn {
       background: none; border: none; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer;
     }
-
     .drawer-menu-item {
       background: #f8fafc; border: 2px solid #a0aec0; border-radius: 10px; padding: 12px;
       color: #2d3748; text-decoration: none; font-size: 13px; font-weight: bold;
@@ -72,15 +71,9 @@
       border-bottom: 2px solid #00873c; padding-bottom: 4px;
     }
 
-    .news-date { font-size: 10px; color: #718096; font-weight: bold; }
-    .news-badge {
-      display: inline-block; background: #2b6cb0; color: #fff; font-size: 9px;
-      padding: 1px 6px; border-radius: 3px; font-weight: bold; margin-left: 6px;
-    }
-
     .contact-box {
       background: #f7fafc; border: 1px solid #cbd5e0; border-radius: 8px;
-      padding: 10px; margin-top: 8px; font-size: 11px;
+      padding: 10px; margin-top: 10px; font-size: 11px;
     }
 
     /* 🎁 お辞儀・お気持ちボックスの専用スタイル */
@@ -131,43 +124,28 @@
     <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
   </div>
 
-  <!-- 🍔 右スライドメニュー（全7項目統一） -->
+  <!-- 🍔 右側スライドメニュー -->
   <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
   <div id="sideDrawer" class="side-drawer">
     <div class="drawer-header">
       <span>🐾 ワンニャンSOS メニュー</span>
       <button class="drawer-close-btn" onclick="toggleMenu()">✕</button>
     </div>
-    <a href="index.html" class="drawer-menu-item">🏠 ホーム（トップ）</a>
+    <a href="home.html" class="drawer-menu-item">🏠 ホーム（廊下）</a>
     <a href="sos.html" class="drawer-menu-item">📦 不足物資一覧</a>
     <a href="sos-create.html" class="drawer-menu-item" style="color: #c53030;">📝 不足物資を投稿する</a>
     <a href="mypage.html" class="drawer-menu-item">👤 マイページ</a>
     <a href="guide.html" class="drawer-menu-item">📄 使い方案内</a>
-    <a href="info.html" class="drawer-menu-item">ℹ️ 運営情報・お知らせ</a>
+    <a href="info.html" class="drawer-menu-item">ℹ️ 運営情報</a>
     <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
     <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
   </div>
 
-  <div class="info-container">
-
-    <!-- お知らせ -->
-    <div class="info-card">
-      <div class="info-title">📢 お知らせ</div>
-
-      <div>
-        <span class="news-date">2026.09.01</span>
-        <span class="news-badge">NEW</span>
-        <div style="font-weight: bold; margin-top: 2px;">ワンニャン物資SOS熊本 実証テスト運用開始のお知らせ</div>
-        <div style="font-size: 11px; color: #4a5568; margin-top: 4px;">
-          本日より「ワンニャン物資SOS熊本」のテスト運用をスタートいたしました。<br>
-          本プラットフォームは、動物のお世話に必要な支援物資（物品）を迅速かつ安全につなぐマッチングシステムです。皆さまの温かいご支援とご協力をよろしくお願い申し上げます。
-        </div>
-      </div>
-    </div>
+  <div class="info-container" style="margin-top: 10px;">
 
     <!-- 運営概要 -->
     <div class="info-card">
-      <div class="info-title">ℹ️ 運営概要</div>
+      <div class="info-title">ℹ️ 運営概要・方針</div>
 
       <div style="line-height: 1.8;">
         <div>■ <strong>運営団体：</strong> どうらくいちば犬猫支援プロジェクト</div>

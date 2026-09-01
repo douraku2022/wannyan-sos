@@ -16,49 +16,14 @@
       background-color: #dbe2e8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    /* 📌 最上部：共通固定ヘッダー */
+    /* 📌 最上部：共通固定ヘッダー（メニューなし） */
     .app-top-bar {
       position: fixed; top: 0; left: 0; right: 0; height: 46px;
       background: #00873c; color: #ffffff; border-bottom: 2px solid #005a28;
-      display: flex; align-items: center; justify-content: space-between; padding: 0 10px;
+      display: flex; align-items: center; justify-content: center; padding: 0 10px;
       z-index: 1000; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
-    .top-btn {
-      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
-      color: #ffffff; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold;
-      text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 4px;
-    }
-    .top-btn:active { background: rgba(255,255,255,0.3); }
     .top-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
-
-    /* 🍔 右側スライドナビゲーション */
-    .menu-overlay {
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); z-index: 1001;
-    }
-    .side-drawer {
-      position: fixed; top: 0; right: -260px; width: 240px; height: 100%;
-      background: linear-gradient(180deg, #ecefe6 0%, #d8ded6 100%);
-      border-left: 3px solid #9aa5b0; z-index: 1002;
-      box-shadow: -4px 0 16px rgba(0,0,0,0.2); transition: right 0.25s ease-in-out;
-      display: flex; flex-direction: column; padding: 12px; gap: 10px;
-    }
-    .side-drawer.open { right: 0; }
-    .drawer-header {
-      background: #00873c; color: #fff; border-radius: 8px; padding: 10px;
-      text-align: center; font-size: 13px; font-weight: bold; border: 1px solid #005a28;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .drawer-close-btn {
-      background: none; border: none; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer;
-    }
-
-    .drawer-menu-item {
-      background: #f8fafc; border: 2px solid #a0aec0; border-radius: 10px; padding: 12px;
-      color: #2d3748; text-decoration: none; font-size: 13px; font-weight: bold;
-      display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 0 #cbd5e0;
-    }
-    .drawer-menu-item:active { transform: translateY(1px); box-shadow: 0 1px 0 #cbd5e0; }
 
     .entry-container { max-width: 480px; margin: 0 auto; padding: 0 12px; text-align: center; }
 
@@ -81,31 +46,12 @@
 
 <body>
 
-  <!-- 📌 最上部：共通固定ヘッダー -->
+  <!-- 📌 最上部：共通固定ヘッダー（メニュー削除版） -->
   <div class="app-top-bar">
-    <button type="button" class="top-btn" style="visibility:hidden;">← 戻る</button>
     <div class="top-title">🐕🐈 ワンニャンSOS熊本</div>
-    <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
   </div>
 
-  <!-- 🍔 右スライドメニュー -->
-  <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
-  <div id="sideDrawer" class="side-drawer">
-    <div class="drawer-header">
-      <span>🐾 ワンニャンSOS メニュー</span>
-      <button class="drawer-close-btn" onclick="toggleMenu()">✕</button>
-    </div>
-    <a href="index.html" class="drawer-menu-item">🏠 ホーム（トップ）</a>
-    <a href="sos.html" class="drawer-menu-item">📦 不足物資一覧</a>
-    <a href="sos-create.html" class="drawer-menu-item" style="color: #c53030;">📝 不足物資を投稿する</a>
-    <a href="mypage.html" class="drawer-menu-item">👤 マイページ</a>
-    <a href="guide.html" class="drawer-menu-item">📄 使い方案内</a>
-    <a href="info.html" class="drawer-menu-item">ℹ️ 運営情報・お知らせ</a>
-    <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
-    <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
-  </div>
-
-  <div class="entry-container">
+  <div class="entry-container" style="margin-top: 10px;">
     <div class="hero-card">
       <div style="font-size: 40px;">🐕 🐾 🐈</div>
       <div class="hero-title">ワンニャンSOS熊本</div>
@@ -123,21 +69,6 @@
       </a>
     </div>
   </div>
-
-  <script>
-    function toggleMenu() {
-      const drawer = document.getElementById('sideDrawer');
-      const overlay = document.getElementById('menuOverlay');
-      const isOpen = drawer.classList.contains('open');
-      if (isOpen) {
-        drawer.classList.remove('open');
-        overlay.style.display = 'none';
-      } else {
-        drawer.classList.add('open');
-        overlay.style.display = 'block';
-      }
-    }
-  </script>
 
 </body>
 </html>

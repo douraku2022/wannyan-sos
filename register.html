@@ -16,7 +16,7 @@
       background-color: #dbe2e8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    /* 📌 最上部：共通固定ヘッダー */
+    /* 📌 最上部：共通固定ヘッダー（メニューなし） */
     .app-top-bar {
       position: fixed; top: 0; left: 0; right: 0; height: 46px;
       background: #00873c; color: #ffffff; border-bottom: 2px solid #005a28;
@@ -46,34 +46,6 @@
     .nav-item.active { color: #00873c; }
     .nav-item span.icon { font-size: 18px; line-height: 1; }
     .nav-item:active { background: #f7fafc; }
-
-    /* 🍔 右側スライドナビゲーション */
-    .menu-overlay {
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); z-index: 1001;
-    }
-    .side-drawer {
-      position: fixed; top: 0; right: -260px; width: 240px; height: 100%;
-      background: linear-gradient(180deg, #ecefe6 0%, #d8ded6 100%);
-      border-left: 3px solid #9aa5b0; z-index: 1002;
-      box-shadow: -4px 0 16px rgba(0,0,0,0.2); transition: right 0.25s ease-in-out;
-      display: flex; flex-direction: column; padding: 12px; gap: 10px;
-    }
-    .side-drawer.open { right: 0; }
-    .drawer-header {
-      background: #00873c; color: #fff; border-radius: 8px; padding: 10px;
-      text-align: center; font-size: 13px; font-weight: bold; border: 1px solid #005a28;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .drawer-close-btn {
-      background: none; border: none; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer;
-    }
-    .drawer-menu-item {
-      background: #f8fafc; border: 2px solid #a0aec0; border-radius: 10px; padding: 12px;
-      color: #2d3748; text-decoration: none; font-size: 13px; font-weight: bold;
-      display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 0 #cbd5e0;
-    }
-    .drawer-menu-item:active { transform: translateY(1px); box-shadow: 0 1px 0 #cbd5e0; }
 
     .reg-container { max-width: 480px; margin: 0 auto; padding: 0 12px; }
 
@@ -125,39 +97,33 @@
 
 <body>
 
-  <!-- 📌 最上部：共通固定ヘッダー -->
+  <!-- 📌 最上部：共通固定ヘッダー（メニューなし） -->
   <div class="app-top-bar">
-    <button type="button" class="top-btn" onclick="window.location.href='mypage.html'">← マイページへ</button>
+    <button type="button" class="top-btn" onclick="window.location.href='home.html'">← ホームへ</button>
     <div class="top-title" id="pageHeaderTitle">🐕🐈 ワンニャンSOS | 新規登録</div>
-    <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
+    <div style="width: 70px;"></div>
   </div>
 
-  <!-- 🍔 右スライドメニュー -->
-  <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
-  <div id="sideDrawer" class="side-drawer">
-    <div class="drawer-header">
-      <span>🐾 ワンニャンSOS メニュー</span>
-      <button class="drawer-close-btn" onclick="toggleMenu()">✕</button>
-    </div>
-    <a href="index.html" class="drawer-menu-item">🏠 ホーム（トップ）</a>
-    <a href="sos.html" class="drawer-menu-item">📦 不足物資一覧</a>
-    <a href="sos-create.html" class="drawer-menu-item" style="color: #c53030;">📝 不足物資を投稿する</a>
-    <a href="mypage.html" class="drawer-menu-item">👤 マイページ</a>
-    <a href="guide.html" class="drawer-menu-item">📄 使い方案内</a>
-    <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
-    <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
-  </div>
-
-  <div class="reg-container">
+  <div class="reg-container" style="margin-top: 10px;">
     <div class="reg-card">
-      <div class="reg-title" id="cardTitle">✨ 新規ユーザー登録</div>
+      <div class="reg-title" id="cardTitle">✨ ユーザー登録（電話番号認証）</div>
 
       <div class="notice-box">
-        🔒 命に関わる現場の安全を守るため、完全クローズドで運用を行っています。<br>
-        ※本名・住所・電話番号などの個人情報は厳重に管理され、一般に公開されることは一切ありません。
+        🔒 パスワード不要：お使いの「お電話番号」があなた専用の合言葉になります。<br>
+        ※登録した電話番号を使って、どの端末からでもマイページを呼び出せます。
       </div>
 
       <form id="regForm">
+        <!-- 📞 電話番号（最重要キー） -->
+        <div class="form-group">
+          <label class="form-label">
+            お電話番号（マイページ復元の鍵になります） <span style="color:#c53030;">*</span>
+            <span class="badge-private">🔒 必須（ID代わり）</span>
+          </label>
+          <input type="tel" id="regPhone" class="form-input" placeholder="例：09012345678" required>
+          <div class="form-hint">※ハイフンなしでご入力ください。この番号でデータを保存・復元します。</div>
+        </div>
+
         <!-- 🌐 画面上表示（公開） -->
         <div class="form-group">
           <label class="form-label">
@@ -202,15 +168,6 @@
 
         <div class="form-group">
           <label class="form-label">
-            電話番号（連絡先） <span style="color:#c53030;">*</span>
-            <span class="badge-private">🔒 非公開（管理用）</span>
-          </label>
-          <input type="tel" id="regPhone" class="form-input" placeholder="例：09012345678" required>
-          <div class="form-hint">※本人確認・緊急連絡用です。</div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">
             お住まいの地域・市区町村（住所） <span style="color:#c53030;">*</span>
             <span class="badge-private">🔒 非公開（管理用）</span>
           </label>
@@ -223,7 +180,7 @@
         </div>
 
         <button type="submit" class="submit-btn" id="submitBtnText">
-          🐾 入力内容を確認して登録する ➔
+          🐾 クラウドに保存して登録する ➔
         </button>
       </form>
     </div>
@@ -231,7 +188,7 @@
 
   <!-- 📱 公式LINE風 ボトムフッターナビゲーション -->
   <nav class="app-bottom-nav">
-    <a href="index.html" class="nav-item">
+    <a href="home.html" class="nav-item">
       <span class="icon">🏠</span>
       <span>ホーム</span>
     </a>
@@ -278,15 +235,10 @@
         daySelect.appendChild(opt);
       }
 
-      // 🔄 すでに登録データがあれば「変更モード」に切り替えて値を自動セットする
       const savedProfile = localStorage.getItem('wanSOS_profile');
       if (savedProfile) {
         try {
           const profile = JSON.parse(savedProfile);
-          document.getElementById('pageHeaderTitle').textContent = "🐕🐈 ワンニャンSOS | 登録情報変更";
-          document.getElementById('cardTitle').textContent = "✏️ 登録情報の変更";
-          document.getElementById('submitBtnText').textContent = "🐾 変更内容を保存する ➔";
-
           if (profile.nickname) document.getElementById('regNickname').value = profile.nickname;
           if (profile.fullName) document.getElementById('regFullName').value = profile.fullName;
           if (profile.phone) document.getElementById('regPhone').value = profile.phone;
@@ -300,38 +252,22 @@
               document.getElementById('birthDay').value = parts[2];
             }
           }
-        } catch (e) {
-          console.error(e);
-        }
+        } catch (e) {}
       }
     });
 
-    function toggleMenu() {
-      const drawer = document.getElementById('sideDrawer');
-      const overlay = document.getElementById('menuOverlay');
-      const isOpen = drawer.classList.contains('open');
-      if (isOpen) {
-        drawer.classList.remove('open');
-        overlay.style.display = 'none';
-      } else {
-        drawer.classList.add('open');
-        overlay.style.display = 'block';
-      }
-    }
-
-    // 保存・更新処理
-    document.getElementById('regForm').addEventListener('submit', function(e) {
+    document.getElementById('regForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
+      const phone = document.getElementById('regPhone').value.trim().replace(/[-\s]/g, '');
       const nickname = document.getElementById('regNickname').value.trim();
       const fullName = document.getElementById('regFullName').value.trim();
       const year = document.getElementById('birthYear').value;
       const month = document.getElementById('birthMonth').value;
       const day = document.getElementById('birthDay').value;
-      const phone = document.getElementById('regPhone').value.trim();
       const address = document.getElementById('regAddress').value.trim();
 
-      if (!nickname || !fullName || !year || !month || !day || !phone || !address) {
+      if (!phone || !nickname || !fullName || !year || !month || !day || !address) {
         alert("すべての項目を入力（選択）してください。");
         return;
       }
@@ -351,31 +287,43 @@
         return;
       }
 
-      const previewMsg = `【登録内容の確認】\n\n・表示名: ${nickname}\n・本名/団体名: ${fullName}\n・生年月日: ${birthStr}\n・電話番号: ${phone}\n・地域: ${address}\n\nこの内容で保存しますか？`;
-      if (!confirm(previewMsg)) {
-        return;
+      const profileData = {
+        phone: phone,
+        nickname: nickname,
+        full_name: fullName,
+        birth: birthStr,
+        address: address,
+        updated_at: new Date().toISOString()
+      };
+
+      if (window.supabaseClient) {
+        try {
+          const { error } = await window.supabaseClient
+            .from('users_profiles')
+            .upsert(profileData, { onConflict: 'phone' });
+          
+          if (error) {
+            console.warn("Supabase upsert warning (using local fallback):", error.message);
+          }
+        } catch (err) {
+          console.warn("Supabase connection error:", err);
+        }
       }
 
-      let profile = {};
-      const savedProfile = localStorage.getItem('wanSOS_profile');
-      if (savedProfile) {
-        try { profile = JSON.parse(savedProfile); } catch(e){}
-      }
-
-      profile.nickname = nickname;
-      profile.fullName = fullName;
-      profile.birth = birthStr;
-      profile.phone = phone;
-      profile.address = address;
-      if (!profile.registeredAt) {
-        profile.registeredAt = new Date().toISOString();
-      }
-
-      localStorage.setItem('wanSOS_profile', JSON.stringify(profile));
+      const localProfile = {
+        phone: phone,
+        nickname: nickname,
+        fullName: fullName,
+        birth: birthStr,
+        address: address,
+        registeredAt: new Date().toISOString()
+      };
+      localStorage.setItem('wanSOS_profile', JSON.stringify(localProfile));
+      localStorage.setItem('wanSOS_user_phone', phone);
       sessionStorage.setItem('wannyanSOS_loggedIn', 'true');
 
-      alert("🎉 登録情報の変更が完了しました！マイページに戻ります。");
-      window.location.href = "mypage.html";
+      alert("🎉 登録情報の保存が完了しました！ホームに戻ります。");
+      window.location.href = "home.html";
     });
   </script>
 
