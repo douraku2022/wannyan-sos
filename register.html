@@ -381,38 +381,67 @@
       submitBtn.textContent = "登録中...";
 
       try {
-        // 1. Supabase Authにアカウントを作成（電話番号＋暗証番号）
-        const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
-          email: phoneToPseudoEmail(phone),
-          password: pinToPassword(pin)
-        });
+        let authUserId = null;
 
-        if (authError) {
-          if (authError.message && authError.message.toLowerCase().includes('already registered')) {
-            alert("この電話番号はすでに登録されています。\n「ログイン」画面からお進みください。");
-          } else {
-            alert("登録に失敗しました：" + authError.message);
+        if (isReturningUser) {
+          // ✏️ 情報変更モード：すでに登録済みのため signUp は使わず、
+          // 今のログインセッションのユーザーIDをそのまま使ってプロフィールだけを更新する
+          const { data: { session } } = await window.supabaseClient.auth.getSession();
+          if (!session || !session.user) {
+            alert("⚠️ ログイン情報が確認できませんでした。お手数ですが、ログイン画面から入り直してください。");
+            submitBtn.disabled = false;
+            submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
+            window.location.href = 'login.html';
+            return;
           }
-          submitBtn.disabled = false;
-          submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
-          return;
+          authUserId = session.user.id;
+
+          // 暗証番号も変更されている可能性があるため、あわせて更新する
+          const { error: pwError } = await window.supabaseClient.auth.updateUser({
+            password: pinToPassword(pin)
+          });
+          if (pwError) {
+            alert("暗証番号の更新に失敗しました：" + pwError.message);
+            submitBtn.disabled = false;
+            submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
+            return;
+          }
+        } else {
+          // ✨ 新規登録モード：Supabase Authにアカウントを新規作成（電話番号＋暗証番号）
+          const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
+            email: phoneToPseudoEmail(phone),
+            password: pinToPassword(pin)
+          });
+
+          if (authError) {
+            if (authError.message && authError.message.toLowerCase().includes('already registered')) {
+              alert("この電話番号はすでに登録されています。\n「ログイン」画面からお進みください。");
+            } else {
+              alert("登録に失敗しました：" + authError.message);
+            }
+            submitBtn.disabled = false;
+            submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
+            return;
+          }
+
+          if (!authData.user) {
+            alert("登録処理が完了しませんでした。時間をおいてもう一度お試しください。");
+            submitBtn.disabled = false;
+            submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
+            return;
+          }
+
+          authUserId = authData.user.id;
         }
 
-        if (!authData.user) {
-          alert("登録処理が完了しませんでした。時間をおいてもう一度お試しください。");
-          submitBtn.disabled = false;
-          submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
-          return;
-        }
-
-        // 2. プロフィール情報を保存（auth_user_idを紐づける）
+        // プロフィール情報を保存（auth_user_idを紐づける）
         const profileData = {
           phone: phone,
           nickname: nickname,
           full_name: fullName,
           birth: birthStr,
           address: address,
-          auth_user_id: authData.user.id,
+          auth_user_id: authUserId,
           updated_at: new Date().toISOString()
         };
 
@@ -439,7 +468,7 @@
         localStorage.setItem('wanSOS_profile', JSON.stringify(localProfile));
         localStorage.setItem('wanSOS_user_phone', phone);
 
-        alert("🎉 登録情報の保存が完了しました！ホームに戻ります。");
+        alert(isReturningUser ? "🎉 登録情報を更新しました！ホームに戻ります。" : "🎉 登録情報の保存が完了しました！ホームに戻ります。");
         window.location.href = "member/home.html";
       } catch (err) {
         alert("登録処理中にエラーが発生しました：" + err.message);

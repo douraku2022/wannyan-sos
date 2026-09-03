@@ -386,8 +386,8 @@
       if (item) {
         summaryEl.innerHTML = `
           <div>
-            <strong>📦 ${item.title}</strong><br>
-            <span style="color:#718096; font-size:10px;">投稿者: ${item.poster_name || 'どうらくいちば'} 様 (${item.city || '熊本'})</span>
+            <strong>📦 ${escapeHtml(item.title)}</strong><br>
+            <span style="color:#718096; font-size:10px;">投稿者: ${escapeHtml(item.poster_name || 'どうらくいちば')} 様 (${escapeHtml(item.city || '熊本')})</span>
           </div>
           <a href="sos-detail.html?id=${item.id}" style="color:#3182ce; font-weight:bold; font-size:10px; text-decoration:none;">詳細を見る ➔</a>
         `;

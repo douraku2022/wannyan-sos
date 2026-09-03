@@ -291,25 +291,25 @@
           <div class="detail-header-row">
             ${statusBadgeHtml}
             <span class="badge ${badgeClass}">${badgeText}</span>
-            <span class="badge badge-tag">目安: ${item.timeframe || '2〜3日以内'}</span>
-            <span class="badge badge-tag">属性: ${item.attribute || '施設'}</span>
+            <span class="badge badge-tag">目安: ${escapeHtml(item.timeframe || '2〜3日以内')}</span>
+            <span class="badge badge-tag">属性: ${escapeHtml(item.attribute || '施設')}</span>
           </div>
 
-          <div class="detail-title">${item.title || '状況・支援詳細'}</div>
+          <div class="detail-title">${escapeHtml(item.title || '状況・支援詳細')}</div>
 
           ${statusReasonHtml}
 
           <div class="detail-grid">
-            <div>■ <strong>投稿者：</strong> ${posterName}</div>
-            <div>■ <strong>エリア：</strong> ${item.city || item.area || '未設定'}</div>
-            <div>■ <strong>対象動物：</strong> ${item.animal_type || '未指定'} (${item.count || '1〜3頭'})</div>
-            <div>■ <strong>物資カテゴリ：</strong> ${item.category || 'ペットフード'} / ${item.category_sub || 'ウェット'}</div>
+            <div>■ <strong>投稿者：</strong> ${escapeHtml(posterName)}</div>
+            <div>■ <strong>エリア：</strong> ${escapeHtml(item.city || item.area || '未設定')}</div>
+            <div>■ <strong>対象動物：</strong> ${escapeHtml(item.animal_type || '未指定')} (${escapeHtml(item.count || '1〜3頭')})</div>
+            <div>■ <strong>物資カテゴリ：</strong> ${escapeHtml(item.category || 'ペットフード')} / ${escapeHtml(item.category_sub || 'ウェット')}</div>
           </div>
 
           <div class="detail-line"></div>
 
           <div style="font-size: 0.9rem; color: #4a5568; line-height: 1.6; white-space: pre-wrap; margin-bottom: 16px;">
-            <strong>【詳細説明・ご事情】</strong><br>${item.description || '特記事項なし'}
+            <strong>【詳細説明・ご事情】</strong><br>${escapeHtml(item.description || '特記事項なし')}
           </div>
 
           <div class="notice-box">
@@ -317,8 +317,8 @@
           </div>
 
           <div style="font-size: 0.8rem; color: #718096; text-align: center;">
-            投稿時刻：${dateStr}<br>
-            ID: ${item.id}
+            投稿時刻：${escapeHtml(dateStr)}<br>
+            ID: ${escapeHtml(item.id)}
           </div>
 
           <div class="action-group">
@@ -330,6 +330,13 @@
           </div>
         </div>
       `;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
     }
   </script>
 

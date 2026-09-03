@@ -440,17 +440,17 @@
           <div class="card-line-1">
             ${statusBadgeHtml}
             <span class="badge ${badgeClass}">${badgeText}</span>
-            <span class="tag">${timeframe}</span>
-            <span class="tag">${area}</span>
-            <span class="tag">${attribute}</span>
+            <span class="tag">${escapeHtml(timeframe)}</span>
+            <span class="tag">${escapeHtml(area)}</span>
+            <span class="tag">${escapeHtml(attribute)}</span>
           </div>
           <div class="card-line-2-needs">
-            <span class="highlight">${animal} ${count}分</span>
-            <span class="tag">${categoryMain} (${categorySub})</span>
+            <span class="highlight">${escapeHtml(animal)} ${escapeHtml(count)}分</span>
+            <span class="tag">${escapeHtml(categoryMain)} (${escapeHtml(categorySub)})</span>
           </div>
           <div class="card-line-3">
-            <span class="poster">👤 ${posterName}</span>
-            <span class="timestamp">${dateStr}</span>
+            <span class="poster">👤 ${escapeHtml(posterName)}</span>
+            <span class="timestamp">${escapeHtml(dateStr)}</span>
           </div>
         `;
 
@@ -459,6 +459,13 @@
     }
 
     window.addEventListener('DOMContentLoaded', fetchPosts);
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
+    }
   </script>
 
 </body>
