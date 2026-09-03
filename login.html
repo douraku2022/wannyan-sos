@@ -170,7 +170,7 @@
     // 電話番号を、Supabase Auth用の疑似メールアドレスに変換する共通ルール
     // register.html 側でも必ず同じ変換ルールを使うこと
     function phoneToPseudoEmail(phone) {
-      return `${phone}@gmail.com`;
+      return `${phone}@wannyansos-users.com`;
     }
 
     // 4桁の暗証番号を、Supabaseの最低文字数(6文字)を満たすパスワードに変換する
@@ -216,6 +216,10 @@
           return;
         }
 
+        // 🔑 ここが本人確認の本体。認証さえ成功していれば、家の中に入るための鍵を必ず保存する
+        // （この後のプロフィール取得は「表示用のキャッシュ」に過ぎず、失敗しても鍵には影響させない）
+        localStorage.setItem('wanSOS_user_phone', phone);
+
         // プロフィール情報を取得して画面表示用にキャッシュ（表示専用。権限判定には使わない）
         try {
           const { data: profile } = await window.supabaseClient
@@ -233,13 +237,12 @@
               birth: profile.birth
             };
             localStorage.setItem('wanSOS_profile', JSON.stringify(profileCache));
-            localStorage.setItem('wanSOS_user_phone', profile.phone);
           }
         } catch (cacheErr) {
           // 表示用キャッシュの失敗は致命的ではないので無視
         }
 
-        alert("🎉 ログインしました！マイページへ移動します。");
+        alert("🎉 ログインしました！ホームへ移動します。");
         window.location.href = "member/home.html";
       } catch (err) {
         alert("ログイン処理中にエラーが発生しました。");
