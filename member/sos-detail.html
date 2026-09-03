@@ -224,19 +224,8 @@
 
       let item = null;
 
-      // 1. ローカルストレージから該当IDを検索
-      try {
-        const localSaved = localStorage.getItem('wanSOS_posts');
-        if (localSaved) {
-          const posts = JSON.parse(localSaved);
-          item = posts.find(p => String(p.id) === String(sosId));
-        }
-      } catch(e) {
-        console.warn("ローカル読込エラー:", e);
-      }
-
-      // 2. なければSupabaseから取得
-      if (!item && window.supabaseClient) {
+      // Supabaseから取得
+      if (window.supabaseClient) {
         try {
           const { data, error } = await window.supabaseClient
             .from('sos_items')

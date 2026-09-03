@@ -361,13 +361,6 @@
       }
 
       let item = null;
-      try {
-        const localSaved = localStorage.getItem('wanSOS_posts');
-        if (localSaved) {
-          const posts = JSON.parse(localSaved);
-          item = posts.find(p => String(p.id) === String(sosId));
-        }
-      } catch(e){}
 
       if (window.supabaseClient) {
         try {

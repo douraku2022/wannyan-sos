@@ -357,7 +357,7 @@
 
       let myPosts = [];
 
-      // 1. Supabaseから自分のcreator_idの投稿だけを取得
+      // Supabaseから自分のcreator_idの投稿だけを取得
       if (window.supabaseClient) {
         try {
           const { data, error } = await window.supabaseClient
@@ -370,18 +370,6 @@
           }
         } catch(e) {}
       }
-
-      // 2. ローカルストレージ側も、同じcreator_idのものだけ拾ってマージ（未同期分の保険）
-      try {
-        const savedPosts = localStorage.getItem('wanSOS_posts');
-        if (savedPosts) {
-          const posts = JSON.parse(savedPosts).filter(p => p.creator_id === currentUserId);
-          const existingIds = new Set(myPosts.map(p => p.id));
-          posts.forEach(p => {
-            if (!existingIds.has(p.id)) myPosts.push(p);
-          });
-        }
-      } catch(e) {}
 
       const activePosts = myPosts.filter(p => p.status !== 'completed' && p.status !== 'cancelled');
       const pastPosts = myPosts.filter(p => p.status === 'completed' || p.status === 'cancelled');
@@ -430,25 +418,6 @@
     async function loadMyChats() {
       const container = document.getElementById('myChatListContainer');
       let chatItems = [];
-
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('wanSOS_chat_')) {
-          const sosId = key.replace('wanSOS_chat_', '');
-          try {
-            const msgs = JSON.parse(localStorage.getItem(key) || '[]');
-            if (msgs.length > 0) {
-              const lastMsg = msgs[msgs.length - 1];
-              chatItems.push({
-                sosId: sosId,
-                lastMessage: lastMsg.message,
-                lastSender: lastMsg.sender_name,
-                time: lastMsg.created_at
-              });
-            }
-          } catch(e){}
-        }
-      }
 
       if (window.supabaseClient) {
         try {

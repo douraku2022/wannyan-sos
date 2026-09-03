@@ -199,11 +199,10 @@
 
   <script>
     (function(){
-      const isLoggedIn = sessionStorage.getItem('wannyanSOS_loggedIn');
-      const hasProfile = localStorage.getItem('wanSOS_profile');
-      if (isLoggedIn !== 'true' && !hasProfile) {
+      const savedPhone = localStorage.getItem('wanSOS_user_phone');
+      if (!savedPhone) {
         alert("投稿を行うにはユーザー登録が必要です。");
-        window.location.href = "../register.html";
+        window.location.href = "../index.html";
       }
     })();
   </script>
@@ -509,20 +508,16 @@
     };
 
     try {
-      if (window.supabaseClient) {
-        const { error } = await window.supabaseClient.from('sos_items').insert([newEntry]);
-        if (error) {
-          console.warn("Supabase制限によるスキップ、ローカルモードにフォールバックします:", error.message);
-        }
+      if (!window.supabaseClient) {
+        alert("データベース接続設定が見つかりません。");
+        return;
       }
 
-      let existingPosts = [];
-      try {
-        const saved = localStorage.getItem('wanSOS_posts');
-        if (saved) existingPosts = JSON.parse(saved);
-      } catch(e){}
-      existingPosts.unshift(newEntry);
-      localStorage.setItem('wanSOS_posts', JSON.stringify(existingPosts));
+      const { error } = await window.supabaseClient.from('sos_items').insert([newEntry]);
+      if (error) {
+        alert("投稿の保存に失敗しました：" + error.message);
+        return;
+      }
 
       document.getElementById('tMode').textContent = mode === 'sos' ? '🆘 不足している' : '✳️ 支援できる';
       document.getElementById('tTimeframe').textContent = timeframe;
@@ -548,10 +543,6 @@
   function closeTicketAndGo() {
     window.location.href = "sos.html";
   }
-</script>
-
-<script>
-  sessionStorage.setItem('wannyanSOS_loggedIn', 'true');
 </script>
 </body>
 </html>

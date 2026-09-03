@@ -144,13 +144,12 @@
   </style>
 
   <script>
-    // 🔒 未登録・未ログインならここで弾く（sos-create.htmlと同じゲート）
+    // 🔒 未登録・未ログインならここで弾く（home.html等と同じゲート）
     (function(){
-      const isLoggedIn = sessionStorage.getItem('wannyanSOS_loggedIn');
-      const hasProfile = localStorage.getItem('wanSOS_profile');
-      if (isLoggedIn !== 'true' && !hasProfile) {
+      const savedPhone = localStorage.getItem('wanSOS_user_phone');
+      if (!savedPhone) {
         alert("投稿の編集・状態変更を行うにはユーザー登録が必要です。");
-        window.location.href = "../register.html";
+        window.location.href = "../index.html";
       }
     })();
   </script>
@@ -376,15 +375,7 @@
 
       let item = null;
 
-      try {
-        const localSaved = localStorage.getItem('wanSOS_posts');
-        if (localSaved) {
-          const posts = JSON.parse(localSaved);
-          item = posts.find(p => String(p.id) === String(sosId));
-        }
-      } catch(e) {}
-
-      if (!item && window.supabaseClient) {
+      if (window.supabaseClient) {
         try {
           const { data, error } = await window.supabaseClient
             .from('sos_items')
@@ -564,15 +555,6 @@
       };
 
       try {
-        try {
-          const localSaved = localStorage.getItem('wanSOS_posts');
-          if (localSaved) {
-            let posts = JSON.parse(localSaved);
-            posts = posts.map(p => String(p.id) === String(sosId) ? { ...p, ...updatedSOS } : p);
-            localStorage.setItem('wanSOS_posts', JSON.stringify(posts));
-          }
-        } catch(e){}
-
         if (window.supabaseClient) {
           const { error } = await window.supabaseClient
             .from('sos_items')
