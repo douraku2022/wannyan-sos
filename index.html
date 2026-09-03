@@ -29,8 +29,18 @@
     .step-badge {
       background: #2b6cb0; color: #ffffff; border-radius: 4px; width: 18px; height: 18px;
       display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;
-      margin-right: 4px;
+      margin-right: 4px; flex: 0 0 auto;
     }
+
+    /* 🆘✳️ 双方向であることを示すバッジ行 */
+    .mode-badge-row {
+      display: flex; gap: 8px; justify-content: center; margin-bottom: 10px;
+    }
+    .mode-badge {
+      font-size: 12px; font-weight: bold; padding: 5px 12px; border-radius: 20px;
+    }
+    .mode-badge.sos { background: #fff5f5; color: #c53030; border: 1px solid #feb2b2; }
+    .mode-badge.offer { background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
 
     /* 📢 お知らせカード用スタイル */
     .info-card {
@@ -43,10 +53,15 @@
       border-bottom: 2px solid #00873c; padding-bottom: 4px;
     }
     .news-date { font-size: 10px; color: #718096; font-weight: bold; }
+    .news-item { border-bottom: 1px dashed #e2e8f0; padding-bottom: 10px; margin-bottom: 10px; }
+    .news-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
     .news-badge {
       display: inline-block; background: #2b6cb0; color: #fff; font-size: 9px;
       padding: 1px 6px; border-radius: 3px; font-weight: bold; margin-left: 6px;
     }
+    .news-item-title { font-weight: bold; margin-top: 2px; }
+    .news-item-body { font-size: 11px; color: #4a5568; margin-top: 4px; white-space: pre-wrap; }
+    .empty-box { text-align: center; color: #a0aec0; font-size: 12px; padding: 8px 0; }
 
     /* 🎁 お辞儀・お気持ちボックスの専用スタイル */
     .volunteer-notice-card {
@@ -100,7 +115,7 @@
           ワンニャンSOS熊本<br>犬猫支援物資の伝言板
         </h1>
         <p style="font-size: 12px; color: #4a5568; line-height: 1.6; margin: 0;">
-          動物のお世話に必要な「物資」を通じて<br>お困りの方と応援したい方をつなぐ伝言板です。<br>
+          動物のお世話に必要な「物資」を通じて<br>お困りの方と応援したい方を、双方向でつなぐ伝言板です。<br>
           できるひとが、できるときに、できることを。<br>
           <span style="font-size: 11px; color: #c53030; font-weight: bold; display: block; margin-top: 6px;">
             ※当サービスは🔸物資支援🔸限定です。<br>金銭のやり取りは一切禁止されています。
@@ -109,18 +124,27 @@
       </div>
     </div>
 
-    <!-- カンタン投稿ガイド -->
+    <!-- カンタン投稿ガイド（双方向対応版） -->
     <div style="background: #ffffff; border: 2px solid #cbd5e0; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
       <h2 style="font-size: 14px; color: #00873c; margin: 0 0 10px 0; text-align: center; font-weight: bold; border-bottom: 2px solid #00873c; padding-bottom: 6px;">
         📝 ボタンを押して選ぶだけ！カンタン投稿
       </h2>
+
+      <div class="mode-badge-row">
+        <span class="mode-badge sos">🆘 不足している</span>
+        <span class="mode-badge offer">✳️ 支援できる</span>
+      </div>
+      <p style="font-size: 11px; color: #718096; text-align: center; margin: 0 0 12px 0;">
+        どちらのお立場でも、同じ投稿フォームから登録できます
+      </p>
+
       <div style="font-size: 12px; color: #2d3748; line-height: 1.8;">
-        <div><span class="step-badge">1</span><strong>お世話の動物：</strong> 犬 / 猫 / 両方</div>
-        <div><span class="step-badge">2</span><strong>お世話の頭数：</strong> 1〜2匹 / 3〜5匹 / 6〜9匹 / 10匹以上</div>
-        <div><span class="step-badge">3</span><strong>不足物資：</strong> 必要物資を選択（複数選択可）</div>
-        <div><span class="step-badge">4</span><strong>お受け取り方法：</strong> 郵送可 / 直接お届け / 相談</div>
-        <div><span class="step-badge">5</span><strong>お住まい：</strong> 熊本市 / 県北 / 県央 / 県南 / 天草 / 阿蘇</div>
-        <div><span class="step-badge">6</span><strong>募集の状況：</strong> 今すぐ必要 / 1週間以内 / 持続的支援</div>
+        <div><span class="step-badge">1</span><strong>時間的な目安：</strong> 2〜3日以内 / 1週間以内 / 持続的</div>
+        <div><span class="step-badge">2</span><strong>エリア：</strong> 熊本市・八代市など県内の市区町村から選択</div>
+        <div><span class="step-badge">3</span><strong>対象動物：</strong> 犬 / 猫 / 犬猫両方</div>
+        <div><span class="step-badge">4</span><strong>頭数：</strong> 1〜3頭 / 4〜9頭 / 10〜19頭 / 20頭以上</div>
+        <div><span class="step-badge">5</span><strong>物資カテゴリ：</strong> ペットフード・ペットシーツ・タオル類など（大分類＋細目）</div>
+        <div><span class="step-badge">6</span><strong>投稿者属性：</strong> 施設 / 個人</div>
       </div>
       <div style="margin-top: 10px; background: #fff5f5; border: 1px dashed #feb2b2; padding: 8px; border-radius: 6px; font-size: 11px; color: #c53030; text-align: center; line-height: 1.4; font-weight: bold;">
         ⚠️ お届け数量や納期（日数）を保証するものではありません。<br>相互のご事情に合わせて個別チャットで調整を行います。
@@ -148,17 +172,11 @@
       </div>
     </div>
 
-    <!-- 📌 お知らせカード -->
+    <!-- 📌 お知らせカード（announcementsテーブルから動的読み込み） -->
     <div class="info-card">
       <div class="info-title">📢 お知らせ</div>
-      <div>
-        <span class="news-date">2026.09.01</span>
-        <span class="news-badge">NEW</span>
-        <div style="font-weight: bold; margin-top: 2px;">ワンニャンSOS熊本 実証テスト運用開始のお知らせ</div>
-        <div style="font-size: 11px; color: #4a5568; margin-top: 4px;">
-          本日より「ワンニャンSOS熊本」のテスト運用をスタートいたしました。<br>
-          本プラットフォームは、動物のお世話に必要な支援物資（物品）を迅速かつ安全につなぐマッチングシステムです。皆さまの温かいご支援とご協力をよろしくお願い申し上げます。
-        </div>
+      <div id="newsListContainer">
+        <div class="empty-box">読み込み中...</div>
       </div>
     </div>
 
@@ -182,6 +200,57 @@
     </div>
 
   </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', loadNews);
+
+    async function loadNews() {
+      const container = document.getElementById('newsListContainer');
+      if (!window.supabaseClient) {
+        container.innerHTML = '<div class="empty-box">データベース接続設定が見つかりません。</div>';
+        return;
+      }
+      try {
+        const { data, error } = await window.supabaseClient
+          .from('announcements')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(3);
+
+        if (error || !data || data.length === 0) {
+          container.innerHTML = '<div class="empty-box">現在、お知らせはありません。</div>';
+          return;
+        }
+
+        container.innerHTML = data.map((n, i) => {
+          let dateStr = '';
+          if (n.created_at) {
+            const d = new Date(n.created_at);
+            dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+          }
+          return `
+            <div class="news-item">
+              <span class="news-date">${dateStr}</span>
+              ${i === 0 ? '<span class="news-badge">NEW</span>' : ''}
+              <div class="news-item-title">${escapeHtml(n.title)}</div>
+              <div class="news-item-body">${escapeHtml(n.body)}</div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        container.innerHTML = '<div class="empty-box">読み込みに失敗しました。</div>';
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
+    }
+  </script>
 
 </body>
 </html>
