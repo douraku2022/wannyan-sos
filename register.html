@@ -432,6 +432,25 @@
           }
 
           authUserId = authData.user.id;
+
+          // 🔑 signUp() の時点ではまだ本物のログインセッションが確立していない場合があるため、
+          // ここで signInWithPassword を使って確実にセッションを張ってから次の処理へ進む
+          if (!authData.session) {
+            const { data: signInData, error: signInError } = await window.supabaseClient.auth.signInWithPassword({
+              email: phoneToPseudoEmail(phone),
+              password: pinToPassword(pin)
+            });
+
+            if (signInError || !signInData.session) {
+              alert("アカウントは作成されましたが、ログインの確立に失敗しました。\nお手数ですが「ログイン」画面から入り直してください。");
+              submitBtn.disabled = false;
+              submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
+              window.location.href = 'login.html';
+              return;
+            }
+
+            authUserId = signInData.session.user.id;
+          }
         }
 
         // プロフィール情報を保存（auth_user_idを紐づける）
