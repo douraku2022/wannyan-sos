@@ -212,6 +212,8 @@
 
     document.addEventListener("DOMContentLoaded", fetchDetail);
 
+    let currentItemId = null;
+
     async function fetchDetail() {
       const container = document.getElementById('detailContent');
       const urlParams = new URLSearchParams(window.location.search);
@@ -286,6 +288,21 @@
       const currentUserId = await getCurrentUserId();
       const isOwner = !!(item.creator_id && currentUserId && item.creator_id === currentUserId);
 
+      // 🛠 管理者かどうかを確認（通報対応での削除ボタン表示に使う）
+      let isAdminUser = false;
+      if (window.supabaseClient && currentUserId) {
+        try {
+          const { data: myProfile } = await window.supabaseClient
+            .from('users_profiles')
+            .select('is_admin')
+            .eq('auth_user_id', currentUserId)
+            .single();
+          isAdminUser = !!(myProfile && myProfile.is_admin === true);
+        } catch(e) {}
+      }
+
+      currentItemId = item.id;
+
       container.innerHTML = `
         <div class="detail-card">
           <div class="detail-header-row">
@@ -328,6 +345,8 @@
             </a>
 
             ${isOwner ? `<a href="sos-edit.html?id=${item.id}" class="edit-btn">✏️ 投稿内容・状態を変更する</a>` : ''}
+
+            ${(isAdminUser && !isOwner) ? `<button type="button" onclick="adminDeletePost()" class="edit-btn" style="color:#c53030; border-color:#feb2b2; background:#fff5f5;">🗑 管理者として削除する（通報対応）</button>` : ''}
           </div>
         </div>
       `;
@@ -338,6 +357,29 @@
       return String(str).replace(/[&<>"']/g, function(m) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
       });
+    }
+
+    // 🗑 管理者による削除（通報対応）。RLS側でも is_admin_user() により保護されている
+    async function adminDeletePost() {
+      if (!currentItemId) return;
+      if (!confirm("この投稿を削除します。この操作は取り消せません。よろしいですか？")) return;
+
+      try {
+        const { error } = await window.supabaseClient
+          .from('sos_items')
+          .delete()
+          .eq('id', currentItemId);
+
+        if (error) {
+          alert("削除に失敗しました：" + error.message);
+          return;
+        }
+
+        alert("投稿を削除しました。");
+        window.location.href = "sos.html";
+      } catch (e) {
+        alert("削除処理中にエラーが発生しました。");
+      }
     }
   </script>
 
