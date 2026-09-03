@@ -98,9 +98,9 @@
 
 <body>
 
-  <!-- 📌 最上部：共通固定ヘッダー（メニューなし） -->
+  <!-- 📌 最上部：共通固定ヘッダー（メニューなし。戻り先はログイン状態で出し分け） -->
   <div class="app-top-bar">
-    <button type="button" class="top-btn" onclick="window.location.href='home.html'">← ホームへ</button>
+    <button type="button" class="top-btn" id="topBackBtn">← 戻る</button>
     <div class="top-title" id="pageHeaderTitle">🐕🐈 ワンニャンSOS | 新規登録</div>
     <div style="width: 70px;"></div>
   </div>
@@ -196,7 +196,7 @@
         </div>
 
         <div style="font-size: 11px; color: #4a5568; margin-bottom: 12px;">
-          登録ボタンを押すことで、<a href="terms.html" target="_blank" style="color:#3182ce; font-weight:bold;">利用規約</a>および<a href="disclaimer.html" target="_blank" style="color:#3182ce; font-weight:bold;">免責事項</a>に同意したものとみなします。
+          登録ボタンを押すことで、<a href="terms.html" target="_blank" style="color:#3182ce; font-weight:bold;">利用規約</a>、<a href="disclaimer.html" target="_blank" style="color:#3182ce; font-weight:bold;">免責事項</a>および<a href="privacy.html" target="_blank" style="color:#3182ce; font-weight:bold;">プライバシーポリシー</a>に同意したものとみなします。
         </div>
 
         <button type="submit" class="submit-btn" id="submitBtnText">
@@ -206,37 +206,76 @@
     </div>
   </div>
 
-  <!-- 📱 公式LINE風 ボトムフッターナビゲーション -->
-  <nav class="app-bottom-nav">
-    <a href="home.html" class="nav-item">
-      <span class="icon">🏠</span>
-      <span>ホーム</span>
-    </a>
-    <button type="button" class="nav-item" onclick="window.location.href='sos.html'">
-      <span class="icon">📦</span>
-      <span>一覧</span>
-    </button>
-    <a href="mypage.html" class="nav-item">
-      <span class="icon">👤</span>
-      <span>マイページ</span>
-    </a>
-    <button type="button" class="nav-item" onclick="window.location.href='sos-create.html'" style="color: #c53030;">
-      <span class="icon">📝</span>
-      <span>投稿する</span>
-    </button>
+  <!-- 📱 下部固定ナビゲーション（ログイン状態で中身を出し分け） -->
+  <nav class="app-bottom-nav" id="bottomNav">
+    <!-- JSで組み立てます -->
   </nav>
 
   <script>
     // 電話番号を、Supabase Auth用の疑似メールアドレスに変換する共通ルール
     // login.html 側でも必ず同じ変換ルールを使うこと
     function phoneToPseudoEmail(phone) {
-      return `${phone}@wannyansos-users.com`;
+      return `${phone}@gmail.com`;
     }
 
     // 4桁の暗証番号を、Supabaseの最低文字数(6文字)を満たすパスワードに変換する
     // login.html 側でも必ず同じ変換ルールを使うこと
     function pinToPassword(pin) {
       return `wnsos${pin}pin`;
+    }
+
+    // 🔐 登録・ログイン済みの方の「情報変更」なのか、初めての方の「新規登録」なのかで
+    // 戻り先・下部ナビを出し分ける（未登録の人に家の中の存在を見せないため）
+    const savedPhone = localStorage.getItem('wanSOS_user_phone');
+    const isReturningUser = !!savedPhone;
+
+    const topBackBtn = document.getElementById('topBackBtn');
+    const bottomNav = document.getElementById('bottomNav');
+
+    if (isReturningUser) {
+      document.getElementById('pageHeaderTitle').textContent = '🐕🐈 ワンニャンSOS | 登録情報の変更';
+      document.getElementById('cardTitle').textContent = '✏️ 登録情報の確認・変更';
+      topBackBtn.onclick = () => window.location.href = 'member/home.html';
+
+      bottomNav.innerHTML = `
+        <a href="member/home.html" class="nav-item">
+          <span class="icon">🏠</span>
+          <span>ホーム</span>
+        </a>
+        <button type="button" class="nav-item" onclick="window.location.href='member/sos.html'">
+          <span class="icon">📦</span>
+          <span>一覧</span>
+        </button>
+        <a href="member/mypage.html" class="nav-item active">
+          <span class="icon">👤</span>
+          <span>マイページ</span>
+        </a>
+        <button type="button" class="nav-item" onclick="window.location.href='member/sos-create.html'" style="color: #c53030;">
+          <span class="icon">📝</span>
+          <span>投稿する</span>
+        </button>
+      `;
+    } else {
+      topBackBtn.onclick = () => window.location.href = 'index.html';
+
+      bottomNav.innerHTML = `
+        <a href="index.html" class="nav-item">
+          <span class="icon">🏠</span>
+          <span>トップ</span>
+        </a>
+        <a href="guide.html" class="nav-item">
+          <span class="icon">📄</span>
+          <span>使い方</span>
+        </a>
+        <a href="terms.html" class="nav-item">
+          <span class="icon">📜</span>
+          <span>利用規約</span>
+        </a>
+        <a href="login.html" class="nav-item" style="color: #2b6cb0;">
+          <span class="icon">🔑</span>
+          <span>ログイン</span>
+        </a>
+      `;
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -401,7 +440,7 @@
         localStorage.setItem('wanSOS_user_phone', phone);
 
         alert("🎉 登録情報の保存が完了しました！ホームに戻ります。");
-        window.location.href = "home.html";
+        window.location.href = "member/home.html";
       } catch (err) {
         alert("登録処理中にエラーが発生しました：" + err.message);
         submitBtn.disabled = false;

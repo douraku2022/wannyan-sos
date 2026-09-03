@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>投稿修正・状態変更｜ワンニャンSOS熊本</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../supabase-config.js"></script>
+
+  <style>
+    :root {
+      --primary-color: #e67e22;
+      --primary-hover: #d35400;
+      --bg-color: #f9f9f9;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --border-color: #dddddd;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 60px 16px 40px 16px;
+      background-color: var(--bg-color); color: var(--text-color);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex; justify-content: center;
+    }
+
+    /* 📌 最上部：共通固定ヘッダー */
+    .app-top-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 46px;
+      background: #00873c; color: #ffffff; border-bottom: 2px solid #005a28;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 10px;
+      z-index: 1000; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .top-btn {
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+      color: #ffffff; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold;
+      text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 4px;
+    }
+    .top-btn:active { background: rgba(255,255,255,0.3); }
+    .top-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
+
+    /* 🍔 右側スライドナビゲーション */
+    .menu-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); z-index: 1001;
+    }
+    .side-drawer {
+      position: fixed; top: 0; right: -260px; width: 240px; height: 100%;
+      background: linear-gradient(180deg, #ecefe6 0%, #d8ded6 100%);
+      border-left: 3px solid #9aa5b0; z-index: 1002;
+      box-shadow: -4px 0 16px rgba(0,0,0,0.2); transition: right 0.25s ease-in-out;
+      display: flex; flex-direction: column; padding: 12px; gap: 10px;
+    }
+    .side-drawer.open { right: 0; }
+    .drawer-header {
+      background: #00873c; color: #fff; border-radius: 8px; padding: 10px;
+      text-align: center; font-size: 13px; font-weight: bold; border: 1px solid #005a28;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .drawer-close-btn { background: none; border: none; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; }
+    .drawer-menu-item {
+      background: #f8fafc; border: 2px solid #a0aec0; border-radius: 10px; padding: 12px;
+      color: #2d3748; text-decoration: none; font-size: 13px; font-weight: bold;
+      display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 0 #cbd5e0;
+    }
+
+    /* 📄 モダンなフォームコンテナ（sos-create等と統一） */
+    .form-container {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 480px;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      box-sizing: border-box;
+      border: 1px solid var(--border-color);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      padding: 8px 14px;
+      border: 1px solid var(--border-color);
+      background-color: #ffffff;
+      color: var(--text-color);
+      font-size: 0.85rem;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chip.active {
+      background-color: var(--primary-color);
+      color: #ffffff;
+      border-color: var(--primary-color);
+    }
+
+    .scroll-select, .form-textarea {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: #ffffff;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+    .form-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background-color: var(--primary-color);
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin-top: 10px;
+    }
+    .submit-btn:hover { background-color: var(--primary-hover); }
+  </style>
+
+  <script>
+    // 🔒 未登録・未ログインならここで弾く（sos-create.htmlと同じゲート）
+    (function(){
+      const isLoggedIn = sessionStorage.getItem('wannyanSOS_loggedIn');
+      const hasProfile = localStorage.getItem('wanSOS_profile');
+      if (isLoggedIn !== 'true' && !hasProfile) {
+        alert("投稿の編集・状態変更を行うにはユーザー登録が必要です。");
+        window.location.href = "../register.html";
+      }
+    })();
+  </script>
+</head>
+
+<body>
+
+  <!-- 📌 最上部：共通固定ヘッダー -->
+  <div class="app-top-bar">
+    <button type="button" class="top-btn" onclick="goBackSafe()">← 戻る</button>
+    <div class="top-title">🐕🐈 ワンニャンSOS | 投稿管理</div>
+    <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
+  </div>
+
+  <!-- 🍔 右側スライドナビゲーション -->
+  <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+  <div id="sideDrawer" class="side-drawer">
+    <div class="drawer-header">
+      <span>🐾 ワンニャンSOS メニュー</span>
+      <button class="drawer-close-btn" onclick="toggleMenu()">✕</button>
+    </div>
+    <a href="home.html" class="drawer-menu-item">🏠 ホーム（トップ）</a>
+    <a href="sos.html" class="drawer-menu-item" style="color: #00873c;">📦 状況・支援一覧</a>
+    <a href="sos-create.html" class="drawer-menu-item">📝 状況・支援を登録する</a>
+    <a href="mypage.html" class="drawer-menu-item">👤 マイページ</a>
+    <a href="../guide.html" class="drawer-menu-item">📄 使い方案内</a>
+    <a href="../info.html" class="drawer-menu-item">ℹ️ 運営情報</a>
+    <a href="../disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
+    <a href="../terms.html" class="drawer-menu-item">📜 利用規約</a>
+    <a href="../privacy.html" class="drawer-menu-item">🔒 プライバシーポリシー</a>
+    <button onclick="logout()" class="drawer-menu-item" style="background:#fff5f5; color:#c53030; border-color:#feb2b2; width:100%; cursor:pointer;">🚪 ログアウト</button>
+  </div>
+
+  <div class="form-container">
+    <form id="editForm">
+
+      <!-- 募集状況 -->
+      <div class="form-group">
+        <label>📌 現在の募集状況</label>
+        <div class="chip-group" id="statusGroup">
+          <button type="button" class="chip active" onclick="selectChip(this, 'status')">🔴 募集中</button>
+          <button type="button" class="chip" onclick="selectChip(this, 'status')">✅ 支援完了</button>
+          <button type="button" class="chip" onclick="selectChip(this, 'status')">⚠️ 取り消し</button>
+        </div>
+        <input type="hidden" id="ticket_status" value="open">
+      </div>
+
+      <!-- 完了・取り消し理由 -->
+      <div class="form-group" id="reasonBox" style="display: none;">
+        <label for="status_reasonInput">💬 理由・詳細（任意）</label>
+        <input type="text" id="status_reasonInput" class="scroll-select" placeholder="例：この掲示板で届きました / 間違えて投稿したため">
+      </div>
+
+      <!-- ① 時間的な目安 -->
+      <div class="form-group">
+        <label>① 時間的な目安</label>
+        <div class="chip-group" id="timeframe-group">
+          <button type="button" class="chip active" onclick="selectChip(this, 'timeframe')">2〜3日以内</button>
+          <button type="button" class="chip" onclick="selectChip(this, 'timeframe')">1週間以内</button>
+          <button type="button" class="chip" onclick="selectChip(this, 'timeframe')">持続的</button>
+        </div>
+        <input type="hidden" id="timeframe-input" name="timeframe" value="2〜3日以内">
+      </div>
+
+      <!-- ② エリア -->
+      <div class="form-group">
+        <label for="areaSelect">② エリア</label>
+        <select id="areaSelect" name="area" class="scroll-select" required>
+          <option value="">選択してください</option>
+          <option value="熊本市">熊本市</option>
+          <option value="八代市">八代市</option>
+          <option value="水俣市">水俣市</option>
+          <option value="山鹿市">山鹿市</option>
+          <option value="菊池市">菊池市</option>
+          <option value="宇土市">宇土市</option>
+          <option value="上天草市">上天草市</option>
+          <option value="宇城市">宇城市</option>
+          <option value="天草市">天草市</option>
+          <option value="合志市">合志市</option>
+          <option value="上益城郡">上益城郡</option>
+          <option value="下益城郡">下益城郡</option>
+          <option value="菊池郡">菊池郡</option>
+          <option value="阿蘇郡">阿蘇郡</option>
+          <option value="八代郡">八代郡</option>
+          <option value="葦北郡">葦北郡</option>
+        </select>
+      </div>
+
+      <!-- ③ 対象動物 -->
+      <div class="form-group">
+        <label>③ 対象動物</label>
+        <div class="chip-group" id="animal-group">
+          <button type="button" class="chip active" onclick="selectChip(this, 'animal')">犬</button>
+          <button type="button" class="chip" onclick="selectChip(this, 'animal')">猫</button>
+          <button type="button" class="chip" onclick="selectChip(this, 'animal')">犬猫両方</button>
+        </div>
+        <input type="hidden" id="animal-input" name="animal" value="犬">
+      </div>
+
+      <!-- ④ 頭数 -->
+      <div class="form-group">
+        <label>④ 頭数</label>
+        <div class="chip-group" id="count-group">
+          <button type="button" class="chip active" onclick="selectChip(this, 'count')">1〜3頭</button>
+          <button type="button" class="chip" onclick="selectChip(this, 'count')">4〜9頭</button>
+          <button type="button" class="chip" onclick="selectChip(this, 'count')">10〜19頭</button>
+          <button type="button" class="chip" onclick="selectChip(this, 'count')">20頭以上</button>
+        </div>
+        <input type="hidden" id="count-input" name="count" value="1〜3頭">
+      </div>
+
+      <!-- ⑤ 物資大カテゴリ -->
+      <div class="form-group">
+        <label>⑤ 物資大カテゴリ</label>
+        <div class="chip-group" id="categoryMain-group">
+          <button type="button" class="chip active" onclick="selectChip(this, 'categoryMain')">ペットフード</button>
+          <button type="button" class="chip" onclick="selectChip(this, 'categoryMain')">ペットシーツ</button>
+          <button type="button" class="chip" onclick="selectChip(this, 'categoryMain')">タオル類</button>
+          <button type="button" class="chip" onclick="selectChip(this, 'categoryMain')">その他</button>
+        </div>
+        <input type="hidden" id="categoryMain-input" name="categoryMain" value="ペットフード">
+      </div>
+
+      <!-- ⑥ 細目カテゴリ -->
+      <div class="form-group">
+        <label>⑥ 細目カテゴリ</label>
+        <div class="chip-group" id="categorySub-group">
+          <button type="button" class="chip active" onclick="selectChip(this, 'categorySub')">ウェット</button>
+          <button type="button" class="chip" onclick="selectChip(this, 'categorySub')">ドライ</button>
+          <button type="button" class="chip" onclick="selectChip(this, 'categorySub')">レギュラー</button>
+          <button type="button" class="chip" onclick="selectChip(this, 'categorySub')">ワイド</button>
+          <button type="button" class="chip" onclick="selectChip(this, 'categorySub')">その他</button>
+        </div>
+        <input type="hidden" id="categorySub-input" name="categorySub" value="ウェット">
+      </div>
+
+      <!-- ⑦ 投稿者属性 -->
+      <div class="form-group">
+        <label>⑦ 投稿者属性</label>
+        <div class="chip-group" id="attribute-group">
+          <button type="button" class="chip active" onclick="selectChip(this, 'attribute')">施設</button>
+          <button type="button" class="chip" onclick="selectChip(this, 'attribute')">個人</button>
+        </div>
+        <input type="hidden" id="attribute-input" name="attribute" value="施設">
+      </div>
+
+      <!-- ⑧ 備考欄（自由記述） -->
+      <div class="form-group">
+        <label for="descriptionInput">⑧ 備考欄・詳細（自由記述）</label>
+        <textarea id="descriptionInput" name="description" class="form-textarea" placeholder="例：〇〇メーカーのフードだと助かります、受渡しの希望時間などがあればご記入ください"></textarea>
+      </div>
+
+      <input type="hidden" id="itemCreatorId" value="">
+
+      <button type="submit" id="submitBtn" class="submit-btn">
+        ✏️ 内容・状態を保存（更新）する
+      </button>
+
+    </form>
+  </div>
+
+  <script>
+    function logout() {
+      if (confirm("ログアウトしますか？")) {
+        localStorage.removeItem('wanSOS_user_phone');
+        localStorage.removeItem('wanSOS_profile');
+        sessionStorage.removeItem('wannyanSOS_loggedIn');
+        window.location.href = '../index.html';
+      }
+    }
+
+    function toggleMenu() {
+      const drawer = document.getElementById('sideDrawer');
+      const overlay = document.getElementById('menuOverlay');
+      const isOpen = drawer.classList.contains('open');
+      if (isOpen) {
+        drawer.classList.remove('open');
+        overlay.style.display = 'none';
+      } else {
+        drawer.classList.add('open');
+        overlay.style.display = 'block';
+      }
+    }
+
+    function goBackSafe() {
+      if (window.history.length > 1) {
+        history.back();
+      } else {
+        window.location.href = 'sos.html';
+      }
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const sosId = urlParams.get('id');
+
+    // 🔑 現在ログイン中のユーザーIDを取得する共通関数
+    async function getCurrentUserId() {
+      let currentUserId = '';
+      try {
+        const profile = JSON.parse(localStorage.getItem('wanSOS_profile') || '{}');
+        currentUserId = profile.auth_user_id || profile.phone || '';
+      } catch(e){}
+
+      if (window.supabaseClient) {
+        try {
+          const { data: { session } } = await window.supabaseClient.auth.getSession();
+          if (session && session.user) {
+            currentUserId = session.user.id;
+          }
+        } catch(e){}
+      }
+      return currentUserId;
+    }
+
+    document.addEventListener("DOMContentLoaded", loadTicketData);
+
+    async function loadTicketData() {
+      if (!sosId) {
+        alert("投稿IDが指定されていません。");
+        window.location.href = "sos.html";
+        return;
+      }
+
+      let item = null;
+
+      try {
+        const localSaved = localStorage.getItem('wanSOS_posts');
+        if (localSaved) {
+          const posts = JSON.parse(localSaved);
+          item = posts.find(p => String(p.id) === String(sosId));
+        }
+      } catch(e) {}
+
+      if (!item && window.supabaseClient) {
+        try {
+          const { data, error } = await window.supabaseClient
+            .from('sos_items')
+            .select('*')
+            .eq('id', sosId)
+            .single();
+
+          if (!error && data) { item = data; }
+        } catch(err) {}
+      }
+
+      if (!item) {
+        alert("該当の投稿が見つかりませんでした。");
+        window.location.href = "sos.html";
+        return;
+      }
+
+      const currentUserId = await getCurrentUserId();
+
+      // 🔒 本人確認：未ログイン、または本人以外は編集不可（ここが今回の修正の核心）
+      if (!currentUserId) {
+        alert("⚠️ ログイン情報が確認できませんでした。登録済みの端末・アカウントで開き直してください。");
+        window.location.href = "sos.html";
+        return;
+      }
+      if (item.creator_id && item.creator_id !== currentUserId) {
+        alert("⚠️ この投稿を編集する権限がありません。（ご自身の投稿のみ編集できます）");
+        window.location.href = "sos.html";
+        return;
+      }
+
+      document.getElementById('itemCreatorId').value = item.creator_id || '';
+
+      // ステータス反映
+      const currentStatus = item.status || 'open';
+      document.getElementById('ticket_status').value = currentStatus;
+      setChipByValue('statusGroup', currentStatus === 'completed' ? '✅ 支援完了' : currentStatus === 'cancelled' ? '⚠️ 取り消し' : '🔴 募集中');
+      toggleReasonBox(currentStatus);
+
+      if (item.status_reason) {
+        document.getElementById('status_reasonInput').value = item.status_reason;
+      }
+
+      // 各項目反映
+      if (item.timeframe) {
+        document.getElementById('timeframe-input').value = item.timeframe;
+        setChipByValue('timeframe-group', item.timeframe);
+      }
+      if (item.city || item.area) {
+        const cleanArea = (item.city || item.area || '').replace(/ブロック/g, '');
+        document.getElementById('areaSelect').value = cleanArea;
+      }
+      if (item.animal_type) {
+        document.getElementById('animal-input').value = item.animal_type;
+        setChipByValue('animal-group', item.animal_type);
+      }
+      if (item.count) {
+        document.getElementById('count-input').value = item.count;
+        setChipByValue('count-group', item.count);
+      }
+      if (item.category) {
+        document.getElementById('categoryMain-input').value = item.category;
+        setChipByValue('categoryMain-group', item.category);
+      }
+      if (item.category_sub) {
+        document.getElementById('categorySub-input').value = item.category_sub;
+        setChipByValue('categorySub-group', item.category_sub);
+      }
+      if (item.attribute) {
+        document.getElementById('attribute-input').value = item.attribute;
+        setChipByValue('attribute-group', item.attribute);
+      }
+      if (item.description) {
+        // 古い機械的定型文の残骸だけを除外して純粋な備考欄だけをtextareaに戻す
+        let cleanDesc = item.description
+          .replace(/【対象頭数】[^\n]*/g, '')
+          .replace(/【希望物資】[^\n]*/g, '')
+          .replace(/【受け取り】[^\n]*/g, '')
+          .replace(/【地域】[^\n]*/g, '')
+          .replace(/【緊急度】[^\n]*/g, '')
+          .replace(/※お届.*$/g, '')
+          .trim();
+        document.getElementById('descriptionInput').value = cleanDesc;
+      }
+    }
+
+    function setChipByValue(groupId, val) {
+      const group = document.getElementById(groupId);
+      group.querySelectorAll('.chip').forEach(chip => {
+        if (chip.textContent.includes(val) || val.includes(chip.textContent.trim())) {
+          chip.classList.add('active');
+          const hiddenId = groupId.replace('-group', '-input');
+          const hiddenEl = document.getElementById(hiddenId);
+          if (hiddenEl) hiddenEl.value = chip.textContent.trim();
+        } else {
+          chip.classList.remove('active');
+        }
+      });
+    }
+
+    function selectChip(button, groupName) {
+      const group = document.getElementById(groupName + '-group');
+      group.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
+      button.classList.add('active');
+
+      if (groupName === 'status') {
+        const text = button.textContent;
+        let val = 'open';
+        if (text.includes('支援完了')) val = 'completed';
+        else if (text.includes('取り消し')) val = 'cancelled';
+        document.getElementById('ticket_status').value = val;
+        toggleReasonBox(val);
+      } else {
+        document.getElementById(groupName + '-input').value = button.textContent.trim();
+      }
+    }
+
+    function toggleReasonBox(status) {
+      const reasonBox = document.getElementById('reasonBox');
+      if (status === 'open') {
+        reasonBox.style.display = 'none';
+        document.getElementById('status_reasonInput').value = '';
+      } else {
+        reasonBox.style.display = 'block';
+      }
+    }
+
+    document.getElementById('editForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      // 🔒 保存時にも二重で本人確認（画面を開いたままログアウトされるケースに備える）
+      const currentUserId = await getCurrentUserId();
+      if (!currentUserId) {
+        alert("⚠️ ログイン情報が確認できませんでした。登録済みの端末・アカウントで開き直してください。");
+        return;
+      }
+
+      const itemCreatorId = document.getElementById('itemCreatorId').value;
+      if (itemCreatorId && itemCreatorId !== currentUserId) {
+        alert("⚠️ 権限エラー：他人の投稿を書き換えることはできません。");
+        return;
+      }
+
+      const areaSelect = document.getElementById('areaSelect').value;
+      if (!areaSelect) {
+        alert('エリア（市郡）を選択してください。');
+        return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = "保存中...";
+
+      const status = document.getElementById('ticket_status').value;
+      const statusReason = document.getElementById('status_reasonInput').value;
+      const timeframe = document.getElementById('timeframe-input').value;
+      const animal = document.getElementById('animal-input').value;
+      const count = document.getElementById('count-input').value;
+      const categoryMain = document.getElementById('categoryMain-input').value;
+      const categorySub = document.getElementById('categorySub-input').value;
+      const attribute = document.getElementById('attribute-input').value;
+      const description = document.getElementById('descriptionInput').value;
+
+      const updatedSOS = {
+        status: status,
+        status_reason: statusReason,
+        title: `${areaSelect}｜${animal} ${count}（${categoryMain}）`,
+        timeframe: timeframe,
+        city: areaSelect,
+        area: areaSelect,
+        animal_type: animal,
+        count: count,
+        category: categoryMain,
+        category_sub: categorySub,
+        attribute: attribute,
+        description: description
+      };
+
+      try {
+        try {
+          const localSaved = localStorage.getItem('wanSOS_posts');
+          if (localSaved) {
+            let posts = JSON.parse(localSaved);
+            posts = posts.map(p => String(p.id) === String(sosId) ? { ...p, ...updatedSOS } : p);
+            localStorage.setItem('wanSOS_posts', JSON.stringify(posts));
+          }
+        } catch(e){}
+
+        if (window.supabaseClient) {
+          const { error } = await window.supabaseClient
+            .from('sos_items')
+            .update(updatedSOS)
+            .eq('id', sosId);
+          if (error) {
+            console.warn("Supabase更新エラー:", error.message);
+          }
+        }
+
+        alert("投稿内容・状態を更新しました！");
+        window.location.href = `sos-detail.html?id=${sosId}`;
+      } catch (err) {
+        console.error("更新エラー:", err);
+        alert("更新に失敗しました：" + err.message);
+        btn.disabled = false;
+        btn.textContent = "✏️ 内容・状態を保存（更新）する";
+      }
+    });
+  </script>
+
+</body>
+</html>

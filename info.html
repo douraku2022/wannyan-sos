@@ -124,21 +124,14 @@
     <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
   </div>
 
-  <!-- 🍔 右側スライドメニュー -->
+  <!-- 🍔 右側スライドメニュー（ログイン状態でJSが中身を出し分けます） -->
   <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
   <div id="sideDrawer" class="side-drawer">
     <div class="drawer-header">
       <span>🐾 ワンニャンSOS メニュー</span>
       <button class="drawer-close-btn" onclick="toggleMenu()">✕</button>
     </div>
-    <a href="home.html" class="drawer-menu-item">🏠 ホーム（廊下）</a>
-    <a href="sos.html" class="drawer-menu-item">📦 不足物資一覧</a>
-    <a href="sos-create.html" class="drawer-menu-item" style="color: #c53030;">📝 不足物資を投稿する</a>
-    <a href="mypage.html" class="drawer-menu-item">👤 マイページ</a>
-    <a href="guide.html" class="drawer-menu-item">📄 使い方案内</a>
-    <a href="info.html" class="drawer-menu-item">ℹ️ 運営情報</a>
-    <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
-    <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
+    <div id="drawerMenuItems"></div>
   </div>
 
   <div class="info-container" style="margin-top: 10px;">
@@ -182,6 +175,36 @@
   </div>
 
   <script>
+    // 🔐 ログイン状態でメニューの中身を出し分ける（未登録者に家の中を見せないため）
+    (function(){
+      const isReturningUser = !!localStorage.getItem('wanSOS_user_phone');
+      const container = document.getElementById('drawerMenuItems');
+      if (isReturningUser) {
+        container.innerHTML = `
+          <a href="member/home.html" class="drawer-menu-item">🏠 ホーム</a>
+          <a href="member/sos.html" class="drawer-menu-item">📦 状況・支援一覧</a>
+          <a href="member/sos-create.html" class="drawer-menu-item" style="color: #c53030;">📝 状況・支援を登録する</a>
+          <a href="member/mypage.html" class="drawer-menu-item">👤 マイページ</a>
+          <a href="guide.html" class="drawer-menu-item">📄 使い方案内</a>
+          <a href="info.html" class="drawer-menu-item" style="color: #00873c;">ℹ️ 運営情報</a>
+          <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
+          <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
+          <a href="privacy.html" class="drawer-menu-item">🔒 プライバシーポリシー</a>
+        `;
+      } else {
+        container.innerHTML = `
+          <a href="index.html" class="drawer-menu-item">🏠 トップページ</a>
+          <a href="login.html" class="drawer-menu-item" style="color: #2b6cb0;">🔑 ログイン</a>
+          <a href="register.html" class="drawer-menu-item" style="color: #c53030;">✨ 新規ユーザー登録</a>
+          <a href="guide.html" class="drawer-menu-item">📄 使い方案内</a>
+          <a href="info.html" class="drawer-menu-item" style="color: #00873c;">ℹ️ 運営情報</a>
+          <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
+          <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
+          <a href="privacy.html" class="drawer-menu-item">🔒 プライバシーポリシー</a>
+        `;
+      }
+    })();
+
     function toggleMenu() {
       const drawer = document.getElementById('sideDrawer');
       const overlay = document.getElementById('menuOverlay');

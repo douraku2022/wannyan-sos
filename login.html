@@ -31,7 +31,7 @@
     .top-btn:active { background: rgba(255,255,255,0.3); }
     .top-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
 
-    /* 🍔 右側スライドナビゲーション（全7項目統一） */
+    /* 🍔 右側スライドナビゲーション（公開ページのみ） */
     .menu-overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.5); z-index: 1001;
@@ -100,26 +100,25 @@
 
   <!-- 📌 最上部：共通固定ヘッダー -->
   <div class="app-top-bar">
-    <button type="button" class="top-btn" onclick="history.back()">← 戻る</button>
+    <button type="button" class="top-btn" onclick="window.location.href='index.html'">← 戻る</button>
     <div class="top-title">🐕🐈 ワンニャンSOS | ログイン</div>
     <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
   </div>
 
-  <!-- 🍔 右側スライドメニュー（全7項目統一） -->
+  <!-- 🍔 右側スライドメニュー（未ログイン向け・公開ページのみ） -->
   <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
   <div id="sideDrawer" class="side-drawer">
     <div class="drawer-header">
       <span>🐾 ワンニャンSOS メニュー</span>
       <button class="drawer-close-btn" onclick="toggleMenu()">✕</button>
     </div>
-    <a href="index.html" class="drawer-menu-item">🏠 ホーム（トップ）</a>
-    <a href="sos.html" class="drawer-menu-item">📦 不足物資一覧</a>
-    <a href="sos-create.html" class="drawer-menu-item" style="color: #c53030;">📝 不足物資を投稿する</a>
-    <a href="mypage.html" class="drawer-menu-item">👤 マイページ</a>
+    <a href="index.html" class="drawer-menu-item">🏠 トップページ</a>
+    <a href="register.html" class="drawer-menu-item" style="color: #c53030;">✨ 新規ユーザー登録</a>
     <a href="guide.html" class="drawer-menu-item">📄 使い方案内</a>
-    <a href="info.html" class="drawer-menu-item">ℹ️ 運営情報・お知らせ</a>
+    <a href="info.html" class="drawer-menu-item">ℹ️ 運営情報</a>
     <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
     <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
+    <a href="privacy.html" class="drawer-menu-item">🔒 プライバシーポリシー</a>
   </div>
 
   <div class="login-container">
@@ -171,7 +170,7 @@
     // 電話番号を、Supabase Auth用の疑似メールアドレスに変換する共通ルール
     // register.html 側でも必ず同じ変換ルールを使うこと
     function phoneToPseudoEmail(phone) {
-      return `${phone}@wannyansos-users.com`;
+      return `${phone}@gmail.com`;
     }
 
     // 4桁の暗証番号を、Supabaseの最低文字数(6文字)を満たすパスワードに変換する
@@ -241,7 +240,7 @@
         }
 
         alert("🎉 ログインしました！マイページへ移動します。");
-        window.location.href = "mypage.html";
+        window.location.href = "member/home.html";
       } catch (err) {
         alert("ログイン処理中にエラーが発生しました。");
         submitBtn.disabled = false;

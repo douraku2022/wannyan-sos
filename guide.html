@@ -130,21 +130,14 @@
     <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
   </div>
 
-  <!-- 🍔 右スライドメニュー（全7項目統一） -->
+  <!-- 🍔 右スライドメニュー（ログイン状態でJSが中身を出し分けます） -->
   <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
   <div id="sideDrawer" class="side-drawer">
     <div class="drawer-header">
       <span>🐾 ワンニャンSOS メニュー</span>
       <button class="drawer-close-btn" onclick="toggleMenu()">✕</button>
     </div>
-    <a href="home.html" class="drawer-menu-item">🏠 ホーム（トップ）</a>
-    <a href="sos.html" class="drawer-menu-item">📦 不足物資一覧</a>
-    <a href="sos-create.html" class="drawer-menu-item" style="color: #c53030;">📝 不足物資を投稿する</a>
-    <a href="mypage.html" class="drawer-menu-item">👤 マイページ</a>
-    <a href="guide.html" class="drawer-menu-item">📄 使い方案内</a>
-    <a href="info.html" class="drawer-menu-item">ℹ️ 運営情報</a>
-    <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
-    <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
+    <div id="drawerMenuItems"></div>
   </div>
 
   <div class="guide-container">
@@ -153,7 +146,7 @@
     <div class="guide-card">
       <div class="guide-title">📦 物資が必要な方（SOS投稿）</div>
       <div><span class="step-badge">STEP 1</span> ユーザー登録をする</div>
-      <div><span class="step-badge">STEP 2</span> 「不足物資を投稿する」で必要な項目を選ぶ→投稿</div>
+      <div><span class="step-badge">STEP 2</span> 「状況・支援を登録する」で「不足している」を選び、必要な項目を選ぶ→投稿</div>
       <div><span class="step-badge">STEP 3</span> 支援者から個別チャットで連絡→受け取りの調整</div>
       <div><span class="step-badge">STEP 4</span> 物資を受領→マイページから状況を変更→「支援完了」</div>
     </div>
@@ -162,8 +155,8 @@
     <div class="guide-card">
       <div class="guide-title">🤝 支援をしたい方</div>
       <div><span class="step-badge">STEP 1</span> ユーザー登録をする</div>
-      <div><span class="step-badge">STEP 2</span> 「不足物資一覧」から支援可能な投稿を探す</div>
-      <div><span class="step-badge">STEP 3</span> 「支援を申し出る」→個別チャットで調整</div>
+      <div><span class="step-badge">STEP 2</span> 「状況・支援一覧」から支援可能な投稿を探す、または「支援できる」で自分から投稿する</div>
+      <div><span class="step-badge">STEP 3</span> 個別チャットで受け渡しを調整</div>
       <div><span class="step-badge">STEP 4</span> お届けを実行する💞</div>
     </div>
 
@@ -200,6 +193,36 @@
   </div>
 
   <script>
+    // 🔐 ログイン状態でメニューの中身を出し分ける（未登録者に家の中を見せないため）
+    (function(){
+      const isReturningUser = !!localStorage.getItem('wanSOS_user_phone');
+      const container = document.getElementById('drawerMenuItems');
+      if (isReturningUser) {
+        container.innerHTML = `
+          <a href="member/home.html" class="drawer-menu-item">🏠 ホーム</a>
+          <a href="member/sos.html" class="drawer-menu-item">📦 状況・支援一覧</a>
+          <a href="member/sos-create.html" class="drawer-menu-item" style="color: #c53030;">📝 状況・支援を登録する</a>
+          <a href="member/mypage.html" class="drawer-menu-item">👤 マイページ</a>
+          <a href="guide.html" class="drawer-menu-item" style="color: #00873c;">📄 使い方案内</a>
+          <a href="info.html" class="drawer-menu-item">ℹ️ 運営情報</a>
+          <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
+          <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
+          <a href="privacy.html" class="drawer-menu-item">🔒 プライバシーポリシー</a>
+        `;
+      } else {
+        container.innerHTML = `
+          <a href="index.html" class="drawer-menu-item">🏠 トップページ</a>
+          <a href="login.html" class="drawer-menu-item" style="color: #2b6cb0;">🔑 ログイン</a>
+          <a href="register.html" class="drawer-menu-item" style="color: #c53030;">✨ 新規ユーザー登録</a>
+          <a href="guide.html" class="drawer-menu-item" style="color: #00873c;">📄 使い方案内</a>
+          <a href="info.html" class="drawer-menu-item">ℹ️ 運営情報</a>
+          <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
+          <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
+          <a href="privacy.html" class="drawer-menu-item">🔒 プライバシーポリシー</a>
+        `;
+      }
+    })();
+
     function toggleMenu() {
       const drawer = document.getElementById('sideDrawer');
       const overlay = document.getElementById('menuOverlay');

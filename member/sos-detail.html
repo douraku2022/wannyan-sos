@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>詳細情報｜ワンニャンSOS熊本</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../supabase-config.js"></script>
+
+  <style>
+    :root {
+      --primary-color: #e67e22;
+      --bg-color: #f9f9f9;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --border-color: #dddddd;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 64px 16px 40px 16px;
+      background-color: var(--bg-color); color: var(--text-color);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      display: flex; justify-content: center;
+    }
+
+    /* 📌 最上部：共通固定ヘッダー */
+    .app-top-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 50px;
+      background: #00873c; color: #ffffff; border-bottom: 2px solid #005a28;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 12px;
+      z-index: 1000; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .top-btn {
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+      color: #ffffff; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold;
+      text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 4px;
+    }
+    .top-btn:active { background: rgba(255,255,255,0.3); }
+    .top-title { font-size: 14px; font-weight: bold; letter-spacing: 0.5px; }
+
+    /* 🍔 右側スライドナビゲーション */
+    .menu-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); z-index: 1001;
+    }
+    .side-drawer {
+      position: fixed; top: 0; right: -260px; width: 240px; height: 100%;
+      background: linear-gradient(180deg, #ecefe6 0%, #d8ded6 100%);
+      border-left: 3px solid #9aa5b0; z-index: 1002;
+      box-shadow: -4px 0 16px rgba(0,0,0,0.2); transition: right 0.25s ease-in-out;
+      display: flex; flex-direction: column; padding: 12px; gap: 10px;
+    }
+    .side-drawer.open { right: 0; }
+    .drawer-header {
+      background: #00873c; color: #fff; border-radius: 8px; padding: 10px;
+      text-align: center; font-size: 13px; font-weight: bold; border: 1px solid #005a28;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .drawer-close-btn { background: none; border: none; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; }
+    .drawer-menu-item {
+      background: #f8fafc; border: 2px solid #a0aec0; border-radius: 10px; padding: 12px;
+      color: #2d3748; text-decoration: none; font-size: 13px; font-weight: bold;
+      display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 0 #cbd5e0;
+    }
+
+    .detail-container { width: 100%; max-width: 480px; box-sizing: border-box; }
+
+    /* 📄 詳細カード */
+    .detail-card {
+      background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px;
+      padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); color: var(--text-color);
+    }
+
+    .detail-header-row {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 6px;
+    }
+    .badge { font-size: 0.85rem; padding: 4px 10px; border-radius: 6px; font-weight: bold; color: #fff; }
+    .badge-sos { background-color: #c53030; }
+    .badge-offer { background-color: #2b6cb0; }
+    .badge-tag { background: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0; }
+    .badge-completed { background-color: #2f855a; }
+    .badge-cancelled { background-color: #718096; }
+
+    .detail-title {
+      font-size: 1.15rem; font-weight: bold; color: #1a202c; margin: 12px 0 16px 0;
+      border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; line-height: 1.4;
+    }
+
+    .detail-grid {
+      display: flex; flex-direction: column; gap: 10px; font-size: 0.95rem; line-height: 1.6; margin-bottom: 16px;
+    }
+    .detail-grid div { border-bottom: 1px dashed #e2e8f0; padding-bottom: 6px; }
+
+    .detail-line { border-bottom: 1px solid #e2e8f0; margin: 16px 0; }
+
+    .status-reason-box {
+      background: #f0fff4; border: 1px solid #9ae6b4; border-radius: 8px; padding: 10px;
+      font-size: 0.88rem; color: #22543d; margin-bottom: 16px; font-weight: bold;
+    }
+
+    .notice-box {
+      background: #fff5f5; border: 1px solid #feb2b2; border-radius: 8px; padding: 10px;
+      font-size: 0.82rem; color: #9b2c2c; text-align: center; margin-bottom: 20px; line-height: 1.5;
+    }
+
+    /* アクションボタン群 */
+    .action-group { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+    .support-btn {
+      width: 100%; background: #c53030; color: #ffffff; border: none; border-radius: 10px;
+      padding: 14px; font-size: 1rem; font-weight: bold; text-align: center; text-decoration: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: block; cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .support-btn:hover { background: #9b2c2c; }
+
+    .edit-btn {
+      width: 100%; background: #edf2f7; color: #4a5568; border: 1px solid #cbd5e0; border-radius: 10px;
+      padding: 12px; font-size: 0.9rem; font-weight: bold; text-align: center; text-decoration: none; display: block;
+    }
+
+    .loading-box {
+      background: #fff; border: 1px solid #cbd5e0; border-radius: 12px; padding: 30px; text-align: center; color: #718096; font-size: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 📌 最上部：共通固定ヘッダー -->
+  <div class="app-top-bar">
+    <button type="button" class="top-btn" onclick="history.back()">← 戻る</button>
+    <div class="top-title">🐕🐈 ワンニャンSOS | 詳細情報</div>
+    <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
+  </div>
+
+  <!-- 🍔 右側スライドナビゲーション -->
+  <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+  <div id="sideDrawer" class="side-drawer">
+    <div class="drawer-header">
+      <span>🐾 ワンニャンSOS メニュー</span>
+      <button class="drawer-close-btn" onclick="toggleMenu()">✕</button>
+    </div>
+    <a href="home.html" class="drawer-menu-item">🏠 ホーム（トップ）</a>
+    <a href="sos.html" class="drawer-menu-item" style="color: #00873c;">📦 状況・支援一覧</a>
+    <a href="sos-create.html" class="drawer-menu-item">📝 状況・支援を登録する</a>
+    <a href="mypage.html" class="drawer-menu-item">👤 マイページ</a>
+    <a href="../guide.html" class="drawer-menu-item">📄 使い方案内</a>
+    <a href="../info.html" class="drawer-menu-item">ℹ️ 運営情報</a>
+    <a href="../disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
+    <a href="../terms.html" class="drawer-menu-item">📜 利用規約</a>
+    <a href="../privacy.html" class="drawer-menu-item">🔒 プライバシーポリシー</a>
+    <button onclick="logout()" class="drawer-menu-item" style="background:#fff5f5; color:#c53030; border-color:#feb2b2; width:100%; cursor:pointer;">🚪 ログアウト</button>
+  </div>
+
+  <div class="detail-container">
+    <div id="detailContent">
+      <div class="loading-box">投稿情報を読み込み中...</div>
+    </div>
+  </div>
+
+  <script>
+    // 🔐 未ログインガード（家の中に入るためのチェック。home.htmlと同じ基準）
+    (function(){
+      const savedPhone = localStorage.getItem('wanSOS_user_phone');
+      if (!savedPhone) {
+        window.location.href = '../index.html';
+      }
+    })();
+
+    function logout() {
+      if (confirm("ログアウトしますか？")) {
+        localStorage.removeItem('wanSOS_user_phone');
+        localStorage.removeItem('wanSOS_profile');
+        sessionStorage.removeItem('wannyanSOS_loggedIn');
+        window.location.href = '../index.html';
+      }
+    }
+
+    function toggleMenu() {
+      const drawer = document.getElementById('sideDrawer');
+      const overlay = document.getElementById('menuOverlay');
+      const isOpen = drawer.classList.contains('open');
+      if (isOpen) {
+        drawer.classList.remove('open');
+        overlay.style.display = 'none';
+      } else {
+        drawer.classList.add('open');
+        overlay.style.display = 'block';
+      }
+    }
+
+    // 🔑 現在ログイン中のユーザーID（sos-edit.htmlと同じロジック）
+    async function getCurrentUserId() {
+      let currentUserId = '';
+      try {
+        const profile = JSON.parse(localStorage.getItem('wanSOS_profile') || '{}');
+        currentUserId = profile.auth_user_id || profile.phone || '';
+      } catch(e){}
+
+      if (window.supabaseClient) {
+        try {
+          const { data: { session } } = await window.supabaseClient.auth.getSession();
+          if (session && session.user) {
+            currentUserId = session.user.id;
+          }
+        } catch(e){}
+      }
+      return currentUserId;
+    }
+
+    document.addEventListener("DOMContentLoaded", fetchDetail);
+
+    async function fetchDetail() {
+      const container = document.getElementById('detailContent');
+      const urlParams = new URLSearchParams(window.location.search);
+      const sosId = urlParams.get('id');
+
+      if (!sosId) {
+        container.innerHTML = '<div class="loading-box">投稿IDが指定されていません。</div>';
+        return;
+      }
+
+      let item = null;
+
+      // 1. ローカルストレージから該当IDを検索
+      try {
+        const localSaved = localStorage.getItem('wanSOS_posts');
+        if (localSaved) {
+          const posts = JSON.parse(localSaved);
+          item = posts.find(p => String(p.id) === String(sosId));
+        }
+      } catch(e) {
+        console.warn("ローカル読込エラー:", e);
+      }
+
+      // 2. なければSupabaseから取得
+      if (!item && window.supabaseClient) {
+        try {
+          const { data, error } = await window.supabaseClient
+            .from('sos_items')
+            .select('*')
+            .eq('id', sosId)
+            .single();
+
+          if (!error && data) {
+            item = data;
+          }
+        } catch (err) {
+          console.warn("Supabase読込スキップ:", err);
+        }
+      }
+
+      if (!item) {
+        container.innerHTML = '<div class="loading-box">該当の投稿が見つかりませんでした。</div>';
+        return;
+      }
+
+      const isSos = item.mode !== 'offer';
+      const badgeClass = isSos ? 'badge-sos' : 'badge-offer';
+      const badgeText = isSos ? '🆘 不足SOS' : '✳️ 支援オファー';
+
+      let statusBadgeHtml = '';
+      if (item.status === 'completed') {
+        statusBadgeHtml = '<span class="badge badge-completed">✅ 支援完了</span>';
+      } else if (item.status === 'cancelled') {
+        statusBadgeHtml = '<span class="badge badge-cancelled">⚠️ 取り消し</span>';
+      }
+
+      let statusReasonHtml = '';
+      if (item.status_reason) {
+        statusReasonHtml = `<div class="status-reason-box">✅ 状況：${item.status_reason}</div>`;
+      }
+
+      let dateStr = item.date;
+      if (!dateStr && item.created_at) {
+        const date = new Date(item.created_at);
+        dateStr = `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+      }
+      if (!dateStr) dateStr = '本日';
+
+      const posterName = item.poster_name || 'どうらくいちば';
+
+      // 🔒 本人確認：ハードコードをやめ、実際のログインセッションとcreator_idを照合する
+      const currentUserId = await getCurrentUserId();
+      const isOwner = !!(item.creator_id && currentUserId && item.creator_id === currentUserId);
+
+      container.innerHTML = `
+        <div class="detail-card">
+          <div class="detail-header-row">
+            ${statusBadgeHtml}
+            <span class="badge ${badgeClass}">${badgeText}</span>
+            <span class="badge badge-tag">目安: ${item.timeframe || '2〜3日以内'}</span>
+            <span class="badge badge-tag">属性: ${item.attribute || '施設'}</span>
+          </div>
+
+          <div class="detail-title">${item.title || '状況・支援詳細'}</div>
+
+          ${statusReasonHtml}
+
+          <div class="detail-grid">
+            <div>■ <strong>投稿者：</strong> ${posterName}</div>
+            <div>■ <strong>エリア：</strong> ${item.city || item.area || '未設定'}</div>
+            <div>■ <strong>対象動物：</strong> ${item.animal_type || '未指定'} (${item.count || '1〜3頭'})</div>
+            <div>■ <strong>物資カテゴリ：</strong> ${item.category || 'ペットフード'} / ${item.category_sub || 'ウェット'}</div>
+          </div>
+
+          <div class="detail-line"></div>
+
+          <div style="font-size: 0.9rem; color: #4a5568; line-height: 1.6; white-space: pre-wrap; margin-bottom: 16px;">
+            <strong>【詳細説明・ご事情】</strong><br>${item.description || '特記事項なし'}
+          </div>
+
+          <div class="notice-box">
+            ⚠️ 個別チャットで相互にご調整ください。
+          </div>
+
+          <div style="font-size: 0.8rem; color: #718096; text-align: center;">
+            投稿時刻：${dateStr}<br>
+            ID: ${item.id}
+          </div>
+
+          <div class="action-group">
+            <a href="chat.html?sos_id=${item.id}" class="support-btn">
+              🤝 個別チャットへ進む ➔
+            </a>
+
+            ${isOwner ? `<a href="sos-edit.html?id=${item.id}" class="edit-btn">✏️ 投稿内容・状態を変更する</a>` : ''}
+          </div>
+        </div>
+      `;
+    }
+  </script>
+
+</body>
+</html>
