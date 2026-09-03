@@ -4,28 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>状況・支援登録｜ワンニャンSOS熊本</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>運営情報・お知らせ｜ワンニャンSOS熊本</title>
+  <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../supabase-config.js"></script>
+  <script src="supabase-config.js"></script>
 
   <style>
-    :root {
-      --primary-color: #e67e22;
-      --primary-hover: #d35400;
-      --bg-color: #f9f9f9;
-      --card-bg: #ffffff;
-      --text-color: #333333;
-      --border-color: #dddddd;
-    }
-
+    * { box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      margin: 0;
-      padding: 60px 16px 40px 16px;
-      display: flex;
-      justify-content: center;
+      margin: 0; padding: 54px 0 40px 0;
+      background-color: #dbe2e8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     /* 📌 最上部：共通固定ヘッダー */
@@ -64,514 +55,246 @@
     .drawer-close-btn {
       background: none; border: none; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer;
     }
-
     .drawer-menu-item {
       background: #f8fafc; border: 2px solid #a0aec0; border-radius: 10px; padding: 12px;
       color: #2d3748; text-decoration: none; font-size: 13px; font-weight: bold;
       display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 0 #cbd5e0;
     }
+    .drawer-menu-item:active { transform: translateY(1px); box-shadow: 0 1px 0 #cbd5e0; }
 
-    .form-container {
-      background-color: var(--card-bg);
+    .info-container { max-width: 480px; margin: 0 auto; padding: 0 12px; }
+
+    .info-card {
+      background: #ffffff; border: 2px solid #b0bec5; border-radius: 12px;
+      padding: 16px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      font-size: 12px; color: #2d3748; line-height: 1.7;
+    }
+    .info-title {
+      font-size: 14px; font-weight: bold; color: #00873c; margin-bottom: 10px;
+      border-bottom: 2px solid #00873c; padding-bottom: 4px;
+    }
+
+    .contact-box {
+      background: #f7fafc; border: 1px solid #cbd5e0; border-radius: 8px;
+      padding: 10px; margin-top: 10px; font-size: 11px;
+    }
+
+    .news-item {
+      border-bottom: 1px dashed #e2e8f0; padding-bottom: 10px; margin-bottom: 10px;
+    }
+    .news-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .news-date { font-size: 10px; color: #718096; font-weight: bold; }
+    .news-item-title { font-weight: bold; margin-top: 2px; }
+    .news-item-body { font-size: 11px; color: #4a5568; margin-top: 4px; white-space: pre-wrap; }
+
+    .empty-box {
+      text-align: center; color: #a0aec0; font-size: 12px; padding: 12px 0;
+    }
+
+    /* 🎁 お辞儀・お気持ちボックスの専用スタイル */
+    .volunteer-notice-card {
       width: 100%;
-      max-width: 480px;
-      padding: 24px;
+      margin: 16px 0 30px 0;
+      background: #fffdf9;
+      border: 2px dashed #e2b714;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      box-sizing: border-box;
-    }
-
-    /* モード切替タブ */
-    .mode-switch-group {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 24px;
-    }
-
-    .mode-btn {
-      flex: 1;
-      padding: 12px;
-      border: 2px solid var(--border-color);
-      background-color: #ffffff;
-      color: #666666;
-      font-size: 0.95rem;
-      font-weight: bold;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .mode-btn.active {
-      border-color: var(--primary-color);
-      background-color: #fffaf0;
-      color: var(--primary-color);
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      font-size: 0.9rem;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-
-    /* チップボタン群 */
-    .chip-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .chip {
-      padding: 8px 14px;
-      border: 1px solid var(--border-color);
-      background-color: #ffffff;
-      color: var(--text-color);
-      font-size: 0.85rem;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .chip.active {
-      background-color: var(--primary-color);
-      color: #ffffff;
-      border-color: var(--primary-color);
-    }
-
-    /* スクロールセレクト & テキストエリア */
-    .scroll-select, .form-textarea {
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      background-color: #ffffff;
-      box-sizing: border-box;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
       font-family: inherit;
     }
-    .form-textarea {
-      resize: vertical;
-      min-height: 80px;
+    .volunteer-notice-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #f0e6d2;
+      padding-bottom: 8px;
     }
-
-    /* 送信ボタン */
-    .submit-btn {
-      width: 100%;
-      padding: 14px;
-      background-color: var(--primary-color);
-      color: #ffffff;
-      font-size: 1rem;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-      margin-top: 10px;
+    .bowing-icon { font-size: 20px; }
+    .notice-title { font-size: 13px; font-weight: bold; color: #744210; }
+    .volunteer-notice-body p {
+      font-size: 12px;
+      color: #4a5568;
+      line-height: 1.6;
+      margin-bottom: 8px;
     }
-
-    .submit-btn:hover {
-      background-color: var(--primary-hover);
-    }
-
-    /* 受付票 Modal */
-    .ticket-modal {
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; padding: 16px;
-    }
-    .ticket-paper {
-      background: #fffdfa; border: 2px dashed #8c7b6c; border-radius: 12px; width: 100%; max-width: 360px;
-      padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); font-family: monospace, sans-serif; color: #2d3748;
-    }
-    .ticket-type-badge {
-      display: inline-block; background: #2b6cb0; color: #fff; font-size: 12px; padding: 2px 8px;
-      border-radius: 4px; font-weight: bold; margin-bottom: 8px;
-    }
-    .ticket-line { border-bottom: 1px dashed #cbd5e0; margin: 10px 0; }
-    .ticket-close-btn {
-      width: 100%; background: #2b6cb0; color: #fff; border: none; padding: 12px;
-      border-radius: 8px; font-weight: bold; font-size: 14px; margin-top: 16px; cursor: pointer;
+    .volunteer-notice-body p:last-child { margin-bottom: 0; }
+    .notice-future {
+      background: #fefcbf;
+      border-left: 3px solid #d69e2e;
+      padding: 8px 10px;
+      border-radius: 0 6px 6px 0;
+      margin-top: 8px;
+      color: #744210 !important;
     }
   </style>
-
-  <script>
-    (function(){
-      const savedPhone = localStorage.getItem('wanSOS_user_phone');
-      if (!savedPhone) {
-        alert("投稿を行うにはユーザー登録が必要です。");
-        window.location.href = "../index.html";
-      }
-    })();
-  </script>
 </head>
+
 <body>
 
-  <!-- 📌 最上部：共通固定ヘッダー（安全な戻る処理を実装） -->
+  <!-- 📌 最上部：共通固定ヘッダー -->
   <div class="app-top-bar">
-    <button type="button" class="top-btn" onclick="goBackSafe()">← 戻る</button>
-    <div class="top-title">🐕🐈 ワンニャンSOS | 状況・支援登録</div>
+    <button type="button" class="top-btn" onclick="history.back()">← 戻る</button>
+    <div class="top-title">🐕🐈 ワンニャンSOS | 運営情報</div>
     <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
   </div>
 
-  <!-- 🍔 右側スライドナビゲーション -->
+  <!-- 🍔 右側スライドメニュー（ログイン状態でJSが中身を出し分けます） -->
   <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
   <div id="sideDrawer" class="side-drawer">
     <div class="drawer-header">
       <span>🐾 ワンニャンSOS メニュー</span>
       <button class="drawer-close-btn" onclick="toggleMenu()">✕</button>
     </div>
-    <a href="home.html" class="drawer-menu-item">🏠 ホーム（トップ）</a>
-    <a href="sos.html" class="drawer-menu-item" style="color: #00873c;">📦 状況・支援一覧</a>
-    <a href="sos-create.html" class="drawer-menu-item" style="color: #c53030;">📝 状況・支援を登録する</a>
-    <a href="mypage.html" class="drawer-menu-item">👤 マイページ</a>
-    <a href="../guide.html" class="drawer-menu-item">📄 使い方案内</a>
-    <a href="../info.html" class="drawer-menu-item">ℹ️ 運営情報</a>
-    <a href="../disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
-    <a href="../terms.html" class="drawer-menu-item">📜 利用規約</a>
-    <a href="../privacy.html" class="drawer-menu-item">🔒 プライバシーポリシー</a>
-    <button onclick="logout()" class="drawer-menu-item" style="background:#fff5f5; color:#c53030; border-color:#feb2b2; width:100%; cursor:pointer;">🚪 ログアウト</button>
+    <div id="drawerMenuItems"></div>
   </div>
 
-<div class="form-container">
-  <!-- モード選択（2択） -->
-  <div class="mode-switch-group">
-    <button type="button" class="mode-btn active" data-mode="sos" onclick="switchMode('sos')">🆘 不足している</button>
-    <button type="button" class="mode-btn" data-mode="offer" onclick="switchMode('offer')">✳️ 支援できる</button>
+  <div class="info-container" style="margin-top: 10px;">
+
+    <!-- 📢 お知らせ（announcementsテーブルから動的に読み込み） -->
+    <div class="info-card">
+      <div class="info-title">📢 お知らせ</div>
+      <div id="newsListContainer">
+        <div class="empty-box">読み込み中...</div>
+      </div>
+    </div>
+
+    <!-- 運営概要 -->
+    <div class="info-card">
+      <div class="info-title">ℹ️ 運営概要・方針</div>
+
+      <div style="line-height: 1.8;">
+        <div>■ <strong>運営団体：</strong> どうらくいちば犬猫支援プロジェクト</div>
+        <div>■ <strong>事業内容：</strong> 犬猫支援企画・タオルバンク・クリエイターズチャリティ</div>
+        <div>■ <strong>運営方針：</strong> 完全物資限定（金銭取引禁止）、安心・安全のクローズド運用</div>
+      </div>
+
+      <div class="contact-box">
+        <strong>【お問い合わせ窓口】</strong><br>
+        メール：dourakuichiba@gmail.com<br>
+        <span style="font-size: 10px; color: #718096;">※個別トラブルの仲裁等は行っておりません。規約をご確認の上ご利用ください。</span>
+      </div>
+    </div>
+
+    <!-- 📌 運営のお気持ち・ご案内ボックス -->
+    <div class="volunteer-notice-card">
+      <div class="volunteer-notice-header">
+        <span class="bowing-icon">🙇‍♀️</span>
+        <span class="notice-title">運営からのお願いとこれからのこと</span>
+      </div>
+      <div class="volunteer-notice-body">
+        <p>
+          当サービスは、ボランティアによる<strong>実証テスト段階</strong>として、個人情報の保護とコストを最優先に考えた「無料・最小限」の仕組みで運営しています。
+        </p>
+        <p>
+          「本当は通知機能とかも入れたい…！」という気持ちでいっぱいなのですが、これ以上サーバー費用や常時監視体制を強化すると事業レベルになってしまうため、今の仕組みが限界です。ごめんなさい！💦
+        </p>
+        <p class="notice-future">
+          もしゆくゆくは、この仕組みや理念に共感してくださる<strong>公的機関や自治体等の公的な主体へ、管理・運営をまるっと引き継いでいただける未来</strong>があれば…という想いでデザインしています。あらかじめ温かいご理解とご協力をいただけますと幸いです！🙇‍♂️
+        </p>
+      </div>
+    </div>
+
   </div>
 
-  <form id="entryForm" onsubmit="handleSubmit(event)">
-    
-    <!-- ① 時間的な目安 -->
-    <div class="form-group">
-      <label>① 時間的な目安</label>
-      <div class="chip-group" id="timeframe-group">
-        <button type="button" class="chip active" onclick="selectChip(this, 'timeframe')">2〜3日以内</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'timeframe')">1週間以内</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'timeframe')">持続的</button>
-      </div>
-      <input type="hidden" id="timeframe-input" name="timeframe" value="2〜3日以内">
-    </div>
+  <script>
+    // 🔐 ログイン状態でメニューの中身を出し分ける（未登録者に家の中を見せないため）
+    (function(){
+      const isReturningUser = !!localStorage.getItem('wanSOS_user_phone');
+      const container = document.getElementById('drawerMenuItems');
+      if (isReturningUser) {
+        container.innerHTML = `
+          <a href="member/home.html" class="drawer-menu-item">🏠 ホーム</a>
+          <a href="member/sos.html" class="drawer-menu-item">📦 状況・支援一覧</a>
+          <a href="member/sos-create.html" class="drawer-menu-item" style="color: #c53030;">📝 状況・支援を登録する</a>
+          <a href="member/mypage.html" class="drawer-menu-item">👤 マイページ</a>
+          <a href="guide.html" class="drawer-menu-item">📄 使い方案内</a>
+          <a href="info.html" class="drawer-menu-item" style="color: #00873c;">ℹ️ 運営情報</a>
+          <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
+          <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
+          <a href="privacy.html" class="drawer-menu-item">🔒 プライバシーポリシー</a>
+        `;
+      } else {
+        container.innerHTML = `
+          <a href="index.html" class="drawer-menu-item">🏠 トップページ</a>
+          <a href="login.html" class="drawer-menu-item" style="color: #2b6cb0;">🔑 ログイン</a>
+          <a href="register.html" class="drawer-menu-item" style="color: #c53030;">✨ 新規ユーザー登録</a>
+          <a href="guide.html" class="drawer-menu-item">📄 使い方案内</a>
+          <a href="info.html" class="drawer-menu-item" style="color: #00873c;">ℹ️ 運営情報</a>
+          <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
+          <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
+          <a href="privacy.html" class="drawer-menu-item">🔒 プライバシーポリシー</a>
+        `;
+      }
+    })();
 
-    <!-- ② エリア（市郡・スクロール選択） -->
-    <div class="form-group">
-      <label for="areaSelect">② エリア</label>
-      <select id="areaSelect" name="area" class="scroll-select" required>
-        <option value="">選択してください</option>
-        <option value="熊本市">熊本市</option>
-        <option value="八代市">八代市</option>
-        <option value="水俣市">水俣市</option>
-        <option value="山鹿市">山鹿市</option>
-        <option value="菊池市">菊池市</option>
-        <option value="宇土市">宇土市</option>
-        <option value="上天草市">上天草市</option>
-        <option value="宇城市">宇城市</option>
-        <option value="天草市">天草市</option>
-        <option value="合志市">合志市</option>
-        <option value="上益城郡">上益城郡</option>
-        <option value="下益城郡">下益城郡</option>
-        <option value="菊池郡">菊池郡</option>
-        <option value="阿蘇郡">阿蘇郡</option>
-        <option value="八代郡">八代郡</option>
-        <option value="葦北郡">葦北郡</option>
-      </select>
-    </div>
-
-    <!-- ③ 対象動物 -->
-    <div class="form-group">
-      <label>③ 対象動物</label>
-      <div class="chip-group" id="animal-group">
-        <button type="button" class="chip active" onclick="selectChip(this, 'animal')">犬</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'animal')">猫</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'animal')">犬猫両方</button>
-      </div>
-      <input type="hidden" id="animal-input" name="animal" value="犬">
-    </div>
-
-    <!-- ④ 頭数 -->
-    <div class="form-group">
-      <label>④ 頭数</label>
-      <div class="chip-group" id="count-group">
-        <button type="button" class="chip active" onclick="selectChip(this, 'count')">1〜3頭</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'count')">4〜9頭</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'count')">10〜19頭</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'count')">20頭以上</button>
-      </div>
-      <input type="hidden" id="count-input" name="count" value="1〜3頭">
-    </div>
-
-    <!-- ⑤ 物資大カテゴリ -->
-    <div class="form-group">
-      <label>⑤ 物資大カテゴリ</label>
-      <div class="chip-group" id="categoryMain-group">
-        <button type="button" class="chip active" onclick="selectChip(this, 'categoryMain')">ペットフード</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'categoryMain')">ペットシーツ</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'categoryMain')">タオル類</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'categoryMain')">その他</button>
-      </div>
-      <input type="hidden" id="categoryMain-input" name="categoryMain" value="ペットフード">
-    </div>
-
-    <!-- ⑥ 細目カテゴリ -->
-    <div class="form-group">
-      <label>⑥ 細目カテゴリ</label>
-      <div class="chip-group" id="categorySub-group">
-        <button type="button" class="chip active" onclick="selectChip(this, 'categorySub')">ウェット</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'categorySub')">ドライ</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'categorySub')">レギュラー</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'categorySub')">ワイド</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'categorySub')">その他</button>
-      </div>
-      <input type="hidden" id="categorySub-input" name="categorySub" value="ウェット">
-    </div>
-
-    <!-- ⑦ 投稿者属性 -->
-    <div class="form-group">
-      <label>⑦ 投稿者属性</label>
-      <div class="chip-group" id="attribute-group">
-        <button type="button" class="chip active" onclick="selectChip(this, 'attribute')">施設</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'attribute')">個人</button>
-      </div>
-      <input type="hidden" id="attribute-input" name="attribute" value="施設">
-    </div>
-
-    <!-- ⑧ 備考欄（自由記述） -->
-    <div class="form-group">
-      <label for="descriptionInput">⑧ 備考欄・詳細（自由記述）</label>
-      <textarea id="descriptionInput" name="description" class="form-textarea" placeholder="例：〇〇メーカーのフードだと助かります、受渡しの希望時間などがあればご記入ください"></textarea>
-    </div>
-
-    <!-- タイムスタンプ・モード保持用 -->
-    <input type="hidden" id="timestamp" name="timestamp">
-    <input type="hidden" id="mode-input" name="mode" value="sos">
-
-    <!-- 送信ボタン -->
-    <button type="submit" class="submit-btn" id="submitBtn">状況を送信する</button>
-  </form>
-</div>
-
-<!-- 🎟 受付票 Modal -->
-<div id="ticketModal" class="ticket-modal">
-  <div class="ticket-paper">
-    <div style="text-align: center;">
-      <span id="ticketBadge" class="ticket-type-badge">📦 登録受付票</span>
-      <h2 style="font-size: 16px; margin: 4px 0 2px 0;">ワンニャンSOS熊本</h2>
-      <p style="font-size: 10px; color: #718096; margin: 0;">支援の輪を繋ぐ掲示受付票</p>
-    </div>
-
-    <div class="ticket-line"></div>
-
-    <div style="font-size: 12px; line-height: 1.8;">
-      <div>■ <strong>モード：</strong> <span id="tMode"></span></div>
-      <div>■ <strong>目安：</strong> <span id="tTimeframe"></span></div>
-      <div>■ <strong>エリア：</strong> <span id="tArea"></span></div>
-      <div>■ <strong>対象：</strong> <span id="tAnimal"></span>（<span id="tCount"></span>）</div>
-      <div>■ <strong>大カテゴリ：</strong> <span id="tCategoryMain"></span></div>
-      <div>■ <strong>細目：</strong> <span id="tCategorySub"></span></div>
-      <div>■ <strong>属性：</strong> <span id="tAttribute"></span></div>
-    </div>
-
-    <div class="ticket-line"></div>
-
-    <div style="font-size: 10px; color: #4a5568; text-align: center; line-height: 1.4;">
-      投稿者：<strong id="tPoster"></strong><br>
-      投稿時刻：<strong id="tTimeStamp"></strong><br>
-      <span style="color: #e53e3e; font-weight: bold;">📱 画面を保存（スクショ）できます</span>
-    </div>
-
-    <button type="button" class="ticket-close-btn" onclick="closeTicketAndGo()">
-      一覧画面へ進む ➔
-    </button>
-  </div>
-</div>
-
-<script>
-    function logout() {
-      if (confirm("ログアウトしますか？")) {
-        localStorage.removeItem('wanSOS_user_phone');
-        localStorage.removeItem('wanSOS_profile');
-        sessionStorage.removeItem('wannyanSOS_loggedIn');
-        window.location.href = '../index.html';
+    function toggleMenu() {
+      const drawer = document.getElementById('sideDrawer');
+      const overlay = document.getElementById('menuOverlay');
+      const isOpen = drawer.classList.contains('open');
+      if (isOpen) {
+        drawer.classList.remove('open');
+        overlay.style.display = 'none';
+      } else {
+        drawer.classList.add('open');
+        overlay.style.display = 'block';
       }
     }
 
-  function toggleMenu() {
-    const drawer = document.getElementById('sideDrawer');
-    const overlay = document.getElementById('menuOverlay');
-    const isOpen = drawer.classList.contains('open');
-    if (isOpen) {
-      drawer.classList.remove('open');
-      overlay.style.display = 'none';
-    } else {
-      drawer.classList.add('open');
-      overlay.style.display = 'block';
-    }
-  }
+    document.addEventListener('DOMContentLoaded', loadNews);
 
-  // 安全な戻る関数（履歴がない場合は確実に一覧画面へ飛ばす）
-  function goBackSafe() {
-    if (window.history.length > 1) {
-      history.back();
-    } else {
-      window.location.href = 'sos.html';
-    }
-  }
-
-  function switchMode(mode) {
-    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-    if (mode === 'sos') {
-      document.querySelector('[data-mode="sos"]').classList.add('active');
-      document.getElementById('mode-input').value = 'sos';
-      document.getElementById('ticketBadge').textContent = '🆘 不足SOS受付票';
-      document.getElementById('ticketBadge').style.background = '#e67e22';
-    } else {
-      document.querySelector('[data-mode="offer"]').classList.add('active');
-      document.getElementById('mode-input').value = 'offer';
-      document.getElementById('ticketBadge').textContent = '✳️ 支援オファー受付票';
-      document.getElementById('ticketBadge').style.background = '#2b6cb0';
-    }
-  }
-
-  function selectChip(button, groupName) {
-    const group = document.getElementById(groupName + '-group');
-    group.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
-    button.classList.add('active');
-    document.getElementById(groupName + '-input').value = button.textContent;
-  }
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-
-    const areaSelect = document.getElementById('areaSelect').value;
-    if (!areaSelect) {
-      alert('エリア（市郡）を選択してください。');
-      return;
-    }
-
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.textContent = "送信処理中...";
-
-    let profile = {};
-    try { profile = JSON.parse(localStorage.getItem('wanSOS_profile') || '{}'); } catch(e){}
-    const posterName = profile.name || profile.nickname || 'どうらくいちば';
-
-    let currentCreatorId = 'anonymous';
-    try {
-      if (profile.auth_user_id) {
-        currentCreatorId = profile.auth_user_id;
-      } else if (profile.phone) {
-        currentCreatorId = profile.phone;
-      }
-    } catch(e){}
-
-    if (window.supabaseClient) {
-      try {
-        const { data: { session } } = await window.supabaseClient.auth.getSession();
-        if (session && session.user) {
-          currentCreatorId = session.user.id;
-        }
-      } catch(e){}
-    }
-
-    const now = new Date();
-    const timeStr = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-    const generatedId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
-
-    const mode = document.getElementById('mode-input').value;
-    const timeframe = document.getElementById('timeframe-input').value;
-    const animal = document.getElementById('animal-input').value;
-    const count = document.getElementById('count-input').value;
-    const categoryMain = document.getElementById('categoryMain-input').value;
-    const categorySub = document.getElementById('categorySub-input').value;
-    const attribute = document.getElementById('attribute-input').value;
-    const description = document.getElementById('descriptionInput').value;
-
-    const newEntry = {
-      id: generatedId,
-      mode: mode,
-      title: `${areaSelect}｜${animal} ${count}（${categoryMain}）`,
-      timeframe: timeframe,
-      city: areaSelect,
-      area: areaSelect,
-      animal_type: animal,
-      count: count,
-      category: categoryMain,
-      category_sub: categorySub,
-      attribute: attribute,
-      description: description,
-      poster_name: posterName,
-      creator_id: currentCreatorId
-    };
-
-    try {
+    async function loadNews() {
+      const container = document.getElementById('newsListContainer');
       if (!window.supabaseClient) {
-        alert("データベース接続設定が見つかりません。");
+        container.innerHTML = '<div class="empty-box">データベース接続設定が見つかりません。</div>';
         return;
       }
 
-      // 🔢 一般ユーザーは同時募集数の上限をチェック（SOS1件＋支援オファー1件、管理者は対象外）
       try {
-        const { data: myProfile } = await window.supabaseClient
-          .from('users_profiles')
-          .select('is_admin')
-          .eq('auth_user_id', currentCreatorId)
-          .single();
+        const { data, error } = await window.supabaseClient
+          .from('announcements')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(10);
 
-        const isAdminUser = !!(myProfile && myProfile.is_admin === true);
-
-        if (!isAdminUser) {
-          const { count, error: countError } = await window.supabaseClient
-            .from('sos_items')
-            .select('id', { count: 'exact', head: true })
-            .eq('creator_id', currentCreatorId)
-            .eq('mode', mode)
-            .not('status', 'in', '(completed,cancelled)');
-
-          if (!countError && count && count >= 1) {
-            const modeLabel = mode === 'sos' ? '🆘 不足している（SOS）' : '✳️ 支援できる（オファー）';
-            alert(`すでに${modeLabel}の募集中の投稿があります。\n新しく投稿するには、先に既存の投稿を「支援完了」または「取り消し」にしてください。\n（SOS・支援オファーはそれぞれ1件まで同時に募集できます）`);
-            btn.disabled = false;
-            btn.textContent = "状況を送信する";
-            return;
-          }
+        if (error) {
+          container.innerHTML = `<div class="empty-box">読み込みエラー：${error.message}</div>`;
+          return;
         }
-      } catch(limitErr) {
-        console.warn("募集数チェックに失敗しました:", limitErr);
+
+        if (!data || data.length === 0) {
+          container.innerHTML = '<div class="empty-box">現在、お知らせはありません。</div>';
+          return;
+        }
+
+        container.innerHTML = data.map((n, i) => {
+          let dateStr = '';
+          if (n.created_at) {
+            const d = new Date(n.created_at);
+            dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+          }
+          const isNew = i === 0;
+          return `
+            <div class="news-item">
+              <span class="news-date">${dateStr}</span>
+              ${isNew ? '<span class="news-badge" style="display:inline-block;background:#2b6cb0;color:#fff;font-size:9px;padding:1px 6px;border-radius:3px;font-weight:bold;margin-left:6px;">NEW</span>' : ''}
+              <div class="news-item-title">${escapeHtml(n.title)}</div>
+              <div class="news-item-body">${escapeHtml(n.body)}</div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        container.innerHTML = '<div class="empty-box">読み込みに失敗しました。</div>';
       }
-
-      const { error } = await window.supabaseClient.from('sos_items').insert([newEntry]);
-      if (error) {
-        alert("投稿の保存に失敗しました：" + error.message);
-        return;
-      }
-
-      document.getElementById('tMode').textContent = mode === 'sos' ? '🆘 不足している' : '✳️ 支援できる';
-      document.getElementById('tTimeframe').textContent = timeframe;
-      document.getElementById('tArea').textContent = areaSelect;
-      document.getElementById('tAnimal').textContent = animal;
-      document.getElementById('tCount').textContent = count;
-      document.getElementById('tCategoryMain').textContent = categoryMain;
-      document.getElementById('tCategorySub').textContent = categorySub;
-      document.getElementById('tAttribute').textContent = attribute;
-      document.getElementById('tPoster').textContent = posterName;
-      document.getElementById('tTimeStamp').textContent = timeStr;
-
-      document.getElementById('ticketModal').style.display = 'flex';
-
-    } catch (err) {
-      console.error("送信エラー:", err);
-      alert("送信に失敗しました：" + err.message);
-      btn.disabled = false;
-      btn.textContent = "状況を送信する";
     }
-  }
 
-  function closeTicketAndGo() {
-    window.location.href = "sos.html";
-  }
-</script>
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
+    }
+  </script>
+
 </body>
 </html>
