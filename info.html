@@ -76,6 +76,18 @@
       padding: 10px; margin-top: 10px; font-size: 11px;
     }
 
+    .news-item {
+      border-bottom: 1px dashed #e2e8f0; padding-bottom: 10px; margin-bottom: 10px;
+    }
+    .news-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .news-date { font-size: 10px; color: #718096; font-weight: bold; }
+    .news-item-title { font-weight: bold; margin-top: 2px; }
+    .news-item-body { font-size: 11px; color: #4a5568; margin-top: 4px; white-space: pre-wrap; }
+
+    .empty-box {
+      text-align: center; color: #a0aec0; font-size: 12px; padding: 12px 0;
+    }
+
     /* 🎁 お辞儀・お気持ちボックスの専用スタイル */
     .volunteer-notice-card {
       width: 100%;
@@ -135,6 +147,14 @@
   </div>
 
   <div class="info-container" style="margin-top: 10px;">
+
+    <!-- 📢 お知らせ（announcementsテーブルから動的に読み込み） -->
+    <div class="info-card">
+      <div class="info-title">📢 お知らせ</div>
+      <div id="newsListContainer">
+        <div class="empty-box">読み込み中...</div>
+      </div>
+    </div>
 
     <!-- 運営概要 -->
     <div class="info-card">
@@ -216,6 +236,60 @@
         drawer.classList.add('open');
         overlay.style.display = 'block';
       }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadNews);
+
+    async function loadNews() {
+      const container = document.getElementById('newsListContainer');
+      if (!window.supabaseClient) {
+        container.innerHTML = '<div class="empty-box">データベース接続設定が見つかりません。</div>';
+        return;
+      }
+
+      try {
+        const { data, error } = await window.supabaseClient
+          .from('announcements')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (error) {
+          container.innerHTML = `<div class="empty-box">読み込みエラー：${error.message}</div>`;
+          return;
+        }
+
+        if (!data || data.length === 0) {
+          container.innerHTML = '<div class="empty-box">現在、お知らせはありません。</div>';
+          return;
+        }
+
+        container.innerHTML = data.map((n, i) => {
+          let dateStr = '';
+          if (n.created_at) {
+            const d = new Date(n.created_at);
+            dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+          }
+          const isNew = i === 0;
+          return `
+            <div class="news-item">
+              <span class="news-date">${dateStr}</span>
+              ${isNew ? '<span class="news-badge" style="display:inline-block;background:#2b6cb0;color:#fff;font-size:9px;padding:1px 6px;border-radius:3px;font-weight:bold;margin-left:6px;">NEW</span>' : ''}
+              <div class="news-item-title">${escapeHtml(n.title)}</div>
+              <div class="news-item-body">${escapeHtml(n.body)}</div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        container.innerHTML = '<div class="empty-box">読み込みに失敗しました。</div>';
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
     }
   </script>
 

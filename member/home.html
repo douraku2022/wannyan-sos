@@ -127,6 +127,7 @@
     <a href="../disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
     <a href="../terms.html" class="drawer-menu-item">📜 利用規約</a>
     <a href="../privacy.html" class="drawer-menu-item">🔒 プライバシーポリシー</a>
+    <div id="adminMenuSlot"></div>
     <button onclick="logout()" class="drawer-menu-item" style="background:#fff5f5; color:#c53030; border-color:#feb2b2; width:100%; cursor:pointer;">🚪 ログアウト</button>
   </div>
 
@@ -193,6 +194,27 @@
     if (!savedPhone) {
       window.location.href = '../index.html';
     }
+
+    // 🛠 管理者かどうかを確認し、管理者だけにコンソールへのリンクを出す
+    async function checkAdminAndShowLink() {
+      if (!window.supabaseClient) return;
+      try {
+        const { data: { session } } = await window.supabaseClient.auth.getSession();
+        if (!session || !session.user) return;
+
+        const { data, error } = await window.supabaseClient
+          .from('users_profiles')
+          .select('is_admin')
+          .eq('auth_user_id', session.user.id)
+          .single();
+
+        if (!error && data && data.is_admin === true) {
+          document.getElementById('adminMenuSlot').innerHTML =
+            '<a href="admin.html" class="drawer-menu-item" style="background:#fff5f5; color:#c53030; border-color:#feb2b2;">🛠 管理コンソール</a>';
+        }
+      } catch (e) {}
+    }
+    checkAdminAndShowLink();
 
     function toggleMenu() {
       const drawer = document.getElementById('sideDrawer');
