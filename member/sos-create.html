@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>状況・支援登録｜ワンニャンSOS熊本</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../supabase-config.js"></script>
@@ -503,14 +506,43 @@
       attribute: attribute,
       description: description,
       poster_name: posterName,
-      creator_id: currentCreatorId,
-      date: timeStr
+      creator_id: currentCreatorId
     };
 
     try {
       if (!window.supabaseClient) {
         alert("データベース接続設定が見つかりません。");
         return;
+      }
+
+      // 🔢 一般ユーザーは同時募集数の上限をチェック（SOS1件＋支援オファー1件、管理者は対象外）
+      try {
+        const { data: myProfile } = await window.supabaseClient
+          .from('users_profiles')
+          .select('is_admin')
+          .eq('auth_user_id', currentCreatorId)
+          .single();
+
+        const isAdminUser = !!(myProfile && myProfile.is_admin === true);
+
+        if (!isAdminUser) {
+          const { count, error: countError } = await window.supabaseClient
+            .from('sos_items')
+            .select('id', { count: 'exact', head: true })
+            .eq('creator_id', currentCreatorId)
+            .eq('mode', mode)
+            .not('status', 'in', '(completed,cancelled)');
+
+          if (!countError && count && count >= 1) {
+            const modeLabel = mode === 'sos' ? '🆘 不足している（SOS）' : '✳️ 支援できる（オファー）';
+            alert(`すでに${modeLabel}の募集中の投稿があります。\n新しく投稿するには、先に既存の投稿を「支援完了」または「取り消し」にしてください。\n（SOS・支援オファーはそれぞれ1件まで同時に募集できます）`);
+            btn.disabled = false;
+            btn.textContent = "状況を送信する";
+            return;
+          }
+        }
+      } catch(limitErr) {
+        console.warn("募集数チェックに失敗しました:", limitErr);
       }
 
       const { error } = await window.supabaseClient.from('sos_items').insert([newEntry]);

@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>支援調整チャット｜ワンニャンSOS熊本</title>
   <link rel="stylesheet" href="../css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -412,7 +415,7 @@
         if (!map[m.thread_supporter_id]) {
           // そのスレッドの、支援者本人が送った最初のメッセージのニックネームをラベルに使う
           const ownMsg = allMsgs.find(x => x.thread_supporter_id === m.thread_supporter_id && x.sender_id === m.thread_supporter_id);
-          map[m.thread_supporter_id] = ownMsg ? (ownMsg.send_nickname || '支援者') : '支援者';
+          map[m.thread_supporter_id] = ownMsg ? (ownMsg.sender_nickname || '支援者') : '支援者';
         }
       });
 
@@ -472,7 +475,7 @@
           if (!error && data) {
             msgs = data.map(d => ({
               sender_id: d.sender_id,
-              sender_name: d.send_nickname,
+              sender_name: d.sender_nickname,
               message: d.message_text,
               created_at: d.created_at
             }));
@@ -529,7 +532,7 @@
               sos_id: sosId,
               sender_id: currentUserId,
               thread_supporter_id: activeThreadId,
-              send_nickname: currentUserName,
+              sender_nickname: currentUserName,
               message_text: text
             }]);
           if (error) {

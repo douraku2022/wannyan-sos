@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>ホーム｜ワンニャンSOS</title>
   <link rel="stylesheet" href="../css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -82,6 +85,11 @@
       display: inline-block; background: #2b6cb0; color: #fff; font-size: 9px;
       padding: 1px 6px; border-radius: 3px; font-weight: bold; margin-left: 6px;
     }
+    .news-item { border-bottom: 1px dashed #e2e8f0; padding-bottom: 10px; margin-bottom: 10px; }
+    .news-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .news-item-title { font-weight: bold; margin-top: 2px; }
+    .news-item-body { font-size: 11px; color: #4a5568; margin-top: 4px; white-space: pre-wrap; }
+    .empty-box { text-align: center; color: #a0aec0; font-size: 12px; padding: 8px 0; }
 
     /* 各個室への扉（ボタン群） */
     .rooms-grid {
@@ -138,16 +146,11 @@
       <img src="wannyanhome.png" alt="ホームイメージ">
     </div>
 
-    <!-- 📢 お知らせカード（スッキリ版） -->
+    <!-- 📢 お知らせカード（announcementsテーブルから動的読み込み） -->
     <div class="info-card">
       <div class="info-title">📢 お知らせ</div>
-      <div>
-        <span class="news-date">2026.09.01</span>
-        <span class="news-badge">NEW</span>
-        <div style="font-weight: bold; margin-top: 2px;">ワンニャン物資SOS熊本 実証テスト運用開始のお知らせ</div>
-        <div style="font-size: 11px; color: #4a5568; margin-top: 4px;">
-          本日より「ワンニャン物資SOS熊本」のテスト運用をスタートいたしました。動物のお世話に必要な支援物資を安全につなぐマッチングシステムです。皆さまの温かいご協力をよろしくお願い申し上げます。
-        </div>
+      <div id="newsListContainer">
+        <div class="empty-box">読み込み中...</div>
       </div>
     </div>
 
@@ -236,6 +239,53 @@
         sessionStorage.removeItem('wannyanSOS_loggedIn');
         window.location.href = '../index.html';
       }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadNews);
+
+    async function loadNews() {
+      const container = document.getElementById('newsListContainer');
+      if (!window.supabaseClient) {
+        container.innerHTML = '<div class="empty-box">データベース接続設定が見つかりません。</div>';
+        return;
+      }
+      try {
+        const { data, error } = await window.supabaseClient
+          .from('announcements')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(3);
+
+        if (error || !data || data.length === 0) {
+          container.innerHTML = '<div class="empty-box">現在、お知らせはありません。</div>';
+          return;
+        }
+
+        container.innerHTML = data.map((n, i) => {
+          let dateStr = '';
+          if (n.created_at) {
+            const d = new Date(n.created_at);
+            dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+          }
+          return `
+            <div class="news-item">
+              <span class="news-date">${dateStr}</span>
+              ${i === 0 ? '<span class="news-badge">NEW</span>' : ''}
+              <div class="news-item-title">${escapeHtml(n.title)}</div>
+              <div class="news-item-body">${escapeHtml(n.body)}</div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        container.innerHTML = '<div class="empty-box">読み込みに失敗しました。</div>';
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
     }
   </script>
 
