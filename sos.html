@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>状況・支援一覧｜ワンニャンSOS熊本</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../supabase-config.js"></script>
+
+  <style>
+    :root {
+      --primary-color: #e67e22;
+      --bg-color: #f9f9f9;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --border-color: #dddddd;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 64px 16px 40px 16px;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* 📌 最上部：共通固定ヘッダー */
+    .app-top-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 50px;
+      background: #00873c; color: #ffffff; border-bottom: 2px solid #005a28;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 12px;
+      z-index: 1000; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .top-btn {
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+      color: #ffffff; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold;
+      text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 4px;
+    }
+    .top-btn:active { background: rgba(255,255,255,0.3); }
+    .top-title { font-size: 14px; font-weight: bold; letter-spacing: 0.5px; }
+
+    /* 🍔 右側スライドナビゲーション */
+    .menu-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); z-index: 1001;
+    }
+    .side-drawer {
+      position: fixed; top: 0; right: -260px; width: 240px; height: 100%;
+      background: linear-gradient(180deg, #ecefe6 0%, #d8ded6 100%);
+      border-left: 3px solid #9aa5b0; z-index: 1002;
+      box-shadow: -4px 0 16px rgba(0,0,0,0.2); transition: right 0.25s ease-in-out;
+      display: flex; flex-direction: column; padding: 12px; gap: 10px;
+    }
+    .side-drawer.open { right: 0; }
+    .drawer-header {
+      background: #00873c; color: #fff; border-radius: 8px; padding: 10px;
+      text-align: center; font-size: 13px; font-weight: bold; border: 1px solid #005a28;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .drawer-close-btn { background: none; border: none; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; }
+    .drawer-menu-item {
+      background: #f8fafc; border: 2px solid #a0aec0; border-radius: 10px; padding: 12px;
+      color: #2d3748; text-decoration: none; font-size: 13px; font-weight: bold;
+      display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 0 #cbd5e0;
+    }
+
+    .main-container {
+      width: 100%;
+      max-width: 480px;
+      box-sizing: border-box;
+    }
+
+    /* フィルタータブ */
+    .filter-tab-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .filter-btn {
+      flex: 1;
+      padding: 12px 6px;
+      border: 2px solid var(--border-color);
+      background-color: #ffffff;
+      color: #555555;
+      font-size: 0.95rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .filter-btn.active {
+      border-color: var(--primary-color);
+      background-color: #fffaf0;
+      color: var(--primary-color);
+    }
+
+    /* 新規登録ボタン */
+    .create-link-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background-color: #c53030;
+      color: #ffffff;
+      text-align: center;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1.05rem;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* ミニマムカード */
+    .mini-card {
+      background: #ffffff;
+      border: 1px solid #cbd5e0;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      cursor: pointer;
+      transition: background-color 0.1s, opacity 0.1s;
+    }
+    .mini-card:active {
+      background-color: #f7fafc;
+    }
+    .mini-card.is-closed {
+      opacity: 0.55;
+    }
+
+    /* 1行目：状況関係 */
+    .card-line-1 {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: #2d3748;
+      margin-bottom: 6px;
+    }
+
+    /* 2行目：ニーズ関係 */
+    .card-line-2-needs {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      color: #1a202c;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+    .badge.sos {
+      background-color: #fff5f5;
+      color: #c53030;
+      border: 1px solid #feb2b2;
+    }
+    .badge.offer {
+      background-color: #ebf8ff;
+      color: #2b6cb0;
+      border: 1px solid #bee3f8;
+    }
+    .badge.completed {
+      background-color: #f0fff4;
+      color: #2f855a;
+      border: 1px solid #9ae6b4;
+    }
+    .badge.cancelled {
+      background-color: #f7fafc;
+      color: #718096;
+      border: 1px solid #cbd5e0;
+    }
+
+    .tag {
+      background: #f7fafc;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+      font-size: 0.88rem;
+    }
+
+    .highlight {
+      font-weight: bold;
+      color: #2b6cb0;
+      background: #ebf8ff;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid #bee3f8;
+      font-size: 0.9rem;
+    }
+
+    /* 3行目：投稿者とタイムスタンプ */
+    .card-line-3 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+      color: #718096;
+      border-top: 1px dashed #e2e8f0;
+      padding-top: 8px;
+    }
+
+    .poster {
+      font-weight: bold;
+      color: #4a5568;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 30px;
+      color: #718096;
+      font-size: 1rem;
+      background: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #cbd5e0;
+    }
+
+    /* 🎁 お辞儀・お気持ちボックス */
+    .volunteer-notice-card {
+      width: 100%; margin: 24px 0 0 0; background: #fffdf9;
+      border: 2px dashed #e2b714; border-radius: 12px; padding: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+    .volunteer-notice-header {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+      border-bottom: 1px solid #f0e6d2; padding-bottom: 8px;
+    }
+    .bowing-icon { font-size: 20px; }
+    .notice-title { font-size: 13px; font-weight: bold; color: #744210; }
+    .volunteer-notice-body p { font-size: 12px; color: #4a5568; line-height: 1.6; margin-bottom: 8px; }
+    .volunteer-notice-body p:last-child { margin-bottom: 0; }
+    .notice-future {
+      background: #fefcbf; border-left: 3px solid #d69e2e;
+      padding: 8px 10px; border-radius: 0 6px 6px 0; margin-top: 8px; color: #744210 !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 📌 最上部：共通固定ヘッダー -->
+  <div class="app-top-bar">
+    <button type="button" class="top-btn" onclick="history.back()">← 戻る</button>
+    <div class="top-title">🐕🐈 ワンニャンSOS | 状況・支援一覧</div>
+    <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
+  </div>
+
+  <!-- 🍔 右側スライドナビゲーション -->
+  <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+  <div id="sideDrawer" class="side-drawer">
+    <div class="drawer-header">
+      <span>🐾 ワンニャンSOS メニュー</span>
+      <button class="drawer-close-btn" onclick="toggleMenu()">✕</button>
+    </div>
+    <a href="home.html" class="drawer-menu-item">🏠 ホーム（トップ）</a>
+    <a href="sos.html" class="drawer-menu-item" style="color: #00873c;">📦 状況・支援一覧</a>
+    <a href="sos-create.html" class="drawer-menu-item">📝 状況・支援を登録する</a>
+    <a href="mypage.html" class="drawer-menu-item">👤 マイページ</a>
+    <a href="../guide.html" class="drawer-menu-item">📄 使い方案内</a>
+    <a href="../info.html" class="drawer-menu-item">ℹ️ 運営情報</a>
+    <a href="../disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
+    <a href="../terms.html" class="drawer-menu-item">📜 利用規約</a>
+    <a href="../privacy.html" class="drawer-menu-item">🔒 プライバシーポリシー</a>
+    <button onclick="logout()" class="drawer-menu-item" style="background:#fff5f5; color:#c53030; border-color:#feb2b2; width:100%; cursor:pointer;">🚪 ログアウト</button>
+  </div>
+
+  <div class="main-container">
+    <!-- 新規登録ボタン -->
+    <a href="sos-create.html" class="create-link-btn">＋ 新しい状況・支援を登録する</a>
+
+    <!-- フィルタータブ -->
+    <div class="filter-tab-group">
+      <button type="button" class="filter-btn active" onclick="filterPosts('all', this)">すべて</button>
+      <button type="button" class="filter-btn" onclick="filterPosts('sos', this)">🆘 不足</button>
+      <button type="button" class="filter-btn" onclick="filterPosts('offer', this)">✳️ 支援</button>
+    </div>
+
+    <!-- リスト表示エリア -->
+    <div id="postsList">
+      <div class="no-data">読み込み中...</div>
+    </div>
+
+    <!-- 📌 運営のお気持ちボックス -->
+    <div class="volunteer-notice-card">
+      <div class="volunteer-notice-header">
+        <span class="bowing-icon">🙇‍♀️</span>
+        <span class="notice-title">運営からのお願いとこれからのこと</span>
+      </div>
+      <div class="volunteer-notice-body">
+        <p>当サービスは、ボランティアによる<strong>実証テスト段階</strong>として、個人情報の保護とコストを最優先に考えた「無料・最小限」の仕組みで運営しています。</p>
+        <p>「本当は通知機能とかも入れたい…！」という気持ちでいっぱいなのですが、これ以上サーバー費用や常時監視体制を強化すると事業レベルになってしまうため、今の仕組みが限界です。ごめんなさい！💦</p>
+        <p class="notice-future">もしゆくゆくは、この仕組みや理念に共感してくださる<strong>公的機関や自治体等の公的な主体へ、管理・運営をまるっと引き継いでいただける未来</strong>があれば…という想いでデザインしています。</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 🔐 未ログインガード（家の中に入るためのチェック。home.htmlと同じ基準）
+    (function(){
+      const savedPhone = localStorage.getItem('wanSOS_user_phone');
+      if (!savedPhone) {
+        window.location.href = '../index.html';
+      }
+    })();
+
+    function logout() {
+      if (confirm("ログアウトしますか？")) {
+        localStorage.removeItem('wanSOS_user_phone');
+        localStorage.removeItem('wanSOS_profile');
+        sessionStorage.removeItem('wannyanSOS_loggedIn');
+        window.location.href = '../index.html';
+      }
+    }
+
+    function toggleMenu() {
+      const drawer = document.getElementById('sideDrawer');
+      const overlay = document.getElementById('menuOverlay');
+      const isOpen = drawer.classList.contains('open');
+      if (isOpen) {
+        drawer.classList.remove('open');
+        overlay.style.display = 'none';
+      } else {
+        drawer.classList.add('open');
+        overlay.style.display = 'block';
+      }
+    }
+
+    let allPosts = [];
+    let currentFilter = 'all';
+
+    async function fetchPosts() {
+      let posts = [];
+
+      if (window.supabaseClient) {
+        try {
+          const { data, error } = await window.supabaseClient
+            .from('sos_items')
+            .select('*')
+            .order('created_at', { ascending: false });
+          if (!error && data) {
+            posts = data;
+          }
+        } catch (e) {
+          console.warn("Supabaseからの取得に失敗しました:", e);
+        }
+      }
+
+      allPosts = posts;
+      renderPosts();
+    }
+
+    function filterPosts(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderPosts();
+    }
+
+    function renderPosts() {
+      const container = document.getElementById('postsList');
+      container.innerHTML = '';
+
+      let filtered = allPosts;
+      if (currentFilter === 'sos') {
+        filtered = allPosts.filter(p => p.mode === 'sos' || !p.mode);
+      } else if (currentFilter === 'offer') {
+        filtered = allPosts.filter(p => p.mode === 'offer');
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="no-data">現在、登録されている情報はありません。</div>';
+        return;
+      }
+
+      filtered.forEach(post => {
+        const isSos = post.mode !== 'offer';
+        const badgeClass = isSos ? 'sos' : 'offer';
+        const badgeText = isSos ? '🆘 不足' : '✳️ 支援';
+
+        // 募集状況バッジ（sos-edit.htmlで設定されたステータスを反映）
+        let statusBadgeHtml = '';
+        let isClosed = false;
+        if (post.status === 'completed') {
+          statusBadgeHtml = '<span class="badge completed">✅ 支援完了</span>';
+          isClosed = true;
+        } else if (post.status === 'cancelled') {
+          statusBadgeHtml = '<span class="badge cancelled">⚠️ 取り消し</span>';
+          isClosed = true;
+        }
+
+        const timeframe = post.timeframe || '2〜3日以内';
+        // 「ブロック」の文字を自動で除外してスッキリ表示
+        let area = post.city || post.area || '未設定';
+        area = area.replace('ブロック', '');
+
+        const attribute = post.attribute || '施設';
+        const animal = post.animal_type || '犬';
+        const count = post.count || '1〜3頭';
+        const categoryMain = post.category || 'ペットフード';
+        const categorySub = post.category_sub || 'ウェット';
+        const posterName = post.poster_name || 'どうらくいちば';
+
+        let dateStr = post.date;
+        if (!dateStr && post.created_at) {
+          const d = new Date(post.created_at);
+          dateStr = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        }
+        if (!dateStr) dateStr = '日時不明';
+
+        // ✏️ 作成時から更新されていれば「編集済み」を表示
+        let editedTag = '';
+        if (post.updated_at && post.created_at) {
+          const createdTime = new Date(post.created_at).getTime();
+          const updatedTime = new Date(post.updated_at).getTime();
+          if (updatedTime - createdTime > 60000) {
+            editedTag = '<span class="tag" style="color:#2b6cb0;">✏️ 編集済み</span>';
+          }
+        }
+
+        const card = document.createElement('div');
+        card.className = 'mini-card' + (isClosed ? ' is-closed' : '');
+        card.onclick = () => {
+          window.location.href = `sos-detail.html?id=${post.id}`;
+        };
+
+        card.innerHTML = `
+          <div class="card-line-1">
+            ${statusBadgeHtml}
+            <span class="badge ${badgeClass}">${badgeText}</span>
+            <span class="tag">${escapeHtml(timeframe)}</span>
+            <span class="tag">${escapeHtml(area)}</span>
+            <span class="tag">${escapeHtml(attribute)}</span>
+            ${editedTag}
+          </div>
+          <div class="card-line-2-needs">
+            <span class="highlight">${escapeHtml(animal)} ${escapeHtml(count)}分</span>
+            <span class="tag">${escapeHtml(categoryMain)} (${escapeHtml(categorySub)})</span>
+          </div>
+          <div class="card-line-3">
+            <span class="poster">👤 ${escapeHtml(posterName)}</span>
+            <span class="timestamp">${escapeHtml(dateStr)}</span>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', fetchPosts);
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
+    }
+  </script>
+
+</body>
+</html>
