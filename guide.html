@@ -85,6 +85,18 @@
       font-size: 11px; color: #c53030; line-height: 1.5; font-weight: bold; margin-top: 10px;
     }
 
+    .faq-item { border-bottom: 1px dashed #e2e8f0; padding-bottom: 10px; margin-bottom: 10px; }
+    .faq-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .faq-q {
+      font-weight: bold; color: #2b6cb0; margin-bottom: 4px;
+      display: flex; gap: 6px;
+    }
+    .faq-q-badge {
+      background: #2b6cb0; color: #fff; border-radius: 4px; padding: 1px 6px;
+      font-size: 10px; font-weight: bold; flex: 0 0 auto; height: fit-content;
+    }
+    .faq-a { color: #4a5568; font-size: 11px; padding-left: 4px; }
+
     /* 🎁 お辞儀・お気持ちボックスの専用スタイル */
     .volunteer-notice-card {
       width: 100%;
@@ -171,6 +183,66 @@
       
       <div class="notice-box">
         ⚠️ お届け数量や納期（日数）を保証するものではありません。<br>相互のご事情に合わせて個別チャットで調整を行ってください。
+      </div>
+    </div>
+
+    <!-- ❓ よくある質問 -->
+    <div class="guide-card">
+      <div class="guide-title">❓ よくある質問</div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="faq-q-badge">Q1</span>このアプリ、法律的にちゃんと大丈夫なの？</div>
+        <div class="faq-a">消費者契約法などを踏まえて利用規約・プライバシーポリシー・免責事項を精査し、専門家と協議しながら整備を進めています。特に「運営側は一切責任を負いません」のような極端な文言は法律で無効になる場合があるため、「運営者の故意または重大な過失を除く」という但し書きをきちんと入れました。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="faq-q-badge">Q2</span>個人情報、本当に外部から見られないの？</div>
+        <div class="faq-a">はい。ログインしていない人はもちろん、ログインしている一般利用者同士でも、他人の本名・住所・生年月日は一切見られません。データベース自体に「本人しか見られない」というルールを直接設定しているので、アプリの画面をどう頑張っても回避できない仕組みです。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="faq-q-badge">Q3</span>もし詐欺やなりすましが起きたら、運営の責任になるの？</div>
+        <div class="faq-a">当事者間のやり取りについて運営は仲裁を行わない旨を規約に明記しています。ただし、通報があれば投稿を削除するなど、できる対応は行います。何か起きた場合、公的機関からの照会があれば、法令に基づき必要な情報開示にも応じます。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="faq-q-badge">Q4</span>変な投稿を見つけたらどうすればいい？</div>
+        <div class="faq-a">運営の問い合わせ窓口（dourakuichiba@gmail.com）に連絡してください。「変な投稿」の基準は、①虚偽のSOS投稿、②過剰・不正な支援要求、③金銭の要求、④嫌がらせ行為、のいずれかに当てはまるかどうかです。削除するかどうかは、どうらくいちば運営団体の役員で協議のうえ決定します。誰か一人の独断で消えることはありません。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="faq-q-badge">Q5</span>18歳未満でも使えるの？</div>
+        <div class="faq-a">使えません。生年月日を登録時に確認し、18歳未満の方は利用できない仕組みになっています。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="faq-q-badge">Q6</span>なんでそこまでするの？NPOやボランティアレベルで？</div>
+        <div class="faq-a">支援活動は善意が集まる場所だからこそ、悪意にも狙われやすいからです。「助けて」を言いやすくすることと、悪用されにくくすることは、両方同時に目指せると考えています。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="faq-q-badge">Q7</span>登録した個人情報が、他の目的に使われたりしない？</div>
+        <div class="faq-a">されません。広告や第三者への提供・販売は行っていません。取得した情報は、本人確認・不正防止・トラブル時の対応など、サービス運営に必要な範囲でのみ使用します。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="faq-q-badge">Q8</span>アカウントを削除したい時は？</div>
+        <div class="faq-a">マイページから、ご自身で「退会する」を選べます。退会すると、そのアカウントでは二度とログインできなくなります。募集中の投稿があれば自動的に取り消しになります。記録として登録情報はデータベースに残りますが、これまでと同じく他の利用者から見られることはありません。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="faq-q-badge">Q9</span>暗証番号を忘れてしまったら？</div>
+        <div class="faq-a">ログイン画面の「暗証番号をお忘れの方はこちら」から、ご自身で再設定できます。ご登録時の電話番号・氏名（本名）・生年月日が一致すれば、新しい番号を設定できます。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="faq-q-badge">Q10</span>これって誰が運営してるの？信頼できる団体？</div>
+        <div class="faq-a">「どうらくいちば犬猫支援プロジェクト」が運営しています。2022年5月に福岡市内で始まった小さなプロジェクトで、2026年4月に任意団体になりました。</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="faq-q-badge">Q11</span>終了した募集のチャットは、その後も使えるの？</div>
+        <div class="faq-a">使えません。募集が「終了」または「取り消し」になると、そのチャットへの新規メッセージ送信は自動的にできなくなります（それまでのやり取りは引き続き見られます）。</div>
       </div>
     </div>
 

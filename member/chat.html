@@ -369,7 +369,7 @@
         try {
           const { data } = await window.supabaseClient
             .from('sos_items')
-            .select('id, title, poster_name, city, creator_id')
+            .select('id, title, poster_name, city, creator_id, status')
             .eq('id', sosId)
             .single();
           if (data) item = data;
@@ -387,6 +387,17 @@
           </div>
           <a href="sos-detail.html?id=${item.id}" style="color:#3182ce; font-weight:bold; font-size:10px; text-decoration:none;">詳細を見る ➔</a>
         `;
+
+        // 🔒 終了・取り消し済みの投稿は、新規メッセージの送信をできないようにする
+        if (item.status === 'completed' || item.status === 'cancelled') {
+          const input = document.getElementById('chatInput');
+          const sendBtn = document.getElementById('sendBtn');
+          if (input) {
+            input.disabled = true;
+            input.placeholder = 'この募集は終了しているため、新しいメッセージは送れません';
+          }
+          if (sendBtn) sendBtn.disabled = true;
+        }
       } else {
         summaryEl.innerHTML = '<div>対象の投稿情報</div>';
       }
@@ -537,7 +548,11 @@
             }]);
           if (error) {
             console.warn("Supabaseへのチャット保存エラー:", error.message);
-            alert("送信に失敗しました：" + error.message);
+            if (error.message && error.message.toLowerCase().includes('row-level security')) {
+              alert("この募集はすでに終了しているため、新しいメッセージを送信できません。");
+            } else {
+              alert("送信に失敗しました：" + error.message);
+            }
             return;
           }
         } catch(err) {

@@ -279,6 +279,7 @@
         <option value="阿蘇郡">阿蘇郡</option>
         <option value="八代郡">八代郡</option>
         <option value="葦北郡">葦北郡</option>
+        <option value="その他（県外など）">その他（県外など）</option>
       </select>
     </div>
 
@@ -317,15 +318,15 @@
       <input type="hidden" id="categoryMain-input" name="categoryMain" value="ペットフード">
     </div>
 
-    <!-- ⑥ 細目カテゴリ -->
+    <!-- ⑥ 細目カテゴリ（複数選択可） -->
     <div class="form-group">
-      <label>⑥ 細目カテゴリ</label>
+      <label>⑥ 細目カテゴリ（複数選べます）</label>
       <div class="chip-group" id="categorySub-group">
-        <button type="button" class="chip active" onclick="selectChip(this, 'categorySub')">ウェット</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'categorySub')">ドライ</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'categorySub')">レギュラー</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'categorySub')">ワイド</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'categorySub')">その他</button>
+        <button type="button" class="chip active" onclick="toggleMultiChip(this, 'categorySub')">ウェット</button>
+        <button type="button" class="chip" onclick="toggleMultiChip(this, 'categorySub')">ドライ</button>
+        <button type="button" class="chip" onclick="toggleMultiChip(this, 'categorySub')">レギュラー</button>
+        <button type="button" class="chip" onclick="toggleMultiChip(this, 'categorySub')">ワイド</button>
+        <button type="button" class="chip" onclick="toggleMultiChip(this, 'categorySub')">その他</button>
       </div>
       <input type="hidden" id="categorySub-input" name="categorySub" value="ウェット">
     </div>

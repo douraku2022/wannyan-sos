@@ -400,6 +400,17 @@
 
         const cleanCity = (post.city || post.area || '').replace(/ブロック/g, '');
 
+        // 📅 募集中のまま30日以上経過していたら、再投稿を促す控えめな一言を添える
+        // （自動で何かを変更するわけではなく、あくまで気づきのための表示）
+        let staleNotice = '';
+        const isActivePost = post.status !== 'completed' && post.status !== 'cancelled';
+        if (isActivePost && post.created_at) {
+          const daysPassed = Math.floor((Date.now() - new Date(post.created_at).getTime()) / (1000 * 60 * 60 * 24));
+          if (daysPassed >= 30) {
+            staleNotice = `<div style="margin-top:6px; font-size:0.72rem; color:#a0703a; background:#fffaf0; border:1px dashed #f0dca0; border-radius:6px; padding:6px 8px; line-height:1.6;">📅 投稿から${daysPassed}日以上経過いたしました。現在、状況は改善されていますでしょうか？<br>もし変化がある場合（もっと必要な数が増えた、ウェットばかり減る、など）、一度、終了して、再投稿することで、最新情報となり、支援者の目に付きやすくなります。</div>`;
+          }
+        }
+
         const card = document.createElement('a');
         card.href = `sos-detail.html?id=${post.id}`;
         card.style.textDecoration = 'none';
@@ -413,6 +424,7 @@
             <span>地域: ${escapeHtml(cleanCity || '未設定')}</span>
             <span>投稿日: ${escapeHtml(post.date || '日時不明')}</span>
           </div>
+          ${staleNotice}
         `;
         container.appendChild(card);
       });

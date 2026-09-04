@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>暗証番号の再設定｜ワンニャンSOS熊本</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 54px 0 40px 0;
+      background-color: #dbe2e8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .app-top-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 46px;
+      background: #00873c; color: #ffffff; border-bottom: 2px solid #005a28;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 10px;
+      z-index: 1000; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .top-btn {
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+      color: #ffffff; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold;
+      text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 4px;
+    }
+    .top-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
+
+    .reset-container { max-width: 480px; margin: 0 auto; padding: 0 12px; }
+
+    .reset-card {
+      background: #ffffff; border: 2px solid #b0bec5; border-radius: 12px;
+      padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .reset-title {
+      font-size: 15px; font-weight: bold; color: #00873c; margin-bottom: 10px;
+      text-align: center; border-bottom: 2px solid #00873c; padding-bottom: 6px;
+    }
+
+    .notice-box {
+      background: #ebf8ff; border: 1px solid #bee3f8; border-radius: 8px; padding: 10px;
+      font-size: 11px; color: #2b6cb0; margin-bottom: 16px; line-height: 1.6;
+    }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: bold; color: #2d3748; margin-bottom: 6px; }
+    .form-input {
+      width: 100%; padding: 12px; border: 2px solid #cbd5e0; border-radius: 8px;
+      font-size: 14px; font-family: inherit;
+    }
+    .form-input:focus { border-color: #3182ce; outline: none; }
+    .form-hint { font-size: 10px; color: #718096; margin-top: 4px; }
+
+    .submit-btn {
+      width: 100%; background: #2b6cb0; color: #ffffff; border: 2px solid #2c5282; border-radius: 10px;
+      padding: 12px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 0 #2c5282; cursor: pointer;
+    }
+    .submit-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #2c5282; }
+    .submit-btn:disabled { opacity: 0.6; }
+
+    .link-row { text-align: center; margin-top: 16px; font-size: 12px; }
+    .link-row a { color: #3182ce; font-weight: bold; text-decoration: none; }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-top-bar">
+    <button type="button" class="top-btn" onclick="window.location.href='login.html'">← ログインへ戻る</button>
+    <div class="top-title">🐕🐈 ワンニャンSOS | 暗証番号の再設定</div>
+    <div style="width: 90px;"></div>
+  </div>
+
+  <div class="reset-container">
+    <div class="reset-card">
+      <div class="reset-title">🔑 暗証番号を忘れた方</div>
+
+      <div class="notice-box">
+        ご登録時の<strong>お電話番号・氏名（本名）・生年月日</strong>がすべて一致すれば、本人と判断して新しい暗証番号を設定できます。
+      </div>
+
+      <form id="resetForm">
+        <div class="form-group">
+          <label class="form-label">ご登録の電話番号</label>
+          <input type="tel" id="resetPhone" class="form-input" placeholder="例：09012345678" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">ご登録の氏名（本名）</label>
+          <input type="text" id="resetFullName" class="form-input" placeholder="例：熊本 花子" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">生年月日</label>
+          <input type="date" id="resetBirth" class="form-input" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">新しい暗証番号（4桁）</label>
+          <input type="password" id="newPin" class="form-input" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="新しく設定する4桁の番号" required>
+          <div class="form-hint">※次回のログインから、この番号を使ってください。</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">新しい暗証番号（確認のため再入力）</label>
+          <input type="password" id="newPinConfirm" class="form-input" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="もう一度入力してください" required>
+        </div>
+
+        <div class="form-group">
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAAEmscAvL6qMbu2_R"></div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          🔑 この内容で再設定する ➔
+        </button>
+      </form>
+
+      <div class="link-row">
+        <a href="login.html">← ログイン画面に戻る</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('resetForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const phone = document.getElementById('resetPhone').value.trim().replace(/[-\s]/g, '');
+      const fullName = document.getElementById('resetFullName').value.trim();
+      const birthInput = document.getElementById('resetBirth').value; // YYYY-MM-DD
+      const newPin = document.getElementById('newPin').value.trim();
+      const newPinConfirm = document.getElementById('newPinConfirm').value.trim();
+
+      if (!phone || !fullName || !birthInput) {
+        alert("すべての項目を入力してください。");
+        return;
+      }
+      if (!/^\d{4}$/.test(newPin)) {
+        alert("新しい暗証番号は4桁の数字で入力してください。");
+        return;
+      }
+      if (newPin !== newPinConfirm) {
+        alert("新しい暗証番号が一致しません。もう一度ご確認ください。");
+        return;
+      }
+
+      const captchaToken = (typeof turnstile !== 'undefined') ? turnstile.getResponse() : '';
+      if (!captchaToken) {
+        alert("画像認証（チェックボックス）にチェックを入れてください。");
+        return;
+      }
+
+      // register.htmlはゼロ埋め形式（YYYY-MM-DD）で保存しているため、
+      // <input type="date">の値（同じくYYYY-MM-DD）をそのまま使う
+      const birthStr = birthInput;
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = "確認中...";
+
+      try {
+        const res = await fetch('https://oigqxzmrurxywomdsyet.supabase.co/functions/v1/reset-pin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': 'sb_publishable_6EGuWS6Lff0eWpTryKCZZw_Tr0LGoAr'
+          },
+          body: JSON.stringify({ phone, fullName, birth: birthStr, newPin, captchaToken })
+        });
+
+        const result = await res.json();
+
+        if (!res.ok || result.error) {
+          alert(result.error || "再設定に失敗しました。入力内容をご確認ください。");
+          if (typeof turnstile !== 'undefined') turnstile.reset();
+          submitBtn.disabled = false;
+          submitBtn.textContent = "🔑 この内容で再設定する ➔";
+          return;
+        }
+
+        alert("🎉 暗証番号を再設定しました！新しい番号でログインしてください。");
+        window.location.href = "login.html";
+      } catch (err) {
+        alert("処理中にエラーが発生しました。しばらくしてからもう一度お試しください。");
+        if (typeof turnstile !== 'undefined') turnstile.reset();
+        submitBtn.disabled = false;
+        submitBtn.textContent = "🔑 この内容で再設定する ➔";
+      }
+    });
+  </script>
+
+</body>
+</html>

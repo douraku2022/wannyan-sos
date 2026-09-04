@@ -156,7 +156,8 @@
       </form>
 
       <div class="link-row">
-        初めてご利用の方は <a href="register.html">✨ 新規ユーザー登録</a>
+        初めてご利用の方は <a href="register.html">✨ 新規ユーザー登録</a><br>
+        <span style="display:inline-block; margin-top:8px;">暗証番号をお忘れの方は <a href="forgot-pin.html">🔑 こちら</a></span>
       </div>
     </div>
   </div>
@@ -230,6 +231,26 @@
           submitBtn.disabled = false;
           submitBtn.textContent = "🐾 ログインして利用する ➔";
           return;
+        }
+
+        // 🚪 退会済みアカウントかどうかを確認（認証は通っても、ここで弾く）
+        try {
+          const { data: profileCheck } = await window.supabaseClient
+            .from('users_profiles')
+            .select('is_withdrawn')
+            .eq('phone', phone)
+            .single();
+
+          if (profileCheck && profileCheck.is_withdrawn === true) {
+            await window.supabaseClient.auth.signOut();
+            alert("このアカウントは退会済みです。再度ご利用の場合は、お手数ですが新規登録を行ってください。");
+            if (typeof turnstile !== 'undefined') turnstile.reset();
+            submitBtn.disabled = false;
+            submitBtn.textContent = "🐾 ログインして利用する ➔";
+            return;
+          }
+        } catch (checkErr) {
+          // 確認に失敗した場合も、念のため通常ログインは継続させる（表示用チェックのため致命的ではない）
         }
 
         // 🔑 ここが本人確認の本体。認証さえ成功していれば、家の中に入るための鍵を必ず保存する
