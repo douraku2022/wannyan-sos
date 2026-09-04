@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <style>
     * { box-sizing: border-box; }
@@ -145,6 +146,10 @@
                  maxlength="4" placeholder="登録時に決めた4桁の番号" required>
         </div>
 
+        <div class="form-group">
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAAEmscAvL6qMbu2_R"></div>
+        </div>
+
         <button type="submit" class="submit-btn">
           🐾 ログインして利用する ➔
         </button>
@@ -197,6 +202,12 @@
         return;
       }
 
+      const captchaToken = (typeof turnstile !== 'undefined') ? turnstile.getResponse() : '';
+      if (!captchaToken) {
+        alert("画像認証（チェックボックス）にチェックを入れてください。");
+        return;
+      }
+
       if (!window.supabaseClient) {
         alert("データベース接続設定が見つかりません。");
         return;
@@ -209,11 +220,13 @@
       try {
         const { data, error } = await window.supabaseClient.auth.signInWithPassword({
           email: phoneToPseudoEmail(phone),
-          password: pinToPassword(pin)
+          password: pinToPassword(pin),
+          options: { captchaToken: captchaToken }
         });
 
         if (error || !data.session) {
           alert("お電話番号または暗証番号が正しくありません。\n初めての方は「新規ユーザー登録」から登録を行ってください。");
+          if (typeof turnstile !== 'undefined') turnstile.reset();
           submitBtn.disabled = false;
           submitBtn.textContent = "🐾 ログインして利用する ➔";
           return;
@@ -249,6 +262,7 @@
         window.location.href = "member/home.html";
       } catch (err) {
         alert("ログイン処理中にエラーが発生しました。");
+        if (typeof turnstile !== 'undefined') turnstile.reset();
         submitBtn.disabled = false;
         submitBtn.textContent = "🐾 ログインして利用する ➔";
       }

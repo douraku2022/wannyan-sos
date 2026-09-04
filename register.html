@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <style>
     * { box-sizing: border-box; }
@@ -202,6 +203,10 @@
           登録ボタンを押すことで、<a href="terms.html" target="_blank" style="color:#3182ce; font-weight:bold;">利用規約</a>、<a href="disclaimer.html" target="_blank" style="color:#3182ce; font-weight:bold;">免責事項</a>および<a href="privacy.html" target="_blank" style="color:#3182ce; font-weight:bold;">プライバシーポリシー</a>に同意したものとみなします。
         </div>
 
+        <div style="margin-bottom: 12px;">
+          <div id="turnstileWidget" class="cf-turnstile" data-sitekey="0x4AAAAAAEmscAvL6qMbu2_R" data-callback="onTurnstileToken"></div>
+        </div>
+
         <button type="submit" class="submit-btn" id="submitBtnText">
           🐾 クラウドに保存して登録する ➔
         </button>
@@ -334,6 +339,35 @@
     document.getElementById('regForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
+      // 🔒 Turnstileのトークンは1回使うと無効になるため、
+      // 常に最新のトークンをこの変数で保持しておく（コールバックで更新）
+      window.onTurnstileToken = function(token) { window.__latestCaptchaToken = token; };
+
+      // 使用済みトークンを再取得するためのヘルパー（ウィジェットをリセットし、新しいトークンが来るまで待つ）
+      function getFreshCaptchaToken() {
+        return new Promise((resolve) => {
+          let done = false;
+          const timeoutId = setTimeout(() => {
+            if (!done) { done = true; resolve(''); }
+          }, 15000);
+
+          window.onTurnstileToken = (token) => {
+            if (!done) {
+              done = true;
+              clearTimeout(timeoutId);
+              resolve(token);
+            }
+          };
+          if (typeof turnstile !== 'undefined') {
+            turnstile.reset('#turnstileWidget');
+          } else {
+            done = true;
+            clearTimeout(timeoutId);
+            resolve('');
+          }
+        });
+      }
+
       const phone = document.getElementById('regPhone').value.trim().replace(/[-\s]/g, '');
       const pin = document.getElementById('regPin').value.trim();
       const pinConfirm = document.getElementById('regPinConfirm').value.trim();
@@ -371,6 +405,12 @@
 
       if (age < 18) {
         alert("本サービスは18歳未満の方はご利用いただけません。");
+        return;
+      }
+
+      const captchaToken = (typeof turnstile !== 'undefined') ? turnstile.getResponse('#turnstileWidget') : '';
+      if (!captchaToken) {
+        alert("画像認証（チェックボックス）にチェックを入れてください。");
         return;
       }
 
@@ -413,7 +453,8 @@
           // ✨ 新規登録モード：Supabase Authにアカウントを新規作成（電話番号＋暗証番号）
           const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
             email: phoneToPseudoEmail(phone),
-            password: pinToPassword(pin)
+            password: pinToPassword(pin),
+            options: { captchaToken: captchaToken }
           });
 
           if (authError) {
@@ -439,9 +480,20 @@
           // 🔑 signUp() の時点ではまだ本物のログインセッションが確立していない場合があるため、
           // ここで signInWithPassword を使って確実にセッションを張ってから次の処理へ進む
           if (!authData.session) {
+            // Turnstileのトークンは1回使うと無効になるため、ここで新しいトークンを取り直す
+            const freshCaptchaToken = await getFreshCaptchaToken();
+            if (!freshCaptchaToken) {
+              alert("画像認証の再確認に失敗しました。お手数ですが「ログイン」画面から入り直してください。");
+              submitBtn.disabled = false;
+              submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
+              window.location.href = 'login.html';
+              return;
+            }
+
             const { data: signInData, error: signInError } = await window.supabaseClient.auth.signInWithPassword({
               email: phoneToPseudoEmail(phone),
-              password: pinToPassword(pin)
+              password: pinToPassword(pin),
+              options: { captchaToken: freshCaptchaToken }
             });
 
             if (signInError || !signInData.session) {
