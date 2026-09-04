@@ -7,30 +7,20 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>マイページ｜ワンニャンSOS熊本</title>
-  <link rel="stylesheet" href="../css/style.css">
+  <title>登録情報の確認・変更｜ワンニャンSOS熊本</title>
+  <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../supabase-config.js"></script>
+  <script src="supabase-config.js"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <style>
-    :root {
-      --primary-color: #e67e22;
-      --primary-hover: #d35400;
-      --bg-color: #f9f9f9;
-      --card-bg: #ffffff;
-      --text-color: #333333;
-      --border-color: #dddddd;
-    }
-
     * { box-sizing: border-box; }
     body {
-      margin: 0; padding: 60px 16px 40px 16px;
-      background-color: var(--bg-color); color: var(--text-color);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      display: flex; justify-content: center;
+      margin: 0; padding: 54px 0 70px 0;
+      background-color: #dbe2e8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    /* 📌 最上部：共通固定ヘッダー */
+    /* 📌 最上部：共通固定ヘッダー（メニューなし） */
     .app-top-bar {
       position: fixed; top: 0; left: 0; right: 0; height: 46px;
       background: #00873c; color: #ffffff; border-bottom: 2px solid #005a28;
@@ -45,237 +35,393 @@
     .top-btn:active { background: rgba(255,255,255,0.3); }
     .top-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
 
-    /* 🍔 右側スライドナビゲーション */
-    .menu-overlay {
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); z-index: 1001;
+    /* 📱 下部固定ボトムナビゲーション */
+    .app-bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 56px;
+      background: #ffffff; border-top: 1px solid #cbd5e0;
+      display: flex; align-items: center; justify-content: space-around;
+      z-index: 1000; box-shadow: 0 -2px 6px rgba(0,0,0,0.06);
     }
-    .side-drawer {
-      position: fixed; top: 0; right: -260px; width: 240px; height: 100%;
-      background: linear-gradient(180deg, #ecefe6 0%, #d8ded6 100%);
-      border-left: 3px solid #9aa5b0; z-index: 1002;
-      box-shadow: -4px 0 16px rgba(0,0,0,0.2); transition: right 0.25s ease-in-out;
-      display: flex; flex-direction: column; padding: 12px; gap: 10px;
+    .nav-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-decoration: none; color: #4a5568; font-size: 10px; font-weight: bold; height: 100%;
+      background: none; border: none; cursor: pointer; gap: 2px;
     }
-    .side-drawer.open { right: 0; }
-    .drawer-header {
-      background: #00873c; color: #fff; border-radius: 8px; padding: 10px;
-      text-align: center; font-size: 13px; font-weight: bold; border: 1px solid #005a28;
-      display: flex; justify-content: space-between; align-items: center;
+    .nav-item.active { color: #00873c; }
+    .nav-item span.icon { font-size: 18px; line-height: 1; }
+    .nav-item:active { background: #f7fafc; }
+
+    .reg-container { max-width: 480px; margin: 0 auto; padding: 0 12px; }
+
+    .reg-card {
+      background: #ffffff; border: 2px solid #b0bec5; border-radius: 12px;
+      padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
-    .drawer-close-btn { background: none; border: none; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; }
-    .drawer-menu-item {
-      background: #f8fafc; border: 2px solid #a0aec0; border-radius: 10px; padding: 12px;
-      color: #2d3748; text-decoration: none; font-size: 13px; font-weight: bold;
-      display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 0 #cbd5e0;
+    .reg-title {
+      font-size: 15px; font-weight: bold; color: #00873c; margin-bottom: 12px;
+      text-align: center; border-bottom: 2px solid #00873c; padding-bottom: 6px;
     }
 
-    .mypage-container { width: 100%; max-width: 480px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; }
-
-    /* 📄 統一されたモダンカードデザイン */
-    .content-card {
-      background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px;
-      padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); color: var(--text-color);
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: 12px; font-weight: bold; color: #2d3748; margin-bottom: 4px; }
+    .form-input, .form-select {
+      width: 100%; padding: 10px; border: 2px solid #cbd5e0; border-radius: 8px;
+      font-size: 13px; font-family: inherit; background-color: #fff;
     }
+    .form-input:focus, .form-select:focus { border-color: #3182ce; outline: none; }
 
-    .welcome-bar {
-      display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 2px solid #f0f0f0; padding-bottom: 12px; margin-bottom: 14px;
+    .birth-select-group {
+      display: flex; gap: 6px; align-items: center;
     }
-    .welcome-name { font-size: 1.1rem; font-weight: bold; color: #1a202c; }
-    .welcome-badge { background: #2f855a; color: #fff; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; font-weight: bold; }
-
-    .section-heading {
-      font-size: 0.95rem; font-weight: bold; color: #2d3748; margin: 0 0 10px 0;
-      display: flex; align-items: center; gap: 6px;
+    .birth-select-group select {
+      padding: 8px 4px; font-size: 13px; text-align: center;
     }
 
-    .info-row {
-      margin-bottom: 12px; font-size: 0.9rem;
+    .badge-public {
+      background: #e2e8f0; color: #2d3748; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; margin-left: 6px;
     }
-    .info-label {
-      color: #718096; font-size: 0.8rem; margin-bottom: 2px; display: block;
-    }
-    .info-value {
-      font-weight: bold; color: #1a202c; font-size: 0.95rem; word-break: break-all;
+    .badge-private {
+      background: #fed7d7; color: #9b2c2c; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; margin-left: 6px;
     }
 
-    .edit-profile-btn {
-      display: block; width: 100%; background: #2b6cb0; color: #ffffff; border: none;
-      border-radius: 8px; padding: 12px; text-align: center; font-size: 0.9rem; font-weight: bold;
-      text-decoration: none; margin-top: 16px; cursor: pointer; transition: background-color 0.2s;
-    }
-    .edit-profile-btn:hover { background: #2c5282; }
+    .form-hint { font-size: 10px; color: #718096; margin-top: 2px; line-height: 1.4; }
 
-    .empty-box {
-      background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px;
-      padding: 16px; text-align: center; color: #718096; font-size: 0.88rem; line-height: 1.5;
+    .notice-box {
+      background: #ebf8ff; border: 1px solid #bee3f8; border-radius: 8px; padding: 8px;
+      font-size: 11px; color: #2b6cb0; margin-bottom: 14px; line-height: 1.4;
     }
 
-    .chat-link-card {
-      background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 8px;
-      display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: #2d3748;
-      transition: background-color 0.2s;
+    .submit-btn {
+      width: 100%; background: #00873c; color: #ffffff; border: 2px solid #005a28; border-radius: 10px;
+      padding: 12px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 0 #005a28; cursor: pointer;
     }
-    .chat-link-card:hover { background: #edf2f7; }
-
-    .post-item-card {
-      background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 8px; font-size: 0.88rem;
-    }
-    .post-badge-row { display: flex; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
-    .post-badge {
-      font-size: 0.72rem; padding: 2px 7px; border-radius: 4px; font-weight: bold;
-    }
-    .post-badge.sos { background: #fff5f5; color: #c53030; border: 1px solid #feb2b2; }
-    .post-badge.offer { background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
-    .post-badge.completed { background: #f0fff4; color: #2f855a; border: 1px solid #9ae6b4; }
-    .post-badge.cancelled { background: #f7fafc; color: #718096; border: 1px solid #cbd5e0; }
+    .submit-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #005a28; }
+    .submit-btn:disabled { opacity: 0.6; }
   </style>
 </head>
 
 <body>
 
-  <!-- 📌 最上部：共通固定ヘッダー -->
+  <!-- 📌 最上部：共通固定ヘッダー（メニューなし。戻り先はログイン状態で出し分け） -->
   <div class="app-top-bar">
-    <button type="button" class="top-btn" onclick="goBackSafe()">← 戻る</button>
-    <div class="top-title">🐕🐈 ワンニャンSOS | マイページ</div>
-    <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
+    <button type="button" class="top-btn" id="topBackBtn">← 戻る</button>
+    <div class="top-title" id="pageHeaderTitle">🐕🐈 ワンニャンSOS | 新規登録</div>
+    <div style="width: 70px;"></div>
   </div>
 
-  <!-- 🍔 右側スライドナビゲーション -->
-  <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
-  <div id="sideDrawer" class="side-drawer">
-    <div class="drawer-header">
-      <span>🐾 ワンニャンSOS メニュー</span>
-      <button class="drawer-close-btn" onclick="toggleMenu()">✕</button>
-    </div>
-    <a href="home.html" class="drawer-menu-item">🏠 ホーム（トップ）</a>
-    <a href="sos.html" class="drawer-menu-item" style="color: #00873c;">📦 状況・支援一覧</a>
-    <a href="sos-create.html" class="drawer-menu-item">📝 状況・支援を登録する</a>
-    <a href="mypage.html" class="drawer-menu-item">👤 マイページ</a>
-    <a href="../guide.html" class="drawer-menu-item">📄 使い方案内</a>
-    <a href="../info.html" class="drawer-menu-item">ℹ️ 運営情報</a>
-    <a href="../disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
-    <a href="../terms.html" class="drawer-menu-item">📜 利用規約</a>
-    <a href="../privacy.html" class="drawer-menu-item">🔒 プライバシーポリシー</a>
-    <button onclick="logout()" class="drawer-menu-item" style="background:#fff5f5; color:#c53030; border-color:#feb2b2; width:100%; cursor:pointer;">🚪 ログアウト</button>
-  </div>
+  <div class="reg-container" style="margin-top: 10px;">
+    <div class="reg-card">
+      <div class="reg-title" id="cardTitle">✨ ユーザー登録（電話番号＋暗証番号）</div>
 
-  <main class="mypage-container">
-    
-    <!-- 👋 アカウント名カード -->
-    <div class="content-card">
-      <div class="welcome-bar">
-        <div>
-          <span style="font-size: 0.75rem; color: #718096; display: block;">ログイン中アカウント</span>
-          <span id="displayNickname" class="welcome-name">未登録（ゲスト）</span>
+      <div class="notice-box">
+        🔐 お使いの「お電話番号」と、これから決める「4桁の暗証番号」の組み合わせが、あなた専用の鍵になります。<br>
+        ※銀行のキャッシュカードと同じ考え方です。次回ログイン時に両方入力します。
+      </div>
+
+      <form id="regForm">
+        <!-- 📞 電話番号（最重要キー） -->
+        <div class="form-group">
+          <label class="form-label">
+            お電話番号（ログインに使います） <span style="color:#c53030;">*</span>
+            <span class="badge-private">🔒 必須（ID代わり）</span>
+          </label>
+          <input type="tel" id="regPhone" class="form-input" placeholder="例：09012345678" required>
+          <div class="form-hint">※ハイフンなしでご入力ください。この番号でデータを保存・復元します。</div>
         </div>
-        <span class="welcome-badge">🐾 物資支援</span>
-      </div>
+
+        <!-- 🔑 暗証番号（新規追加） -->
+        <div class="form-group">
+          <label class="form-label">
+            暗証番号（4桁の数字） <span style="color:#c53030;">*</span>
+            <span class="badge-private">🔒 必須（ログイン時に使用）</span>
+          </label>
+          <input type="password" id="regPin" class="form-input" inputmode="numeric" pattern="[0-9]{4}"
+                 maxlength="4" placeholder="例：1234" required>
+          <div class="form-hint">※次回ログイン時に、電話番号とあわせて入力します。忘れないようにメモしておいてください。</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            暗証番号（確認のためもう一度） <span style="color:#c53030;">*</span>
+          </label>
+          <input type="password" id="regPinConfirm" class="form-input" inputmode="numeric" pattern="[0-9]{4}"
+                 maxlength="4" placeholder="もう一度入力してください" required>
+        </div>
+
+        <!-- 🌐 画面上表示（公開） -->
+        <div class="form-group">
+          <label class="form-label">
+            表示名（ニックネーム） <span style="color:#c53030;">*</span>
+            <span class="badge-public">🌐 画面上に公開</span>
+          </label>
+          <input type="text" id="regNickname" class="form-input" placeholder="例：ボランティア太郎" required>
+          <div class="form-hint">※掲示板やチャットで他ユーザーに表示されるお名前です。</div>
+        </div>
+
+        <!-- 🔒 本人確認・防犯用（非公開） -->
+        <div class="form-group">
+          <label class="form-label">
+            氏名（本名）または 正式団体名 <span style="color:#c53030;">*</span>
+            <span class="badge-private">🔒 非公開（管理用）</span>
+          </label>
+          <input type="text" id="regFullName" class="form-input" placeholder="例：山田 花子 / ○○保護の会" required>
+          <div class="form-hint">※施設・団体の場合は「団体名＋担当者名」をご記入ください。</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            生年月日（利用資格・年齢確認用） <span style="color:#c53030;">*</span>
+            <span class="badge-private">🔒 非公開（管理用）</span>
+          </label>
+          <div class="birth-select-group">
+            <select id="birthYear" class="form-select" required>
+              <option value="">年</option>
+            </select>
+            <span>年</span>
+            <select id="birthMonth" class="form-select" required>
+              <option value="">月</option>
+            </select>
+            <span>月</span>
+            <select id="birthDay" class="form-select" required>
+              <option value="">日</option>
+            </select>
+            <span>日</span>
+          </div>
+          <div class="form-hint">※18歳未満の方はご利用いただけません。</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            お住まいの地域・市区町村（住所） <span style="color:#c53030;">*</span>
+            <span class="badge-private">🔒 非公開（管理用）</span>
+          </label>
+          <input type="text" id="regAddress" class="form-input" placeholder="例：熊本市中央区" required>
+          <div class="form-hint">※防犯およびトラブル防止のための管理用情報です。</div>
+        </div>
+
+        <div style="font-size: 11px; color: #4a5568; margin-bottom: 12px;">
+          登録ボタンを押すことで、<a href="terms.html" target="_blank" style="color:#3182ce; font-weight:bold;">利用規約</a>、<a href="disclaimer.html" target="_blank" style="color:#3182ce; font-weight:bold;">免責事項</a>および<a href="privacy.html" target="_blank" style="color:#3182ce; font-weight:bold;">プライバシーポリシー</a>に同意したものとみなします。
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <div id="turnstileWidget" class="cf-turnstile" data-sitekey="0x4AAAAAAEmscAvL6qMbu2_R" data-callback="onTurnstileToken"></div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtnText">
+          🐾 クラウドに保存して登録する ➔
+        </button>
+      </form>
     </div>
+  </div>
 
-    <!-- 💬 チャット一覧 -->
-    <div class="content-card">
-      <div class="section-heading">💬 支援・調整チャット一覧</div>
-      <div id="myChatListContainer">
-        <div class="empty-box">やり取り中のチャットはありません。<br>詳細からチャットが始まります。</div>
-      </div>
-    </div>
-
-    <!-- 📦 自分の投稿一覧 -->
-    <div class="content-card">
-      <div class="section-heading">📦 現在募集中のあなたの投稿</div>
-      <div id="myPostsContainer">
-        <div class="empty-box">現在募集中の投稿はありません。</div>
-      </div>
-    </div>
-
-    <!-- 📜 過去の投稿履歴 -->
-    <div class="content-card">
-      <div class="section-heading">📜 過去の投稿履歴（完了・取り消し）</div>
-      <div id="myPastPostsContainer">
-        <div class="empty-box">過去の投稿履歴はありません。</div>
-      </div>
-    </div>
-
-    <!-- 📋 登録情報（一番下） -->
-    <div class="content-card">
-      <div class="section-heading">📋 登録情報確認</div>
-      <div class="info-row">
-        <span class="info-label">本名・団体名</span>
-        <span id="displayFullName" class="info-value">未登録</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">地域（住所）</span>
-        <span id="displayAddress" class="info-value">未登録</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">お電話番号</span>
-        <span id="displayPhone" class="info-value">未登録</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">生年月日</span>
-        <span id="displayBirth" class="info-value">未登録</span>
-      </div>
-
-      <a href="../register.html" class="edit-profile-btn">✏️ 登録情報を変更する</a>
-    </div>
-
-    <!-- 🚪 退会 -->
-    <div class="content-card" style="border-color:#feb2b2;">
-      <div class="section-heading" style="color:#c53030;">🚪 退会について</div>
-      <div style="font-size:11px; color:#718096; line-height:1.6; margin-bottom:10px;">
-        退会すると、このアカウントではログインできなくなります。募集中の投稿があれば、自動的に「取り消し」になります。記録として登録情報はデータベースに残りますが、他の利用者から見えることはこれまでと変わりません。
-      </div>
-      <button type="button" onclick="withdrawAccount()" style="width:100%; padding:10px; background:#fff5f5; color:#c53030; border:2px solid #feb2b2; border-radius:8px; font-weight:bold; cursor:pointer;">
-        🚪 退会する
-      </button>
-    </div>
-
-  </main>
+  <!-- 📱 下部固定ナビゲーション（ログイン状態で中身を出し分け） -->
+  <nav class="app-bottom-nav" id="bottomNav">
+    <!-- JSで組み立てます -->
+  </nav>
 
   <script>
-    // 🔐 未ログインガード（家の中に入るためのチェック。home.htmlと同じ基準）
-    (function(){
-      const savedPhone = localStorage.getItem('wanSOS_user_phone');
-      if (!savedPhone) {
-        window.location.href = '../index.html';
-      }
-    })();
-
-    function logout() {
-      if (confirm("ログアウトしますか？")) {
-        localStorage.removeItem('wanSOS_user_phone');
-        localStorage.removeItem('wanSOS_profile');
-        sessionStorage.removeItem('wannyanSOS_loggedIn');
-        window.location.href = '../index.html';
-      }
+    // 電話番号を、Supabase Auth用の疑似メールアドレスに変換する共通ルール
+    // login.html 側でも必ず同じ変換ルールを使うこと
+    function phoneToPseudoEmail(phone) {
+      return `${phone}@gmail.com`;
     }
 
-    function toggleMenu() {
-      const drawer = document.getElementById('sideDrawer');
-      const overlay = document.getElementById('menuOverlay');
-      const isOpen = drawer.classList.contains('open');
-      if (isOpen) {
-        drawer.classList.remove('open');
-        overlay.style.display = 'none';
-      } else {
-        drawer.classList.add('open');
-        overlay.style.display = 'block';
-      }
+    // 4桁の暗証番号を、Supabaseの最低文字数(6文字)を満たすパスワードに変換する
+    // login.html 側でも必ず同じ変換ルールを使うこと
+    function pinToPassword(pin) {
+      return `wnsos${pin}pin`;
     }
 
-    function goBackSafe() {
-      if (window.history.length > 1) {
-        history.back();
-      } else {
-        window.location.href = 'sos.html';
+    // 🔐 登録・ログイン済みの方の「情報変更」なのか、初めての方の「新規登録」なのかで
+    // 戻り先・下部ナビを出し分ける（未登録の人に家の中の存在を見せないため）
+    const savedPhone = localStorage.getItem('wanSOS_user_phone');
+    const isReturningUser = !!savedPhone;
+
+    const topBackBtn = document.getElementById('topBackBtn');
+    const bottomNav = document.getElementById('bottomNav');
+
+    if (isReturningUser) {
+      document.getElementById('pageHeaderTitle').textContent = '🐕🐈 ワンニャンSOS | 登録情報の変更';
+      document.getElementById('cardTitle').textContent = '✏️ 登録情報の確認・変更';
+      topBackBtn.onclick = () => window.location.href = 'member/home.html';
+
+      // 🔒 情報変更モードでは電話番号を編集不可にする
+      // （ログイン用のメールアドレスは元の電話番号のままなので、ここで変えると次回ログインできなくなるため）
+      const phoneInput = document.getElementById('regPhone');
+      phoneInput.readOnly = true;
+      phoneInput.style.backgroundColor = '#f0f0f0';
+      phoneInput.style.color = '#718096';
+      const phoneHint = phoneInput.nextElementSibling;
+      if (phoneHint && phoneHint.classList.contains('form-hint')) {
+        phoneHint.textContent = '※電話番号の変更はできません。変更が必要な場合は運営までご連絡ください。';
       }
+
+      bottomNav.innerHTML = `
+        <a href="member/home.html" class="nav-item">
+          <span class="icon">🏠</span>
+          <span>ホーム</span>
+        </a>
+        <button type="button" class="nav-item" onclick="window.location.href='member/sos.html'">
+          <span class="icon">📦</span>
+          <span>一覧</span>
+        </button>
+        <a href="member/mypage.html" class="nav-item active">
+          <span class="icon">👤</span>
+          <span>マイページ</span>
+        </a>
+        <button type="button" class="nav-item" onclick="window.location.href='member/sos-create.html'" style="color: #c53030;">
+          <span class="icon">📝</span>
+          <span>投稿する</span>
+        </button>
+      `;
+    } else {
+      topBackBtn.onclick = () => window.location.href = 'index.html';
+
+      bottomNav.innerHTML = `
+        <a href="index.html" class="nav-item">
+          <span class="icon">🏠</span>
+          <span>トップ</span>
+        </a>
+        <a href="guide.html" class="nav-item">
+          <span class="icon">📄</span>
+          <span>使い方</span>
+        </a>
+        <a href="terms.html" class="nav-item">
+          <span class="icon">📜</span>
+          <span>利用規約</span>
+        </a>
+        <a href="login.html" class="nav-item" style="color: #2b6cb0;">
+          <span class="icon">🔑</span>
+          <span>ログイン</span>
+        </a>
+      `;
     }
 
-    // 🚪 退会処理：募集中の投稿を自動で取り消しにし、退会フラグを立ててログアウトする
-    async function withdrawAccount() {
-      if (!confirm("本当に退会しますか？\nこのアカウントでは今後ログインできなくなります。募集中の投稿は自動的に「取り消し」になります。\nこの操作は取り消せません。")) {
+    window.addEventListener('DOMContentLoaded', () => {
+      const yearSelect = document.getElementById('birthYear');
+      const monthSelect = document.getElementById('birthMonth');
+      const daySelect = document.getElementById('birthDay');
+
+      const currentYear = new Date().getFullYear();
+
+      for (let y = currentYear; y >= currentYear - 100; y--) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = y;
+        yearSelect.appendChild(opt);
+      }
+
+      for (let m = 1; m <= 12; m++) {
+        const opt = document.createElement('option');
+        opt.value = m < 10 ? '0' + m : m;
+        opt.textContent = m;
+        monthSelect.appendChild(opt);
+      }
+
+      for (let d = 1; d <= 31; d++) {
+        const opt = document.createElement('option');
+        opt.value = d < 10 ? '0' + d : d;
+        opt.textContent = d;
+        daySelect.appendChild(opt);
+      }
+
+      // 注：暗証番号は保存済みデータから復元しない（セキュリティ上、平文で残さない）
+      const savedProfile = localStorage.getItem('wanSOS_profile');
+      if (savedProfile) {
+        try {
+          const profile = JSON.parse(savedProfile);
+          if (profile.nickname) document.getElementById('regNickname').value = profile.nickname;
+          if (profile.fullName) document.getElementById('regFullName').value = profile.fullName;
+          if (profile.phone) document.getElementById('regPhone').value = profile.phone;
+          if (profile.address) document.getElementById('regAddress').value = profile.address;
+
+          if (profile.birth) {
+            const parts = profile.birth.split('-');
+            if (parts.length === 3) {
+              document.getElementById('birthYear').value = parts[0];
+              document.getElementById('birthMonth').value = parts[1];
+              document.getElementById('birthDay').value = parts[2];
+            }
+          }
+        } catch (e) {}
+      }
+    });
+
+    document.getElementById('regForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      // 🔒 Turnstileのトークンは1回使うと無効になるため、
+      // 常に最新のトークンをこの変数で保持しておく（コールバックで更新）
+      window.onTurnstileToken = function(token) { window.__latestCaptchaToken = token; };
+
+      // 使用済みトークンを再取得するためのヘルパー（ウィジェットをリセットし、新しいトークンが来るまで待つ）
+      function getFreshCaptchaToken() {
+        return new Promise((resolve) => {
+          let done = false;
+          const timeoutId = setTimeout(() => {
+            if (!done) { done = true; resolve(''); }
+          }, 15000);
+
+          window.onTurnstileToken = (token) => {
+            if (!done) {
+              done = true;
+              clearTimeout(timeoutId);
+              resolve(token);
+            }
+          };
+          if (typeof turnstile !== 'undefined') {
+            turnstile.reset('#turnstileWidget');
+          } else {
+            done = true;
+            clearTimeout(timeoutId);
+            resolve('');
+          }
+        });
+      }
+
+      const phone = document.getElementById('regPhone').value.trim().replace(/[-\s]/g, '');
+      const pin = document.getElementById('regPin').value.trim();
+      const pinConfirm = document.getElementById('regPinConfirm').value.trim();
+      const nickname = document.getElementById('regNickname').value.trim();
+      const fullName = document.getElementById('regFullName').value.trim();
+      const year = document.getElementById('birthYear').value;
+      const month = document.getElementById('birthMonth').value;
+      const day = document.getElementById('birthDay').value;
+      const address = document.getElementById('regAddress').value.trim();
+
+      if (!phone || !pin || !pinConfirm || !nickname || !fullName || !year || !month || !day || !address) {
+        alert("すべての項目を入力（選択）してください。");
+        return;
+      }
+
+      if (!/^\d{4}$/.test(pin)) {
+        alert("暗証番号は4桁の数字で入力してください。");
+        return;
+      }
+
+      if (pin !== pinConfirm) {
+        alert("暗証番号が一致しません。もう一度ご確認ください。");
+        return;
+      }
+
+      const birthStr = `${year}-${month}-${day}`;
+      const birthDate = new Date(year, parseInt(month) - 1, day);
+      const today = new Date();
+
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+
+      if (age < 18) {
+        alert("本サービスは18歳未満の方はご利用いただけません。");
+        return;
+      }
+
+      const captchaToken = (typeof turnstile !== 'undefined') ? turnstile.getResponse('#turnstileWidget') : '';
+      if (!captchaToken) {
+        alert("画像認証（チェックボックス）にチェックを入れてください。");
         return;
       }
 
@@ -284,267 +430,137 @@
         return;
       }
 
+      const submitBtn = document.getElementById('submitBtnText');
+      submitBtn.disabled = true;
+      submitBtn.textContent = "登録中...";
+
       try {
-        const currentUserId = await getCurrentUserId();
-        if (!currentUserId) {
-          alert("ログイン情報が確認できませんでした。");
-          return;
-        }
+        let authUserId = null;
 
-        // 募集中の投稿を取り消しにする
-        await window.supabaseClient
-          .from('sos_items')
-          .update({ status: 'cancelled', status_reason: '退会のため自動的に取り消しました' })
-          .eq('creator_id', currentUserId)
-          .not('status', 'in', '(completed,cancelled)');
-
-        // 退会フラグを立てる
-        const { error } = await window.supabaseClient
-          .from('users_profiles')
-          .update({ is_withdrawn: true })
-          .eq('auth_user_id', currentUserId);
-
-        if (error) {
-          alert("退会処理に失敗しました：" + error.message);
-          return;
-        }
-
-        await window.supabaseClient.auth.signOut();
-        localStorage.removeItem('wanSOS_user_phone');
-        localStorage.removeItem('wanSOS_profile');
-        sessionStorage.removeItem('wannyanSOS_loggedIn');
-
-        alert("退会が完了しました。ご利用ありがとうございました。");
-        window.location.href = '../index.html';
-      } catch (e) {
-        alert("退会処理中にエラーが発生しました。");
-      }
-    }
-
-    window.addEventListener('DOMContentLoaded', async () => {
-      await loadUserData();
-      await loadMyPosts();
-      loadMyChats();
-    });
-
-    // 🔑 現在ログイン中のユーザーID（sos-edit.html/sos-detail.htmlと同じロジック）
-    async function getCurrentUserId() {
-      let currentUserId = '';
-      try {
-        const profile = JSON.parse(localStorage.getItem('wanSOS_profile') || '{}');
-        currentUserId = profile.auth_user_id || profile.phone || '';
-      } catch(e){}
-
-      if (window.supabaseClient) {
-        try {
+        if (isReturningUser) {
+          // ✏️ 情報変更モード：すでに登録済みのため signUp は使わず、
+          // 今のログインセッションのユーザーIDをそのまま使ってプロフィールだけを更新する
           const { data: { session } } = await window.supabaseClient.auth.getSession();
-          if (session && session.user) {
-            currentUserId = session.user.id;
+          if (!session || !session.user) {
+            alert("⚠️ ログイン情報が確認できませんでした。お手数ですが、ログイン画面から入り直してください。");
+            submitBtn.disabled = false;
+            submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
+            window.location.href = 'login.html';
+            return;
           }
-        } catch(e){}
-      }
-      return currentUserId;
-    }
+          authUserId = session.user.id;
 
-    async function loadUserData() {
-      let profile = null;
-      const savedPhone = localStorage.getItem('wanSOS_user_phone');
-      let queryCompleted = false; // Supabaseへの問い合わせ自体が成功したか（結果を信頼できるか）
-      let queryFound = false;
-
-      if (window.supabaseClient && savedPhone) {
-        try {
-          const { data, error } = await window.supabaseClient
-            .from('users_profiles')
-            .select('*')
-            .eq('phone', savedPhone)
-            .single();
-
-          queryCompleted = true;
-
-          if (data && !error) {
-            queryFound = true;
-            profile = {
-              nickname: data.nickname,
-              fullName: data.full_name,
-              address: data.address,
-              phone: data.phone,
-              birth: data.birth
-            };
-            localStorage.setItem('wanSOS_profile', JSON.stringify(profile));
+          // 暗証番号も変更されている可能性があるため、あわせて更新する
+          const { error: pwError } = await window.supabaseClient.auth.updateUser({
+            password: pinToPassword(pin)
+          });
+          if (pwError) {
+            alert("暗証番号の更新に失敗しました：" + pwError.message);
+            submitBtn.disabled = false;
+            submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
+            return;
           }
-        } catch (e) {
-          // 通信エラー等。queryCompletedはfalseのままにし、下でキャッシュへフォールバックする
-        }
-      }
-
-      if (!queryFound) {
-        if (queryCompleted) {
-          // 🔒 Supabaseに確認できた上で「該当なし」＝本当に未登録。古いキャッシュは破棄する
-          localStorage.removeItem('wanSOS_profile');
-          localStorage.removeItem('wanSOS_user_phone');
         } else {
-          // オフライン等で確認できなかった場合のみ、ローカルキャッシュを暫定表示に使う
-          const profileJson = localStorage.getItem('wanSOS_profile');
-          if (profileJson) {
-            try {
-              profile = JSON.parse(profileJson);
-            } catch(e) {}
+          // ✨ 新規登録モード：Supabase Authにアカウントを新規作成（電話番号＋暗証番号）
+          const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
+            email: phoneToPseudoEmail(phone),
+            password: pinToPassword(pin),
+            options: { captchaToken: captchaToken }
+          });
+
+          if (authError) {
+            if (authError.message && authError.message.toLowerCase().includes('already registered')) {
+              alert("この電話番号はすでに登録されています。\n「ログイン」画面からお進みください。");
+            } else {
+              alert("登録に失敗しました：" + authError.message);
+            }
+            submitBtn.disabled = false;
+            submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
+            return;
           }
-        }
-      }
 
-      if (profile) {
-        document.getElementById('displayNickname').textContent = profile.nickname || '未登録（ゲスト）';
-        document.getElementById('displayFullName').textContent = profile.fullName || '未登録';
-        document.getElementById('displayAddress').textContent = profile.address || '未登録';
-        document.getElementById('displayPhone').textContent = profile.phone || '未登録';
-        document.getElementById('displayBirth').textContent = profile.birth || '未登録';
-        if (profile.phone && !savedPhone) {
-          localStorage.setItem('wanSOS_user_phone', profile.phone);
-        }
-      }
-    }
-
-    // 🔒 creator_idで絞り込んだ「自分の投稿」だけを取得・表示する
-    async function loadMyPosts() {
-      const activeContainer = document.getElementById('myPostsContainer');
-      const pastContainer = document.getElementById('myPastPostsContainer');
-      const currentUserId = await getCurrentUserId();
-
-      if (!currentUserId) {
-        activeContainer.innerHTML = '<div class="empty-box">ログイン情報が確認できませんでした。</div>';
-        pastContainer.innerHTML = '<div class="empty-box">ログイン情報が確認できませんでした。</div>';
-        return;
-      }
-
-      let myPosts = [];
-
-      // Supabaseから自分のcreator_idの投稿だけを取得
-      if (window.supabaseClient) {
-        try {
-          const { data, error } = await window.supabaseClient
-            .from('sos_items')
-            .select('*')
-            .eq('creator_id', currentUserId)
-            .order('created_at', { ascending: false });
-          if (!error && data) {
-            myPosts = data;
+          if (!authData.user) {
+            alert("登録処理が完了しませんでした。時間をおいてもう一度お試しください。");
+            submitBtn.disabled = false;
+            submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
+            return;
           }
-        } catch(e) {}
-      }
 
-      const activePosts = myPosts.filter(p => p.status !== 'completed' && p.status !== 'cancelled');
-      const pastPosts = myPosts.filter(p => p.status === 'completed' || p.status === 'cancelled');
+          authUserId = authData.user.id;
 
-      renderPostGroup(activeContainer, activePosts, '現在募集中の投稿はありません。');
-      renderPostGroup(pastContainer, pastPosts, '過去の投稿履歴はありません。');
-    }
+          // 🔑 signUp() の時点ではまだ本物のログインセッションが確立していない場合があるため、
+          // ここで signInWithPassword を使って確実にセッションを張ってから次の処理へ進む
+          if (!authData.session) {
+            // Turnstileのトークンは1回使うと無効になるため、ここで新しいトークンを取り直す
+            const freshCaptchaToken = await getFreshCaptchaToken();
+            if (!freshCaptchaToken) {
+              alert("画像認証の再確認に失敗しました。お手数ですが「ログイン」画面から入り直してください。");
+              submitBtn.disabled = false;
+              submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
+              window.location.href = 'login.html';
+              return;
+            }
 
-    function renderPostGroup(container, posts, emptyText) {
-      if (posts.length === 0) {
-        container.innerHTML = `<div class="empty-box">${emptyText}</div>`;
-        return;
-      }
-
-      container.innerHTML = '';
-      posts.forEach(post => {
-        const isSos = post.mode !== 'offer';
-        const modeBadge = isSos
-          ? '<span class="post-badge sos">🆘 不足</span>'
-          : '<span class="post-badge offer">✳️ 支援</span>';
-
-        let statusBadge = '';
-        if (post.status === 'completed') statusBadge = '<span class="post-badge completed">✅ 終了</span>';
-        else if (post.status === 'cancelled') statusBadge = '<span class="post-badge cancelled">⚠️ 取り消し</span>';
-
-        const cleanCity = (post.city || post.area || '').replace(/ブロック/g, '');
-
-        // 📅 募集中のまま30日以上経過していたら、再投稿を促す控えめな一言を添える
-        // （自動で何かを変更するわけではなく、あくまで気づきのための表示）
-        let staleNotice = '';
-        const isActivePost = post.status !== 'completed' && post.status !== 'cancelled';
-        if (isActivePost && post.created_at) {
-          const daysPassed = Math.floor((Date.now() - new Date(post.created_at).getTime()) / (1000 * 60 * 60 * 24));
-          if (daysPassed >= 30) {
-            staleNotice = `<div style="margin-top:6px; font-size:0.72rem; color:#a0703a; background:#fffaf0; border:1px dashed #f0dca0; border-radius:6px; padding:6px 8px; line-height:1.6;">📅 投稿から${daysPassed}日以上経過いたしました。現在、状況は改善されていますでしょうか？<br>もし変化がある場合（もっと必要な数が増えた、ウェットばかり減る、など）、一度、終了して、再投稿することで、最新情報となり、支援者の目に付きやすくなります。</div>`;
-          }
-        }
-
-        const card = document.createElement('a');
-        card.href = `sos-detail.html?id=${post.id}`;
-        card.style.textDecoration = 'none';
-        card.style.color = 'inherit';
-        card.className = 'post-item-card';
-        card.style.display = 'block';
-        card.innerHTML = `
-          <div class="post-badge-row">${statusBadge}${modeBadge}</div>
-          <div style="font-weight:bold; color:#2b6cb0; margin-bottom:4px;">${escapeHtml(post.title || '')}</div>
-          <div style="font-size:0.75rem; color:#718096; display:flex; justify-content:space-between;">
-            <span>地域: ${escapeHtml(cleanCity || '未設定')}</span>
-            <span>投稿日: ${escapeHtml(post.date || '日時不明')}</span>
-          </div>
-          ${staleNotice}
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    async function loadMyChats() {
-      const container = document.getElementById('myChatListContainer');
-      let chatItems = [];
-
-      if (window.supabaseClient) {
-        try {
-          const { data } = await window.supabaseClient
-            .from('sos_chat_messages')
-            .select('sos_id, message_text, sender_nickname, created_at')
-            .order('created_at', { ascending: false });
-
-          if (data && data.length > 0) {
-            const map = {};
-            data.forEach(d => {
-              if (!map[d.sos_id]) {
-                map[d.sos_id] = {
-                  sosId: d.sos_id,
-                  lastMessage: d.message_text,
-                  lastSender: d.sender_nickname,
-                  time: d.created_at
-                };
-              }
+            const { data: signInData, error: signInError } = await window.supabaseClient.auth.signInWithPassword({
+              email: phoneToPseudoEmail(phone),
+              password: pinToPassword(pin),
+              options: { captchaToken: freshCaptchaToken }
             });
-            chatItems = Object.values(map);
+
+            if (signInError || !signInData.session) {
+              alert("アカウントは作成されましたが、ログインの確立に失敗しました。\nお手数ですが「ログイン」画面から入り直してください。");
+              submitBtn.disabled = false;
+              submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
+              window.location.href = 'login.html';
+              return;
+            }
+
+            authUserId = signInData.session.user.id;
           }
-        } catch(e){}
+        }
+
+        // プロフィール情報を保存（auth_user_idを紐づける）
+        const profileData = {
+          phone: phone,
+          nickname: nickname,
+          full_name: fullName,
+          birth: birthStr,
+          address: address,
+          auth_user_id: authUserId,
+          updated_at: new Date().toISOString()
+        };
+
+        const { error: profileError } = await window.supabaseClient
+          .from('users_profiles')
+          .upsert(profileData, { onConflict: 'phone' });
+
+        if (profileError) {
+          alert("プロフィールの保存に失敗しました：" + profileError.message);
+          submitBtn.disabled = false;
+          submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
+          return;
+        }
+
+        // 画面表示用のキャッシュ（暗証番号は保存しない）
+        const localProfile = {
+          phone: phone,
+          nickname: nickname,
+          fullName: fullName,
+          birth: birthStr,
+          address: address,
+          registeredAt: new Date().toISOString()
+        };
+        localStorage.setItem('wanSOS_profile', JSON.stringify(localProfile));
+        localStorage.setItem('wanSOS_user_phone', phone);
+
+        alert(isReturningUser ? "🎉 登録情報を更新しました！ホームに戻ります。" : "🎉 登録情報の保存が完了しました！ホームに戻ります。");
+        window.location.href = "member/home.html";
+      } catch (err) {
+        alert("登録処理中にエラーが発生しました：" + err.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = "🐾 クラウドに保存して登録する ➔";
       }
-
-      if (chatItems.length === 0) {
-        container.innerHTML = '<div class="empty-box">やり取り中のチャットはありません。<br>詳細からチャットが始まります。</div>';
-        return;
-      }
-
-      container.innerHTML = '';
-      chatItems.forEach(chat => {
-        const card = document.createElement('a');
-        card.href = `chat.html?sos_id=${chat.sosId}`;
-        card.className = 'chat-link-card';
-        card.innerHTML = `
-          <div>
-            <div style="font-weight:bold; color:#00873c; font-size:0.9rem; margin-bottom:2px;">💬 支援調整チャットルーム</div>
-            <div style="font-size:0.8rem; color:#4a5568;">最新: [${escapeHtml(chat.lastSender || '匿名')}] ${escapeHtml(chat.lastMessage)}</div>
-          </div>
-          <div style="font-weight:bold; font-size:0.85rem; color:#3182ce;">開く ➔</div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str).replace(/[&<>"']/g, function(m) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
-      });
-    }
+    });
   </script>
 
 </body>
