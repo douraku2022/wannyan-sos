@@ -8,6 +8,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>詳細情報｜ワンニャンSOS熊本</title>
+  <link rel="stylesheet" href="../css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../supabase-config.js"></script>
 
@@ -264,7 +265,7 @@
 
       let statusReasonHtml = '';
       if (item.status_reason) {
-        statusReasonHtml = `<div class="status-reason-box">✅ 状況：${item.status_reason}</div>`;
+        statusReasonHtml = `<div class="status-reason-box">✅ 状況：${escapeHtml(item.status_reason)}</div>`;
       }
 
       let dateStr = item.date;
