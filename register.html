@@ -16,7 +16,7 @@
   <style>
     * { box-sizing: border-box; }
     body {
-      margin: 0; padding: 54px 0 70px 0;
+      margin: 0; padding: 54px 0 40px 0;
       background-color: #dbe2e8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
@@ -35,21 +35,33 @@
     .top-btn:active { background: rgba(255,255,255,0.3); }
     .top-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
 
-    /* 📱 下部固定ボトムナビゲーション */
-    .app-bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0; height: 56px;
-      background: #ffffff; border-top: 1px solid #cbd5e0;
-      display: flex; align-items: center; justify-content: space-around;
-      z-index: 1000; box-shadow: 0 -2px 6px rgba(0,0,0,0.06);
+    /* 🍔 右側スライドナビゲーション */
+    .menu-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); z-index: 1001;
     }
-    .nav-item {
-      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-decoration: none; color: #4a5568; font-size: 10px; font-weight: bold; height: 100%;
-      background: none; border: none; cursor: pointer; gap: 2px;
+    .side-drawer {
+      position: fixed; top: 0; right: -260px; width: 240px; height: 100%;
+      background: linear-gradient(180deg, #ecefe6 0%, #d8ded6 100%);
+      border-left: 3px solid #9aa5b0; z-index: 1002;
+      box-shadow: -4px 0 16px rgba(0,0,0,0.2); transition: right 0.25s ease-in-out;
+      display: flex; flex-direction: column; padding: 12px; gap: 10px;
     }
-    .nav-item.active { color: #00873c; }
-    .nav-item span.icon { font-size: 18px; line-height: 1; }
-    .nav-item:active { background: #f7fafc; }
+    .side-drawer.open { right: 0; }
+    .drawer-header {
+      background: #00873c; color: #fff; border-radius: 8px; padding: 10px;
+      text-align: center; font-size: 13px; font-weight: bold; border: 1px solid #005a28;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .drawer-close-btn {
+      background: none; border: none; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer;
+    }
+    .drawer-menu-item {
+      background: #f8fafc; border: 2px solid #a0aec0; border-radius: 10px; padding: 12px;
+      color: #2d3748; text-decoration: none; font-size: 13px; font-weight: bold;
+      display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 0 #cbd5e0;
+    }
+    .drawer-menu-item:active { transform: translateY(1px); box-shadow: 0 1px 0 #cbd5e0; }
 
     .reg-container { max-width: 480px; margin: 0 auto; padding: 0 12px; }
 
@@ -102,11 +114,21 @@
 
 <body>
 
-  <!-- 📌 最上部：共通固定ヘッダー（メニューなし。戻り先はログイン状態で出し分け） -->
+  <!-- 📌 最上部：共通固定ヘッダー（戻り先はログイン状態で出し分け） -->
   <div class="app-top-bar">
     <button type="button" class="top-btn" id="topBackBtn">← 戻る</button>
     <div class="top-title" id="pageHeaderTitle">🐕🐈 ワンニャンSOS | 新規登録</div>
-    <div style="width: 70px;"></div>
+    <button type="button" class="top-btn" onclick="toggleMenu()">☰ メニュー</button>
+  </div>
+
+  <!-- 🍔 右スライドメニュー（ログイン状態でJSが中身を出し分けます） -->
+  <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+  <div id="sideDrawer" class="side-drawer">
+    <div class="drawer-header">
+      <span>🐾 ワンニャンSOS メニュー</span>
+      <button class="drawer-close-btn" onclick="toggleMenu()">✕</button>
+    </div>
+    <div id="drawerMenuItems"></div>
   </div>
 
   <div class="reg-container" style="margin-top: 10px;">
@@ -214,11 +236,6 @@
     </div>
   </div>
 
-  <!-- 📱 下部固定ナビゲーション（ログイン状態で中身を出し分け） -->
-  <nav class="app-bottom-nav" id="bottomNav">
-    <!-- JSで組み立てます -->
-  </nav>
-
   <script>
     // 電話番号を、Supabase Auth用の疑似メールアドレスに変換する共通ルール
     // login.html 側でも必ず同じ変換ルールを使うこと
@@ -233,12 +250,12 @@
     }
 
     // 🔐 登録・ログイン済みの方の「情報変更」なのか、初めての方の「新規登録」なのかで
-    // 戻り先・下部ナビを出し分ける（未登録の人に家の中の存在を見せないため）
+    // 戻り先・スライドメニューの中身を出し分ける（未登録の人に家の中の存在を見せないため）
     const savedPhone = localStorage.getItem('wanSOS_user_phone');
     const isReturningUser = !!savedPhone;
 
     const topBackBtn = document.getElementById('topBackBtn');
-    const bottomNav = document.getElementById('bottomNav');
+    const drawerMenuItems = document.getElementById('drawerMenuItems');
 
     if (isReturningUser) {
       document.getElementById('pageHeaderTitle').textContent = '🐕🐈 ワンニャンSOS | 登録情報の変更';
@@ -256,45 +273,42 @@
         phoneHint.textContent = '※電話番号の変更はできません。変更が必要な場合は運営までご連絡ください。';
       }
 
-      bottomNav.innerHTML = `
-        <a href="member/home.html" class="nav-item">
-          <span class="icon">🏠</span>
-          <span>ホーム</span>
-        </a>
-        <button type="button" class="nav-item" onclick="window.location.href='member/sos.html'">
-          <span class="icon">📦</span>
-          <span>一覧</span>
-        </button>
-        <a href="member/mypage.html" class="nav-item active">
-          <span class="icon">👤</span>
-          <span>マイページ</span>
-        </a>
-        <button type="button" class="nav-item" onclick="window.location.href='member/sos-create.html'" style="color: #c53030;">
-          <span class="icon">📝</span>
-          <span>投稿する</span>
-        </button>
+      drawerMenuItems.innerHTML = `
+        <a href="member/home.html" class="drawer-menu-item">🏠 ホーム</a>
+        <a href="member/sos.html" class="drawer-menu-item">📦 状況・支援一覧</a>
+        <a href="member/sos-create.html" class="drawer-menu-item" style="color: #c53030;">📝 状況・支援を登録する</a>
+        <a href="member/mypage.html" class="drawer-menu-item">👤 マイページ</a>
+        <a href="guide.html" class="drawer-menu-item">📄 使い方案内</a>
+        <a href="info.html" class="drawer-menu-item">ℹ️ 運営情報</a>
+        <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
+        <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
+        <a href="privacy.html" class="drawer-menu-item">🔒 プライバシーポリシー</a>
       `;
     } else {
       topBackBtn.onclick = () => window.location.href = 'index.html';
 
-      bottomNav.innerHTML = `
-        <a href="index.html" class="nav-item">
-          <span class="icon">🏠</span>
-          <span>トップ</span>
-        </a>
-        <a href="guide.html" class="nav-item">
-          <span class="icon">📄</span>
-          <span>使い方</span>
-        </a>
-        <a href="terms.html" class="nav-item">
-          <span class="icon">📜</span>
-          <span>利用規約</span>
-        </a>
-        <a href="login.html" class="nav-item" style="color: #2b6cb0;">
-          <span class="icon">🔑</span>
-          <span>ログイン</span>
-        </a>
+      drawerMenuItems.innerHTML = `
+        <a href="index.html" class="drawer-menu-item">🏠 トップページ</a>
+        <a href="login.html" class="drawer-menu-item" style="color: #2b6cb0;">🔑 ログイン</a>
+        <a href="guide.html" class="drawer-menu-item">📄 使い方案内</a>
+        <a href="info.html" class="drawer-menu-item">ℹ️ 運営情報</a>
+        <a href="disclaimer.html" class="drawer-menu-item">⚠️ 免責事項・注意事項</a>
+        <a href="terms.html" class="drawer-menu-item">📜 利用規約</a>
+        <a href="privacy.html" class="drawer-menu-item">🔒 プライバシーポリシー</a>
       `;
+    }
+
+    function toggleMenu() {
+      const drawer = document.getElementById('sideDrawer');
+      const overlay = document.getElementById('menuOverlay');
+      const isOpen = drawer.classList.contains('open');
+      if (isOpen) {
+        drawer.classList.remove('open');
+        overlay.style.display = 'none';
+      } else {
+        drawer.classList.add('open');
+        overlay.style.display = 'block';
+      }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
