@@ -407,7 +407,7 @@
         if (isActivePost && post.created_at) {
           const daysPassed = Math.floor((Date.now() - new Date(post.created_at).getTime()) / (1000 * 60 * 60 * 24));
           if (daysPassed >= 30) {
-            staleNotice = `<div style="margin-top:6px; font-size:0.72rem; color:#a0703a; background:#fffaf0; border:1px dashed #f0dca0; border-radius:6px; padding:6px 8px;">📅 投稿から${daysPassed}日が経ちました。状況が変わっていたら、取り消して再投稿すると最新の情報になります。</div>`;
+            staleNotice = `<div style="margin-top:6px; font-size:0.72rem; color:#a0703a; background:#fffaf0; border:1px dashed #f0dca0; border-radius:6px; padding:6px 8px; line-height:1.6;">📅 投稿から${daysPassed}日以上経過いたしました。現在、状況は改善されていますでしょうか？<br>もし変化がある場合（もっと必要な数が増えた、ウェットばかり減る、など）、一度、終了して、再投稿することで、最新情報となり、支援者の目に付きやすくなります。</div>`;
           }
         }
 
