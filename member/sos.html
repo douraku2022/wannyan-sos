@@ -288,6 +288,16 @@
       <button type="button" class="filter-btn" onclick="filterPosts('offer', this)">✳️ 支援</button>
     </div>
 
+    <!-- エリア絞り込み -->
+    <div style="margin: 10px 0;">
+      <select id="areaFilterSelect" onchange="changeAreaFilter(this.value)" style="width:100%; padding:10px; border:2px solid #cbd5e0; border-radius:8px; font-size:13px; background:#fff;">
+        <option value="">📍 エリアで絞り込む（すべて）</option>
+      </select>
+    </div>
+
+    <!-- エリア別件数サマリー（傾向を見つけるための一覧） -->
+    <div id="areaSummaryBox" style="display:none; background:#f7fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 12px; margin-bottom:12px; font-size:11px; color:#4a5568; line-height:1.8;"></div>
+
     <!-- リスト表示エリア -->
     <div id="postsList">
       <div class="no-data">読み込み中...</div>
@@ -340,6 +350,28 @@
 
     let allPosts = [];
     let currentFilter = 'all';
+    let currentAreaFilter = '';
+
+    // sos-create.htmlと同じエリア一覧（市郡単位。個人が特定される粒度ではない）
+    const AREA_LIST = [
+      '熊本市','八代市','水俣市','山鹿市','菊池市','宇土市','上天草市','宇城市',
+      '天草市','合志市','上益城郡','下益城郡','菊池郡','阿蘇郡','八代郡','葦北郡'
+    ];
+
+    function initAreaFilterOptions() {
+      const select = document.getElementById('areaFilterSelect');
+      AREA_LIST.forEach(area => {
+        const opt = document.createElement('option');
+        opt.value = area;
+        opt.textContent = area;
+        select.appendChild(opt);
+      });
+    }
+
+    function changeAreaFilter(value) {
+      currentAreaFilter = value;
+      renderPosts();
+    }
 
     async function fetchPosts() {
       let posts = [];
@@ -369,6 +401,30 @@
       renderPosts();
     }
 
+    // 📍 エリアごとの件数を集計して、傾向に気づきやすくする（募集中のみカウント）
+    function renderAreaSummary(postsForSummary) {
+      const box = document.getElementById('areaSummaryBox');
+      const activeOnes = postsForSummary.filter(p => p.status !== 'completed' && p.status !== 'cancelled');
+
+      if (activeOnes.length === 0) {
+        box.style.display = 'none';
+        return;
+      }
+
+      const counts = {};
+      activeOnes.forEach(p => {
+        const a = (p.city || p.area || '未設定').replace('ブロック', '');
+        counts[a] = (counts[a] || 0) + 1;
+      });
+
+      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+      box.innerHTML = '📊 募集中の件数（エリア別）：' + sorted.map(([area, n]) =>
+        `<span style="display:inline-block; margin:2px 6px 2px 0; padding:2px 8px; background:#fff; border:1px solid #cbd5e0; border-radius:10px;">${escapeHtml(area)} ${n}件</span>`
+      ).join('');
+      box.style.display = 'block';
+    }
+
     function renderPosts() {
       const container = document.getElementById('postsList');
       container.innerHTML = '';
@@ -378,6 +434,12 @@
         filtered = allPosts.filter(p => p.mode === 'sos' || !p.mode);
       } else if (currentFilter === 'offer') {
         filtered = allPosts.filter(p => p.mode === 'offer');
+      }
+
+      renderAreaSummary(filtered);
+
+      if (currentAreaFilter) {
+        filtered = filtered.filter(p => (p.city || p.area || '').includes(currentAreaFilter));
       }
 
       if (filtered.length === 0) {
@@ -394,7 +456,7 @@
         let statusBadgeHtml = '';
         let isClosed = false;
         if (post.status === 'completed') {
-          statusBadgeHtml = '<span class="badge completed">✅ 支援完了</span>';
+          statusBadgeHtml = '<span class="badge completed">✅ 終了</span>';
           isClosed = true;
         } else if (post.status === 'cancelled') {
           statusBadgeHtml = '<span class="badge cancelled">⚠️ 取り消し</span>';
@@ -420,16 +482,6 @@
         }
         if (!dateStr) dateStr = '日時不明';
 
-        // ✏️ 作成時から更新されていれば「編集済み」を表示
-        let editedTag = '';
-        if (post.updated_at && post.created_at) {
-          const createdTime = new Date(post.created_at).getTime();
-          const updatedTime = new Date(post.updated_at).getTime();
-          if (updatedTime - createdTime > 60000) {
-            editedTag = '<span class="tag" style="color:#2b6cb0;">✏️ 編集済み</span>';
-          }
-        }
-
         const card = document.createElement('div');
         card.className = 'mini-card' + (isClosed ? ' is-closed' : '');
         card.onclick = () => {
@@ -443,7 +495,6 @@
             <span class="tag">${escapeHtml(timeframe)}</span>
             <span class="tag">${escapeHtml(area)}</span>
             <span class="tag">${escapeHtml(attribute)}</span>
-            ${editedTag}
           </div>
           <div class="card-line-2-needs">
             <span class="highlight">${escapeHtml(animal)} ${escapeHtml(count)}分</span>
@@ -459,7 +510,10 @@
       });
     }
 
-    window.addEventListener('DOMContentLoaded', fetchPosts);
+    window.addEventListener('DOMContentLoaded', () => {
+      initAreaFilterOptions();
+      fetchPosts();
+    });
 
     function escapeHtml(str) {
       if (!str) return '';

@@ -305,14 +305,14 @@
       <input type="hidden" id="count-input" name="count" value="1〜3頭">
     </div>
 
-    <!-- ⑤ 物資大カテゴリ -->
+    <!-- ⑤ 物資大カテゴリ（複数選択可） -->
     <div class="form-group">
-      <label>⑤ 物資大カテゴリ</label>
+      <label>⑤ 物資大カテゴリ（複数選べます）</label>
       <div class="chip-group" id="categoryMain-group">
-        <button type="button" class="chip active" onclick="selectChip(this, 'categoryMain')">ペットフード</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'categoryMain')">ペットシーツ</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'categoryMain')">タオル類</button>
-        <button type="button" class="chip" onclick="selectChip(this, 'categoryMain')">その他</button>
+        <button type="button" class="chip active" onclick="toggleMultiChip(this, 'categoryMain')">ペットフード</button>
+        <button type="button" class="chip" onclick="toggleMultiChip(this, 'categoryMain')">ペットシーツ</button>
+        <button type="button" class="chip" onclick="toggleMultiChip(this, 'categoryMain')">タオル類</button>
+        <button type="button" class="chip" onclick="toggleMultiChip(this, 'categoryMain')">その他</button>
       </div>
       <input type="hidden" id="categoryMain-input" name="categoryMain" value="ペットフード">
     </div>
@@ -444,6 +444,22 @@
     document.getElementById(groupName + '-input').value = button.textContent;
   }
 
+  // ⑤ 物資大カテゴリ用：複数選択できるチップ（最低1つは選択状態を維持）
+  function toggleMultiChip(button, groupName) {
+    const group = document.getElementById(groupName + '-group');
+    const activeChips = group.querySelectorAll('.chip.active');
+
+    // 選択解除しようとした結果、0件になる場合はブロック（最低1つは必要）
+    if (button.classList.contains('active') && activeChips.length === 1) {
+      alert("物資カテゴリは、最低1つ選択してください。");
+      return;
+    }
+
+    button.classList.toggle('active');
+    const selected = Array.from(group.querySelectorAll('.chip.active')).map(c => c.textContent);
+    document.getElementById(groupName + '-input').value = selected.join('・');
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -535,7 +551,7 @@
 
           if (!countError && count && count >= 1) {
             const modeLabel = mode === 'sos' ? '🆘 不足している（SOS）' : '✳️ 支援できる（オファー）';
-            alert(`すでに${modeLabel}の募集中の投稿があります。\n新しく投稿するには、先に既存の投稿を「支援完了」または「取り消し」にしてください。\n（SOS・支援オファーはそれぞれ1件まで同時に募集できます）`);
+            alert(`すでに${modeLabel}の募集中の投稿があります。\n新しく投稿するには、先に既存の投稿を「終了」または「取り消し」にしてください。\n（SOS・支援オファーはそれぞれ1件まで同時に募集できます）`);
             btn.disabled = false;
             btn.textContent = "状況を送信する";
             return;

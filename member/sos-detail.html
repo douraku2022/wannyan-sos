@@ -257,7 +257,7 @@
 
       let statusBadgeHtml = '';
       if (item.status === 'completed') {
-        statusBadgeHtml = '<span class="badge badge-completed">✅ 支援完了</span>';
+        statusBadgeHtml = '<span class="badge badge-completed">✅ 終了</span>';
       } else if (item.status === 'cancelled') {
         statusBadgeHtml = '<span class="badge badge-cancelled">⚠️ 取り消し</span>';
       }
@@ -274,12 +274,12 @@
       }
       if (!dateStr) dateStr = '本日';
 
-      // ✏️ 更新日時（作成時から変わっていれば「編集済み」として表示）
+      // 🔄 更新日時（作成時から変わっていれば「状態変更あり」として表示）
       let updatedStr = '';
       if (item.updated_at && item.created_at) {
         const createdTime = new Date(item.created_at).getTime();
         const updatedTime = new Date(item.updated_at).getTime();
-        if (updatedTime - createdTime > 60000) { // 1分以上の差があれば編集ありとみなす
+        if (updatedTime - createdTime > 60000) { // 1分以上の差があれば状態変更ありとみなす
           const ud = new Date(item.updated_at);
           updatedStr = `${ud.getFullYear()}/${ud.getMonth()+1}/${ud.getDate()} ${String(ud.getHours()).padStart(2,'0')}:${String(ud.getMinutes()).padStart(2,'0')}`;
         }
@@ -338,7 +338,7 @@
 
           <div style="font-size: 0.8rem; color: #718096; text-align: center;">
             投稿時刻：${escapeHtml(dateStr)}<br>
-            ${updatedStr ? `<span style="color:#2b6cb0;">✏️ 最終更新：${escapeHtml(updatedStr)}</span><br>` : ''}
+            ${updatedStr ? `<span style="color:#2b6cb0;">🔄 状態変更日時：${escapeHtml(updatedStr)}</span><br>` : ''}
             ID: ${escapeHtml(item.id)}
           </div>
 
@@ -347,7 +347,7 @@
               🤝 個別チャットへ進む ➔
             </a>
 
-            ${isOwner ? `<a href="sos-edit.html?id=${item.id}" class="edit-btn">✏️ 投稿内容・状態を変更する</a>` : ''}
+            ${isOwner ? `<a href="sos-edit.html?id=${item.id}" class="edit-btn">✅ 終了・取り消しにする</a>` : ''}
 
             ${(isAdminUser && !isOwner) ? `<button type="button" onclick="adminDeletePost()" class="edit-btn" style="color:#c53030; border-color:#feb2b2; background:#fff5f5;">🗑 管理者として削除する（通報対応）</button>` : ''}
           </div>

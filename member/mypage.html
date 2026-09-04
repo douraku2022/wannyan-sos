@@ -395,7 +395,7 @@
           : '<span class="post-badge offer">✳️ 支援</span>';
 
         let statusBadge = '';
-        if (post.status === 'completed') statusBadge = '<span class="post-badge completed">✅ 支援完了</span>';
+        if (post.status === 'completed') statusBadge = '<span class="post-badge completed">✅ 終了</span>';
         else if (post.status === 'cancelled') statusBadge = '<span class="post-badge cancelled">⚠️ 取り消し</span>';
 
         const cleanCity = (post.city || post.area || '').replace(/ブロック/g, '');
