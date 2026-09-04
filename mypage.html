@@ -8,6 +8,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>マイページ｜ワンニャンSOS熊本</title>
+  <link rel="stylesheet" href="../css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../supabase-config.js"></script>
 
@@ -220,6 +221,17 @@
       <a href="../register.html" class="edit-profile-btn">✏️ 登録情報を変更する</a>
     </div>
 
+    <!-- 🚪 退会 -->
+    <div class="content-card" style="border-color:#feb2b2;">
+      <div class="section-heading" style="color:#c53030;">🚪 退会について</div>
+      <div style="font-size:11px; color:#718096; line-height:1.6; margin-bottom:10px;">
+        退会すると、このアカウントではログインできなくなります。募集中の投稿があれば、自動的に「取り消し」になります。記録として登録情報はデータベースに残りますが、他の利用者から見えることはこれまでと変わりません。
+      </div>
+      <button type="button" onclick="withdrawAccount()" style="width:100%; padding:10px; background:#fff5f5; color:#c53030; border:2px solid #feb2b2; border-radius:8px; font-weight:bold; cursor:pointer;">
+        🚪 退会する
+      </button>
+    </div>
+
   </main>
 
   <script>
@@ -258,6 +270,54 @@
         history.back();
       } else {
         window.location.href = 'sos.html';
+      }
+    }
+
+    // 🚪 退会処理：募集中の投稿を自動で取り消しにし、退会フラグを立ててログアウトする
+    async function withdrawAccount() {
+      if (!confirm("本当に退会しますか？\nこのアカウントでは今後ログインできなくなります。募集中の投稿は自動的に「取り消し」になります。\nこの操作は取り消せません。")) {
+        return;
+      }
+
+      if (!window.supabaseClient) {
+        alert("データベース接続設定が見つかりません。");
+        return;
+      }
+
+      try {
+        const currentUserId = await getCurrentUserId();
+        if (!currentUserId) {
+          alert("ログイン情報が確認できませんでした。");
+          return;
+        }
+
+        // 募集中の投稿を取り消しにする
+        await window.supabaseClient
+          .from('sos_items')
+          .update({ status: 'cancelled', status_reason: '退会のため自動的に取り消しました' })
+          .eq('creator_id', currentUserId)
+          .not('status', 'in', '(completed,cancelled)');
+
+        // 退会フラグを立てる
+        const { error } = await window.supabaseClient
+          .from('users_profiles')
+          .update({ is_withdrawn: true })
+          .eq('auth_user_id', currentUserId);
+
+        if (error) {
+          alert("退会処理に失敗しました：" + error.message);
+          return;
+        }
+
+        await window.supabaseClient.auth.signOut();
+        localStorage.removeItem('wanSOS_user_phone');
+        localStorage.removeItem('wanSOS_profile');
+        sessionStorage.removeItem('wannyanSOS_loggedIn');
+
+        alert("退会が完了しました。ご利用ありがとうございました。");
+        window.location.href = '../index.html';
+      } catch (e) {
+        alert("退会処理中にエラーが発生しました。");
       }
     }
 
